@@ -1,185 +1,187 @@
-# Review the canon
+# Adversarial Review the Canon
 
-A prompt for Claude Code (or any equivalent agentic coding tool). Reads the canonical source-of-truth set and runs an interactive review loop with the user — surfacing findings, proposing bounded fixes, applying or deferring per user direction.
+A prompt for Claude Code or an equivalent agentic coding tool. Runs a systematic adversarial review of the canonical VibeLoom source-of-truth documents, then walks every issue with the user before editing.
 
-This prompt is itself codæ-shaped and reuses the interactive loop from [`tasks/review.md`](vibeloom-templates.md). The criteria the agent surfaces against live in **§ Review checklist** below — that's the human-editable surface; everything else is the loop machinery.
+The goal is not a general polish pass. The goal is to make the canon precise, concise, internally consistent, and operationally dependable enough that downstream site, skill, and engine work can trust it.
 
-**Time budget.** Half-day to a day; ~2–5 min per finding.
+**Time budget.** Audit packet: 1-3 hours. Interactive fixes: 2-5 minutes per issue, longer for authority decisions.
 
 ---
 
 ## Purpose
 
-Audit the canonical source-of-truth set — `codæ-manifesto.html`, `vibeloom-methodology.md`, `vibeloom-implementation.md`, `vibeloom-templates.md` — against the **Review checklist** below. Apply changes in place via the interactive loop. Produce a downstream-propagation list naming every derived doc that needs re-sync.
+Audit the v03 canon:
 
-## Inputs
+- `v03/codæ-manifesto.html` — WHY: durable thesis and motivation.
+- `v03/vibeloom-methodology.md` — WHAT: concepts, modes, operations, status, traces, governance semantics.
+- `v03/vibeloom-implementation.md` — HOW: runtime model, schemas, IDs, dispatch, trace I/O, validation, operation pseudocode.
+- `v03/vibeloom-templates.md` — MATERIALIZATION EVIDENCE: bundled templates and skill content that must faithfully realize methodology + implementation.
 
-| File | Tier | Question it answers |
+Produce a prioritized adversarial issue packet. Each issue must explain why it matters, present 2-3 bounded fix options, recommend one option with rationale, and define how the fix will be verified. Then walk the user through every issue before applying edits.
+
+## Authority Model
+
+Use ownership by concern, not "lower tier wins."
+
+| Concern | Canonical owner | Other docs may do this |
 |---|---|---|
-| `v03/codæ-manifesto.html` | WHY | "why does this paradigm exist?" |
-| `v03/vibeloom-methodology.md` | WHAT | "what does the paradigm contain?" |
-| `v03/vibeloom-implementation.md` | HOW | "how is the paradigm implemented?" |
-| `v03/vibeloom-templates.md` | MATERIALIZATION | "what files / templates / SKILL.md ship?" |
+| Why the paradigm exists | Manifesto | Reference the thesis without adding mechanics |
+| Concepts, terms, modes, operations, status semantics | Methodology | Cite methodology and avoid redefining |
+| Runtime behavior, schemas, IDs, caches, validation, dispatch | Implementation | Cite implementation and avoid motivation |
+| Concrete templates, task prompts, SKILL.md, reference docs | Templates | Materialize methodology + implementation only |
+
+When ownership conflicts, surface the conflict. Do not silently make one document match another.
 
 ## Preconditions
 
-- All four input files exist; working tree is clean (recommend a checkpoint commit).
-- The user is committing time for an interactive session, not a fire-and-forget run.
+- The four canon inputs exist.
+- Inspect `git status --short`; do not require a clean tree, but record unrelated dirty files and avoid reverting them.
+- Do not commit unless the user explicitly asks.
+- The user wants an interactive issue-by-issue review.
 
-## Architecture sketch
+## Adversarial Review Protocol
 
-```text
-codæ-manifesto.html        → WHY
-        │
-vibeloom-methodology.md    → WHAT (tiers, modes, operations, status, traces, eval ladder)
-        │
-vibeloom-implementation.md → HOW (schemas, IDs, dispatch, trace I/O)
-        │
-vibeloom-templates.md      → MATERIALIZATION (artifact + task templates, SKILL.md, references)
-```
+Run these passes in order. Do not start editing until the issue packet is ready and the user chooses the first issue.
 
-**One fact, one tier.** When a fact appears in two tiers, the **lower** tier (closer to materialization) is canonical; the upper tier should reference, not restate.
+### 1. Source Map
 
-## Steps
+Build a compact map of the canon:
 
-1. **Read the canon — three passes per doc, in tier order.** (a) Skim §s, copy heading outline. (b) Read each § slowly, mark every fact (definition, schema, rule, invariant, claim) and where it lives. (c) Cross-walk: for each fact, check whether it appears elsewhere and where it should canonically live.
-   **Verify:** write `canon-fact-map.md` at repo root listing the major facts and their canonical home tier (one line per fact).
+- Heading outline for each document.
+- Major definitions and their canonical owner.
+- Major schemas, ID rules, trace families, status categories, and operation semantics.
+- Repeated claims or repeated definitions across documents.
+- Downstream surfaces likely affected by changes: site, skill, templates, engine, helper prompts.
 
-2. **Build the canon review packet.** Walk every item in the **Review checklist** below. For each surfaced finding: location (file + section), current text (verbatim quote), why it's a finding, proposed bounded fix (concrete diff), downstream-impact preview.
-   **Verify:** `canon-review-packet.md` at repo root with the full categorized list before the loop starts.
+Write or update `canon-review-packet.md` with the map summary. Keep it concise; the map is audit evidence, not a new canon document.
 
-3. **Surface the packet to the user as a summary first** — counts by severity, total findings, estimated walk-time. Confirm scope: walk all High? include Medium? skip Low? User may re-prioritize before drilling in.
+### 2. Attack Passes
 
-4. **Walk findings in priority order.** For each:
-   - Quote location + current text.
-   - Explain why (one sentence).
-   - Propose the fix (concrete `old_string` / `new_string`).
-   - User picks: **Accept** / **Edit** / **Defer** / **Reject**.
-   - On Accept / Edit: apply the edit, log the result, move on.
-   - On Defer / Reject: log decision + rationale, move on.
-   - After every batch (default 5 fixes, or one-per-doc-section): re-walk the relevant Review-checklist items on the affected sub-scope to surface any new findings.
+For each pass, look for concrete findings with file/section evidence.
 
-5. **After all findings: re-walk the full Review checklist on the full canon.** Surface any new items that emerged from the cumulative edits.
+**A. Authority and separation**
 
-6. **Produce `canon-review-report.md`** per § Final report.
+- Methodology contains implementation details, file layout, runtime grammar, or schema tables.
+- Implementation explains motivation instead of runtime behavior.
+- Manifesto relies on low-level implementation mechanics to make the thesis.
+- Templates define concepts that methodology should own.
+- One fact appears in multiple tiers without a clear canonical owner.
 
-## Review checklist
+**B. Internal consistency**
 
-**This is the human-editable surface — adjust bullets as project priorities shift.** The agent surfaces a finding for any item that fails on inspection.
+- Manifesto promises something methodology or implementation does not deliver.
+- Methodology and implementation disagree on modes, operation names, status categories, trace families, graph semantics, approval semantics, or scope semantics.
+- Implementation examples contradict their own schemas.
+- Template inventory or task names in implementation do not match `vibeloom-templates.md`.
+- Forward references and section citations do not resolve.
 
-### A — Separation of concerns (HIGH)
+**C. Concision and load-bearing value**
 
-- No fact stated in two tiers without an explicit `(canonical: X)` cross-reference.
-- Methodology never specifies engine internals (those live in implementation).
-- Implementation never explains motivation (that lives in manifesto).
-- Templates never define concepts (those live in methodology).
-- Manifesto never reaches into implementation details to make its case (uses methodology vocabulary only).
+- A paragraph, table, example, or section can be removed without breaking a downstream consumer.
+- The same concept is explained repeatedly within one document.
+- A proof point, market claim, or example belongs in the site or evidence appendix, not durable canon.
+- A detailed example obscures the rule it is supposed to clarify.
 
-### B — Internal consistency (HIGH)
+**D. Operational adequacy**
 
-- Every manifesto promise is delivered in implementation.
-- Methodology and implementation agree on every shared fact (e.g. mode list, trace family list, status taxonomy).
-- Templates only assert what methodology or implementation specifies.
-- Every forward reference (`see §X`, `per §X`, `methodology §Y`) resolves to existing content with a heading at the cited section.
-- Concepts are named consistently across tiers (e.g. always "approval unit", never "approval scope").
+- Runtime rules are too vague for an agent or engine to implement.
+- Schema examples omit required fields, include noncanonical fields, or use inconsistent IDs.
+- Operation pseudocode has hidden side effects or misses required validation.
+- Acceptance criteria are mixed with stale project status.
 
-### C — Occam's razor: aggressive cuts (MEDIUM)
+**E. Known v03 failure probes**
 
-- Every methodology concept is implemented in the engine OR realized in templates OR cited as load-bearing in the manifesto.
-- No implementation §s specify behavior no operation needs.
-- No template fields no agent ever consumes.
-- No multiple ways of saying the same thing within a tier.
-- Any subsection that, if removed, would not break a downstream consumer, is a candidate for cut.
+Explicitly check these classes even if the broad checklist seems to cover them:
 
-### C' — Occam's razor: but not simpler (MEDIUM)
+- Decision trace identity: event ID vs rendered decision-record ID.
+- Component to bounded-context cardinality.
+- `root` as graph root vs repo/allocation scope.
+- Vibe mode: whether it writes graph/cache/status artifacts.
+- Task-template inventory names vs extracted template names.
+- Task-template versioning promises vs actual templates.
+- Stale acceptance checklists or build-status claims inside canon.
+- Dated evidence and competitor claims embedded in durable canon.
 
-- Don't cut a concept that's load-bearing for the manifesto's case, even if the engine doesn't implement it yet — surface as a roadmap item instead.
-- Don't cut a definition the user-facing site or skill depends on.
+### 3. Finding Quality Bar
 
-### D — Clarity / writing (LOW)
+Every finding must include:
 
-- Long sentences split where natural.
-- Active voice over passive.
-- Specific over vague ("various", "appropriate", "as needed" → concrete).
-- Tables vs lists chosen for readability.
-- Walls of prose split into numbered procedures where applicable.
+- `id`: `CANON-001`, `CANON-002`, etc.
+- `severity`: Critical, High, Medium, or Low.
+- `location`: exact file and section; include line numbers when practical.
+- `issue`: what is wrong.
+- `why it matters`: the downstream consequence for readers, agents, site, skill, or engine.
+- `fix options`: 2-3 options, each with the tradeoff.
+- `recommended fix`: one option and why.
+- `verification`: how to prove the fix worked.
+- `downstream impact`: site, skill, templates, engine, helper prompts, or none.
 
-### E — Cross-doc citation hygiene (LOW)
+Reject vague findings such as "tighten wording" unless the finding includes the exact current wording and a proposed replacement direction.
 
-- Citations cite the specific section (`methodology §6.4`, not `methodology §6`).
-- Forward references use current section names (rename-aware).
-- Citation form is consistent (`methodology §6.4` everywhere, not mixed forms like `methodology section 6.4`).
+### 4. Priority Rules
+
+Walk findings in this order:
+
+1. Identity/schema contradictions that can break generated artifacts or trace replay.
+2. Authority-boundary violations that cause future drift.
+3. Stale or false implementation claims.
+4. Concision cuts that reduce repeated or non-load-bearing text.
+5. Local prose polish.
+
+Group duplicates into one finding with all affected locations.
+
+## Interactive Fix Loop
+
+For each issue:
+
+1. Show the issue summary, evidence, options, recommendation, and verification plan.
+2. Ask the user to choose **Accept**, **Edit**, **Defer**, or **Reject**.
+3. On Accept/Edit, apply only the approved change.
+4. Record the decision and rationale in `canon-review-report.md`.
+5. After every batch of up to five accepted edits, rerun the relevant attack passes on the affected area.
+
+If an accepted fix changes canonical ownership, update downstream-impact notes before moving on.
 
 ## Output
 
-- Edits applied in place across the four canon files (per Accept / Edit decisions).
-- `canon-fact-map.md` — Step 1 verify.
-- `canon-review-packet.md` — Step 2 verify.
-- `canon-review-report.md` — final disposition + downstream-propagation list.
+- `canon-review-packet.md`: source map + prioritized adversarial findings.
+- Edits to canon files only after user approval.
+- `canon-review-report.md`: final disposition, applied changes, deferred items, downstream propagation list, and verification results.
 
 ## Postconditions
 
-- Every checklist item walked; every finding resolved (Accept / Edit / Defer / Reject) with rationale logged.
-- Cross-cutting re-walk after each batch surfaced no un-handled findings.
-- Downstream-propagation list names every derived doc that needs re-sync.
+- Every finding in the packet has a recorded disposition.
+- Every accepted edit has been applied and verified.
+- No site or skill propagation occurs in this prompt; propagation is scheduled.
+- The final report names all downstream surfaces that need follow-up.
 
 ## Constraints
 
-- **Agents propose; humans approve.** Never auto-apply a fix.
-- **One fact, one tier.** When in doubt, the lower tier is canonical.
-- **No silent rewrites.** Every edit lands via the interactive loop.
-- **Don't fix the spec to match implementation.** Conflicts surface as findings (Category B); the user picks direction.
-- **Don't propagate downstream during this prompt.** Site / skill re-syncs are scheduled, not edited inline.
+- Agents propose; humans approve.
+- Do not auto-apply fixes during packet creation.
+- Do not commit unless explicitly requested.
+- Do not fix the site or skill from this prompt.
+- Do not fix canon to match implementation if implementation is wrong; surface the authority decision.
+- Preserve frozen baselines and unrelated user changes.
 
-## Invariants
+## Validation Gates
 
-- Canon hierarchy preserved: manifesto → methodology → implementation → templates.
-- After review, no fact appears in two tiers without `(canonical: X)`.
-- Templates remain a faithful materialization of methodology + implementation.
-- Manifesto continues to make a coherent case using only methodology vocabulary.
+- `git status --short` captured before and after.
+- All forward references touched by accepted edits resolve.
+- If template inventory or extracted-template claims are touched, run `python3 extract-templates.py --check` from `v03/` when available.
+- If runtime/schema claims are touched, verify against the relevant implementation sections and, where useful, engine CLI or tests.
 
-## Validation (exit gates)
+## Failure Modes
 
-- Every Review-checklist item has been considered (or explicitly skipped, with the skip recorded in the report).
-- Every accepted/edited finding has been applied to the canon files in place.
-- Every applied finding has a `downstream-impact: [...]` line in the report.
-- The final report has been produced.
-- A reference commit SHA marks the canon state at session end.
+- **Too many issues.** Keep the packet complete, then ask the user whether to walk Critical/High first or all issues.
+- **Cascade larger than ten dependent edits.** Pause and propose a batch decision.
+- **User rejects a correctness fix.** Record the rationale and add a "known risk" note.
+- **Evidence is ambiguous.** Present the competing readings and recommend the minimum clarifying edit.
 
-## Failure modes
+## Anti-Patterns
 
-- **Conflict between docs (Category B).** Surface with both citations; user picks direction. Never auto-resolve.
-- **User runs out of patience mid-review.** Save `canon-review-resume.md` with remaining findings + decisions so far; resume in next session.
-- **Cascading impact too large** (>10 dependent findings on one accepted edit). Pause; recommend the user batch decisions on the cascade.
-- **Spec-bug surfaced.** Out of scope to fix. Surface as Category B High; user decides whether to address now or defer.
-- **Vestigial concept the user wants to keep.** Accept the call; record as "keep — user rationale: …" so a future review knows it was already considered.
-
-## Anti-patterns
-
-- Auto-applying any fix.
-- Editing across docs in one finding when the right answer is one finding per doc.
-- Inventing new sections when the right answer is moving existing content.
-- Suggesting "consider rephrasing" without proposing the actual rephrasing.
-- Walking findings out of priority order because Low-severity ones happen to be in the same section.
-
-## Final report
-
-`canon-review-report.md` at repo root:
-
-1. **Summary table:** N findings; M applied, K modified, D deferred, R rejected; by Category × Severity.
-2. **Per-finding detail.** ID (`CANON-FIND-001`…), location, severity, category, current quote, why, proposed fix, user decision, applied diff (if Edit), rationale (if Defer/Reject), `downstream-impact: [...]`.
-3. **Cross-cutting re-walk results.**
-4. **Downstream-propagation list:** consolidated, deduplicated, grouped by doc.
-5. **Deferred items.**
-6. **Reference commit SHA** at session end.
-
-## Checkpointing
-
-Commit after each batch — group by doc + category (e.g. `canon: methodology — separation-of-concerns`). If interrupted, resume from the most recent checkpoint.
-
-## After this review
-
-- Walk the downstream-propagation list. Schedule [`review-site.md`](review-site.md) and [`review-skill.md`](review-skill.md) for derived docs.
-- If spec-vs-impl conflicts require an engine change, flag for the next [`build-engine.md`](build-engine.md) iteration.
-- If the manifesto changed materially, the codæ page on the site needs an updated narrative — flag for `review-site.md`.
-- Tag a reference canon commit so downstream review prompts have a stable target.
+- General commentary without concrete fix options.
+- Treating lower-tier materialization as conceptually canonical.
+- Turning methodology into implementation detail.
+- Rewriting across many sections under one vague finding.
+- Doing downstream propagation before canon decisions are settled.

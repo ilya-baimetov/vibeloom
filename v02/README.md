@@ -11,7 +11,6 @@ v02/
 ├── SKILL.md                      # skill file loaded by Claude Code / Codex
 ├── vibeloom-methodology.md       # authoritative WHY — tiers, modes, ops, drift, eval
 ├── vibeloom-implementation.md    # authoritative HOW — metadata, IDs, cache, snapshots
-├── vibeloom-competitive-analysis.md
 ├── references/                   # load-on-demand skill guides
 │   ├── operations.md             # per-operation quick reference
 │   ├── modes.md                  # vibe | pm | dev | expert

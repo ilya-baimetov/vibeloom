@@ -14,6 +14,10 @@ VibeLoom is the reference instantiation of **codæ** — contract-driven agentic
 | [`v02/`](v02/) | **Runnable** | v0.2 methodology, skill, artifact templates, and the deterministic `vibeloom-engine` Python substrate. Use this if you want to actually run the tool today. |
 | [`v01/`](v01/) | Archived | Earliest skill-only package; kept runnable but no longer the active methodology. |
 | [`site/`](site/) | Active | Public website source for `vibeloom.ai` (Cloudflare Workers static assets). |
+| [`vibeloom-dev/`](vibeloom-dev/) | Maintainer skill | Orthogonal Claude/Codex skill for *developing* VibeLoom itself — adversarial canon/skill/site reviews, cross-agent feedback, generation from upstream specs. Operates against any `vNN/` version. **Not** the user-facing VibeLoom skill (that's `vNN/SKILL.md`); shares no command surface or schema. |
+| [`file-layout.md`](file-layout.md) | Reference (v04+) | Repo-level layout spec for v04 onward; ground truth for `vibeloom-dev`. v01–v03 are frozen in their own legacy layouts and not covered by this doc. |
+
+> **Two skills in this repo.** The user-facing **VibeLoom** skill (defined per-version in each `vNN/SKILL.md` with its own methodology + implementation + templates) governs user projects through the operations `init / import / generate / eval / review / reconcile / approve / status`. The **`vibeloom-dev`** maintainer skill develops VibeLoom itself — its commands (`init / eval / review / generate <target> / reconcile / feedback <peer> <target>`) operate against any `vNN/` version. The two are orthogonal: separate command surfaces, separate schemas, separate skill manifests.
 
 ### v03 — the codæ paradigm + VibeLoom v0.3 spec
 

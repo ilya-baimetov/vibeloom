@@ -1,195 +1,193 @@
-# Review the site
+# Adversarial Review the Site
 
-A prompt for Claude Code (or any equivalent agentic coding tool). Reads the marketing-surface artifacts and runs an interactive review loop with the user — surfacing findings, proposing bounded fixes, applying or deferring per user direction.
+A prompt for Claude Code or an equivalent agentic coding tool. Runs a systematic adversarial review of the VibeLoom marketing site, then walks every issue with the user before editing.
 
-This prompt is itself codæ-shaped and reuses the interactive loop from [`tasks/review.md`](vibeloom-templates.md). The criteria the agent surfaces against live in **§ Review checklist** below — that's the human-editable surface.
+The goal is not generic web critique. The goal is to make the site concise, credible, technically correct, aligned with canon, and strong enough to explain VibeLoom to a skeptical visitor.
 
-**Time budget.** Half-day; ~1–3 min per finding (marketing prose iterates faster than canon).
+**Time budget.** Audit packet: 1-2 hours. Interactive fixes: 1-3 minutes per issue, longer for messaging decisions.
 
 ---
 
 ## Purpose
 
-Audit the marketing-surface artifacts — every page under `v03/site/public/` and the standalone `v03/vibeloom-comparison.html` — against the **Review checklist** below. Apply changes in place via the interactive loop. Produce a re-render checklist plus any items flagged for canon update.
+Audit the marketing surface:
 
-## Inputs
+- `v03/site/public/*.html`
+- `v03/site/public/styles.css`
+- `v03/site/public/robots.txt`
+- `v03/site/public/sitemap.xml`
+- `v03/site/public/llms.txt`
+- public assets referenced by the pages
+- `v03/vibeloom-comparison.html` if present
 
-| Surface | Files | Role |
-|---|---|---|
-| Site pages | `v03/site/public/*.html` (index, codae, methodology, implementation, get-started, contact, 404) | Public marketing + onboarding surface |
-| Styling | `v03/site/public/styles.css` | Shared visual system |
-| Standalone marketing | `v03/vibeloom-comparison.html` | Comparison vs spec-driven tools |
-| Source of truth (read-only) | `v03/codæ-manifesto.html`, `v03/vibeloom-methodology.md`, `v03/vibeloom-implementation.md` | What the site faithfully represents |
+Read canon as source-of-truth evidence:
 
-The canon is **read-only** during this review. Site contradictions are site bugs (Category A). Canon issues belong in [`review-canon.md`](review-canon.md).
+- `v03/codæ-manifesto.html`
+- `v03/vibeloom-methodology.md`
+- `v03/vibeloom-implementation.md`
+
+Produce a prioritized adversarial issue packet. Each issue must explain why it matters, present 2-3 bounded fix options, recommend one option with rationale, and define how the fix will be verified. Then walk the user through every issue before applying edits.
 
 ## Preconditions
 
-- All site files exist; working tree is clean (recommend a checkpoint commit).
-- A local server is running (e.g. `python3 -m http.server 8126` from `v03/site/public/`) so the agent can fetch live-rendered pages and screenshot via Chrome MCP for visual checks.
-- The user is committing time for an interactive session.
+- Site files exist.
+- Inspect `git status --short`; do not require a clean tree, but record unrelated dirty files and avoid reverting them.
+- Start a local static server when visual or HTTP checks are needed.
+- Browser screenshots are preferred for layout checks, but static parsing and local HTTP checks are valid fallbacks when browser tooling fails.
+- Do not commit unless the user explicitly asks.
 
-## Architecture sketch — narrative arc
+## Adversarial Review Protocol
 
-```text
-index.html       → claim, evidence, hero CTA
-codae.html       → WHY: makes the philosophical case
-methodology.html → WHAT: paradigm contents (practitioners)
-implementation.html → HOW: engine internals (builders)
-get-started.html → HOW DO I START
-contact.html     → HOW DO I GET HELP
-```
+Run these passes in order. Do not edit until the issue packet is ready and the user chooses the first issue.
 
-The arc must pull a visitor from "I don't know what this is" → "I see why it matters" → "I'm trying it."
+### 1. Surface Map
 
-## Steps
+Build a compact map of the site:
 
-1. **Read each site page top-to-bottom + skim the canon.** (a) Site only — note headlines, claims, CTAs, structural anomalies. (b) Canon — refresh on what the site is supposed to represent. (c) Cross-walk — for every load-bearing claim on the site, locate the canon basis.
-   **Verify:** write `site-claim-map.md` at repo root listing every load-bearing claim and the canon section that backs it.
+- Page inventory and role of each page.
+- Navigation/footer consistency.
+- Primary claim, CTA, and intended visitor action per page.
+- Load-bearing claims and their canon or evidence basis.
+- Metadata, canonical URLs, sitemap entries, robots directives, `llms.txt`, JSON-LD, and major assets.
 
-2. **Build the site review packet.** Walk every item in the **Review checklist** below. For each surfaced finding: location (file + section + element), current text/attribute (verbatim quote), why it's a finding, proposed bounded fix (concrete diff), affected pages if the fix cascades.
-   **Verify:** `site-review-packet.md` at repo root.
+Write or update `site-review-packet.md` with the map summary. Keep it concise.
 
-3. **Surface the packet to the user as a summary first** — counts by severity, total findings, estimated walk-time. Confirm scope.
+### 2. Attack Passes
 
-4. **Walk findings in priority order.** For each:
-   - Quote location + current text/attribute.
-   - Explain why.
-   - Propose the fix.
-   - User picks: **Accept** / **Edit** / **Defer** / **Reject**.
-   - On Accept / Edit: apply, log, move on.
-   - On Defer / Reject: log + rationale, move on.
-   - After every batch (default: one per page-section, OR every 5 fixes): take a fresh screenshot of the affected page (Chrome MCP), visually re-verify, surface any new visual finding immediately.
+For each pass, look for concrete findings with file/element evidence.
 
-5. **After all findings: re-render every page at desktop (1280×800) AND mobile (414×900).** Confirm no horizontal overflow, no broken layouts, all CTAs route correctly. Re-walk the Review checklist on the full site.
+**A. Canon alignment**
 
-6. **Produce `site-review-report.md`** per § Final report.
+- Site claim contradicts canon.
+- Site claim has no canon basis and is not clearly marked as roadmap or positioning.
+- Site uses stale terminology from an older VibeLoom version.
+- Site implementation explanation drifts from `vibeloom-implementation.md`.
+- Public manifesto excerpts diverge from the canonical manifesto without being labeled as an excerpt or adaptation.
 
-## Review checklist
+**B. Messaging quality and concision**
 
-**This is the human-editable surface — adjust bullets as project priorities shift.** The agent surfaces a finding for any item that fails on inspection.
+- The first viewport does not clearly communicate the category, problem, and why VibeLoom is different.
+- Headlines summarize canon instead of selling the value.
+- A section repeats another section without adding a new decision point for the visitor.
+- Competitive claims are too broad, too negative, or insufficiently sourced.
+- Dated evidence overwhelms the product narrative or requires fragile maintenance.
 
-### A — Canon misalignment (HIGH)
+**C. Public web integrity**
 
-- Site claim with no canon basis (a feature mentioned that the methodology doesn't define).
-- Site contradicts canon (e.g. methodology says "five modes," site says "four").
-- Outdated stat, claim, or quote (an evidence stat from an older version of the manifesto).
-- Manifesto excerpt on `codae.html` doesn't match the canonical `v03/codæ-manifesto.html` text.
+- Duplicate public pages compete for the same concept without canonical/noindex/redirect strategy.
+- `sitemap.xml`, `robots.txt`, or `llms.txt` is stale or incomplete.
+- Canonical links are missing, duplicated, or wrong.
+- JSON-LD includes stale, risky, or overly broad claims.
+- Local links, external links, or cross-page fragments are broken.
 
-### B — Marketing punch (MEDIUM-HIGH)
+**D. UX, accessibility, and responsive behavior**
 
-- Headline that doesn't pull (vague verbs, abstract nouns, missing the "so what").
-- Hero copy that buries the lede.
-- Hedge-padded claim ("could potentially help teams that may want to…").
-- Concrete number / outcome buried in prose where it should be the headline.
-- Section that summarizes the canon without adding marketing value (cut or compress).
-- Comparison table cell that's vague where it could be concrete (e.g. "better drift handling" → "drift detection across whole-system contract; per-feature competitors detect only within feature scope").
+- Navigation or footer differs across pages.
+- Active nav state is wrong or missing.
+- CTA labels and destinations are inconsistent.
+- Heading hierarchy, skip links, focus order, or alt text fail basic accessibility.
+- Mobile layout has overflow, cramped touch targets, or comparison content that cannot be scanned.
 
-### C — Brand consistency (MEDIUM)
+**E. Visual and brand consistency**
 
-- Typography drift (heading using wrong weight; code block using wrong font).
-- Color drift (button using non-brand red; missing the signature `#e84057`).
-- Spacing irregularity (inconsistent vertical rhythm between sections).
-- Codæ wordmark inconsistent (the æ should always be in signature red).
-- Voice drift (one page sounds like a brochure, another like a textbook — both should be confident, declarative, technical).
+- Visible category language is inconsistent.
+- Brand tokens, typography, spacing, or wordmark treatment drift across pages.
+- Visual density does not match page intent: marketing pages can be punchy; implementation pages can be denser but still scannable.
 
-### D — Cross-page hygiene (MEDIUM)
+**F. Known v03 failure probes**
 
-- Nav entries differ across pages.
-- Footer differs across pages.
-- A CTA labeled "Get started" routing somewhere other than `get-started.html`.
-- Stale link (e.g. a page still references `index.html#start` after the get-started page was added).
-- Missing `aria-current="page"` or wrong `is-active` on the current page's nav entry.
+Explicitly check these classes even if the broad checklist seems to cover them:
 
-### E — SEO / accessibility (LOW)
+- Stale `llms.txt` content.
+- Duplicate manifesto URLs or duplicate manifesto content.
+- Broken links from site pages to markdown files not published in `site/public`.
+- Broken cross-page fragments.
+- Over-aggressive competitor claims in homepage, comparison table, FAQ, or JSON-LD.
+- Hero animation or copy that weakens "contract-driven agentic engineering."
+- Footer/category copy drift.
+- Implementation page runtime claims that over-specify or contradict canon.
 
-- Page missing unique title or meta description.
-- OG tags missing or generic (same OG image across pages where page-specific would help).
-- Image without alt text (or stale alt text after a content change).
-- JSON-LD with stale `dateModified` or wrong `@type`.
-- Skip link missing or pointing at wrong anchor.
-- Heading hierarchy skips levels (h1 → h3, no h2).
+### 3. Finding Quality Bar
 
-### F — Mobile / responsive (LOW-MEDIUM)
+Every finding must include:
 
-- Horizontal overflow at 414px width.
-- Comparison matrix that doesn't reflow on mobile.
-- Hero text too large on mobile.
-- Touch targets smaller than 44×44px.
+- `id`: `SITE-001`, `SITE-002`, etc.
+- `severity`: Critical, High, Medium, or Low.
+- `location`: exact file and element/section; include line numbers when practical.
+- `issue`: what is wrong.
+- `why it matters`: the consequence for credibility, conversion, accessibility, SEO, AI readers, or canon alignment.
+- `fix options`: 2-3 options, each with the tradeoff.
+- `recommended fix`: one option and why.
+- `verification`: link check, metadata check, screenshot, local HTTP check, or source inspection.
+- `canon impact`: whether this is site-only or should trigger canon review.
+
+Reject vague findings such as "make punchier" unless the finding names the weak copy and gives concrete fix directions.
+
+### 4. Priority Rules
+
+Walk findings in this order:
+
+1. Public correctness defects: broken links, stale `llms.txt`, duplicate canonical surfaces, wrong sitemap/robots.
+2. Canon contradictions and unsupported claims.
+3. Homepage/category/message clarity.
+4. Accessibility and responsive defects.
+5. Brand and prose polish.
+
+Group repeated nav/footer/metadata issues into one finding with affected pages.
+
+## Interactive Fix Loop
+
+For each issue:
+
+1. Show the issue summary, evidence, options, recommendation, and verification plan.
+2. Ask the user to choose **Accept**, **Edit**, **Defer**, or **Reject**.
+3. On Accept/Edit, apply only the approved change.
+4. Record the decision and rationale in `site-review-report.md`.
+5. After every batch of up to five accepted edits, rerun the relevant attack passes and re-check affected pages.
+
+If a fix changes visible layout or CSS, verify desktop and mobile. If browser screenshots fail, record the fallback checks used.
 
 ## Output
 
-- Edits applied in place across site files (per Accept / Edit decisions).
-- `site-claim-map.md` — Step 1 verify.
-- `site-review-packet.md` — Step 2 verify.
-- `site-review-report.md` — final disposition + re-render checklist + items flagged for canon update.
+- `site-review-packet.md`: surface map + prioritized adversarial findings.
+- Edits to site files only after user approval.
+- `site-review-report.md`: final disposition, applied changes, deferred items, canon-update flags, and verification results.
 
 ## Postconditions
 
-- Every checklist item walked; every finding resolved with rationale logged.
-- Every page that was edited has been visually re-verified at desktop AND mobile widths.
-- Cross-cutting re-walk after each batch surfaced no un-handled findings.
+- Every finding in the packet has a recorded disposition.
+- Every accepted edit has been applied and verified.
+- All edited pages have been checked with the best available combination of static parsing, local HTTP, and screenshots.
+- Any canon-side issues are flagged, not fixed here.
 
 ## Constraints
 
-- **Agents propose; humans approve.** Never auto-apply a fix.
-- **Canon is the source of truth.** Site contradictions are site bugs; don't edit the canon to make a site claim true. Flag for [`review-canon.md`](review-canon.md) instead.
-- **Marketing punch ≠ marketing fluff.** Every word earns its place; the marketing surface gets to be *catchier* than the canon, not just shorter.
-- **Brand consistency over personal preference.** Established brand (Inter sans, JetBrains Mono, Fraunces italic serif, signature red `#e84057`, codæ wordmark) is fixed.
-- **No silent rewrites.**
-- **Don't drift into canon edits.** If a finding requires canon change, flag in report; don't edit canon here.
+- Agents propose; humans approve.
+- Do not auto-apply fixes during packet creation.
+- Do not commit unless explicitly requested.
+- Canon is read-only during this prompt.
+- Do not invent a redesign when a bounded copy, metadata, link, or CSS fix is enough.
+- Preserve unrelated user changes.
 
-## Invariants
+## Validation Gates
 
-- The narrative arc is preserved (claim → why → what → how → start → contact).
-- Nav/footer are consistent across every page.
-- The codæ wordmark renders correctly (æ in signature red) on every page where it appears.
-- Every CTA routes to a real, non-404 destination.
-- Skip link present on every page; nav keyboard-traversable.
+- `git status --short` captured before and after.
+- Local link and fragment check across `site/public`.
+- Metadata check for title, description, canonical, OG basics, JSON-LD parseability, sitemap coverage, robots, and `llms.txt`.
+- Local HTTP check for public pages when a server is available.
+- Desktop and mobile visual check for edited pages when browser tooling is available.
 
-## Validation (exit gates)
+## Failure Modes
 
-- Every Review-checklist item considered (or explicitly skipped, recorded in report).
-- Every accepted/edited finding applied to site files in place.
-- Every page edited visually re-verified at desktop + mobile.
-- The final report produced.
-- Reference commit SHA at session end.
+- **Browser tooling fails.** Fall back to static parsing, local HTTP checks, and source inspection; record the limitation.
+- **Claim depends on current external fact.** Verify from primary/current source before treating it as valid.
+- **Fix requires canon change.** Flag it for `review-canon.md` and keep site copy conservative.
+- **Major redesign requested mid-review.** Pause and propose a separate design pass.
 
-## Failure modes
+## Anti-Patterns
 
-- **Site claim with no canon basis.** Two paths: (a) edit the site claim to match canon, or (b) flag for canon update via [`review-canon.md`](review-canon.md). User picks.
-- **Brand drift on >3 pages.** Group as ONE finding with `affected pages: [...]`, not N findings.
-- **User wants a major redesign.** Out of scope. Note in report; recommend a separate design pass.
-- **Visual screenshot reveals a layout regression caused by an accepted CSS edit.** Surface immediately; ask user to reconsider; do not silently roll back.
-- **Canon change cascades to many site claims.** Flag the cascade; schedule a follow-up review-site after the canon settles.
-
-## Anti-patterns
-
-- Auto-applying any fix.
-- Proposing a redesign instead of bounded edits.
-- Editing the canon to "make the site claim true."
-- Inventing new visual elements when the right answer is reusing existing primitives.
-- Skipping the visual re-verify after CSS-affecting edits.
-- Suggesting "consider rephrasing" without the actual rephrasing.
-
-## Final report
-
-`site-review-report.md` at repo root:
-
-1. **Summary table:** N findings; M applied, K modified, D deferred, R rejected; by Category × Severity.
-2. **Per-finding detail.** ID (`SITE-FIND-001`…), location (file + section + element), severity, category, current quote, why, proposed fix, user decision, applied diff (if Edit), rationale (if Defer/Reject), `affected pages: [...]`.
-3. **Cross-cutting re-walk results.**
-4. **Re-render checklist:** which pages visually re-verified at desktop + mobile.
-5. **Items flagged for canon update:** input for the next [`review-canon.md`](review-canon.md) session.
-6. **Deferred items.**
-7. **Reference commit SHA** at session end.
-
-## Checkpointing
-
-Commit after each batch — group by page or category (e.g. `site: codae.html — claim alignment`).
-
-## After this review
-
-- If findings flagged for canon update, schedule [`review-canon.md`](review-canon.md) before the next site pass.
-- If no canon-side cascades, the site is shippable.
-- A major brand shift discussed but deferred = a separate design pass, not a future review-site run.
+- Treating the site as a copy of the canon.
+- Leaving stale `llms.txt` or sitemap files out of scope.
+- Putting broad competitor claims in structured data.
+- Fixing only visible HTML while metadata and AI-reader surfaces remain stale.
+- Skipping verification after CSS or navigation changes.

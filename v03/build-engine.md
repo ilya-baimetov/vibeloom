@@ -1,5 +1,7 @@
 # Build the v0.3 vibeloom engine
 
+> **Historical from-scratch prompt.** This document is the original prompt that produced the current `v03/engine/`. It was written assuming a **greenfield build** — i.e. no `engine/` directory exists. The directory now exists and is the source of truth. Do **not** use this prompt to maintain the engine; for ongoing maintenance, read `v03/vibeloom-implementation.md` directly and edit `v03/engine/` in place. Kept for replay/audit and for v0.4+ engine rebuilds against a future spec.
+
 A prompt for Claude Code (or any equivalent agentic coding tool). The agent reads the canonical implementation spec and produces a working engine — single Python file or multi-file package, agent's call (see Step 4).
 
 This prompt names **what** must happen, not how. Module decomposition, public API shapes, internal data structures, parsing strategies, code style — those are the agent's call. The agent should consult `vibeloom-implementation.md` as the source of truth and exercise judgment.
@@ -67,7 +69,7 @@ How to decompose this into modules and APIs is the agent's choice — match the 
 - Repository is checked out at `vibeloom/`. You are working in `vibeloom/v03/`.
 - Python 3.10+ available.
 - All three input files exist.
-- No `engine/` directory at `v03/`. If one exists from a prior incomplete build, read it first before overwriting; then start clean.
+- No `engine/` directory at `v03/`. **Note (post-v03):** this precondition was authentic when the prompt was first run; the engine now exists at `v03/engine/`. To re-run this prompt in maintenance mode, either work in a clean worktree where `engine/` is absent, or read the existing engine first and treat it as authoritative. For routine edits, do not use this prompt — read the spec and modify `v03/engine/` in place.
 - Templates live as fenced blocks in `vibeloom-templates.md`; `extract-templates.py` materializes them under `v03/templates/`. The engine never reads templates directly — they're inputs to the *skill* build (see [`build-skill.md`](build-skill.md)). Useful as a reference for canonical artifact shapes.
 
 ## Steps

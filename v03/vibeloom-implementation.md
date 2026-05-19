@@ -58,6 +58,7 @@ The engine never judges product meaning or approval outcome. The skill never han
       code-sync.jsonl
       decisions.jsonl
       imports.jsonl
+    state/
       id-registry.json
     runs/
       RUN-.../
@@ -82,13 +83,24 @@ See [methodology §5.1](vibeloom-methodology.md#51-vibe-is-intentionally-minimal
     traces/
       approvals.jsonl
       decisions.jsonl
+    state/
+      id-registry.json
 ```
 
-No graph cache, no code-sync trace. A `status.json` cache may appear after a `status` invocation (regenerable from current state and approval traces; not load-bearing — safe to delete). Approval traces remain — cheap and useful even at vibe scale, and the substrate the future upgrade migration runs on.
+No graph cache. No code-sync trace. No status cache — vibe `status` is recomputed on each invocation from `intent.md` content + tail of `approvals.jsonl` / `generations.jsonl` / `decisions.jsonl`; see §15.6 for the algorithm. Approval traces remain — cheap and useful even at vibe scale, and the substrate the future upgrade migration runs on. The `state/id-registry.json` is initialized at `init` time with empty counters (per §15.7) and grows as intent's CAP/CST items are allocated; vibe never grows it past intent unless the user upgrades.
 
 ---
 
-## 3. Cache vs traces
+## 3. Cache, traces, state
+
+The `.vibeloom/` substrate is a four-part split, each with distinct semantics:
+
+| Subdirectory | Lifetime | Mutability | Contents | Loss tolerance |
+|---|---|---|---|---|
+| `cache/` | Regenerable | Rewritten | Derived state (graph, status) | Safe to delete; engine rebuilds |
+| `traces/` | Durable | Append-only | Provenance event streams (JSONL) | Loss degrades governance; explicit re-baseline required |
+| `state/` | Durable | Mutable | Allocation registries and structured runtime state | Loss requires explicit recovery from traces |
+| `runs/` | Per-invocation | Append-only | Subagent staging (patches, summaries) | Per-run; cleanup after retention window |
 
 ### 3.1 Cache (`.vibeloom/cache/`)
 
@@ -101,7 +113,7 @@ Regenerable state. If deleted, the engine rebuilds it from artifacts and traces.
 
 ### 3.2 Traces (`.vibeloom/traces/`)
 
-Durable provenance. Append-oriented JSONL (with `id-registry.json` as the one structured exception). Never silently regenerated from current state. Missing traces degrade governance integrity; the user must explicitly re-baseline.
+Durable provenance. Append-only JSONL — uniformly. Never silently regenerated from current state. Missing traces degrade governance integrity; the user must explicitly re-baseline.
 
 ```text
 .vibeloom/traces/approvals.jsonl
@@ -110,8 +122,17 @@ Durable provenance. Append-oriented JSONL (with `id-registry.json` as the one st
 .vibeloom/traces/code-sync.jsonl
 .vibeloom/traces/decisions.jsonl
 .vibeloom/traces/imports.jsonl
-.vibeloom/traces/id-registry.json
 ```
+
+### 3.3 State (`.vibeloom/state/`)
+
+Durable mutable runtime state. Distinct from cache (regenerable from artifacts/traces) and from traces (append-only event streams). State files are read-modify-write JSON keyed by a stable schema; the engine owns serialization.
+
+```text
+.vibeloom/state/id-registry.json
+```
+
+The id-registry is the only state file in v0.3 (allocation counters and retired IDs per family — see §5.2). Future state files (e.g., a long-lived run-to-task index, persisted dispatch policy) would land here. **State loss is fatal in v0.3** — there is no recovery procedure. Treat `.vibeloom/state/` like `.vibeloom/traces/` for backup purposes: if it disappears, the project's ID allocation history disappears with it (next-counters reset, no awareness of retired IDs, risk of ID reuse against historical traces). Trace-replay-based recovery is a v0.4+ candidate.
 
 ---
 
@@ -131,7 +152,7 @@ The engine owns:
 - direct-edit detection,
 - stale / uncovered / dangling / drifted / obsolete classification,
 - trace reading and writing for deterministic events,
-- patch staging and atomic application (see §6).
+- patch staging and atomic application (see §14).
 
 The engine does not own:
 
@@ -150,61 +171,68 @@ The engine does not own:
 
 Every governed semantic item carries a stable ID of the form `PREFIX-NNNN` (zero-padded 4-digit, fixed width). Globally unique by prefix across the repo, append-only within each family, retired IDs never reused.
 
-The table below is the **canonical** ID prefix registry. It defines every prefix VibeLoom recognizes, its tier, where it is materialized, its scope, and any layer or derivation constraints. Skill references (the `skill/references/artifacts.md` template inside `vibeloom-templates.md`) and templates derive from this table; if any of them disagree, this table wins.
+The table below is the **canonical** ID prefix registry. It defines every prefix VibeLoom recognizes, its tier, where it is materialized, its allocation namespace, whether it is a graph root, and any layer or derivation constraints. Skill references (the `skill/references/artifacts.md` template inside `vibeloom-templates.md`) and templates derive from this table; if any of them disagree, this table wins.
 
-| Prefix | Name | Tier | Source artifact | Scope | Notes (constraints, derivation) |
-| --- | --- | --- | --- | --- | --- |
-| `CAP` | capability | intent-specs | `intent.md` | root | Root entity; no upstream basis. |
-| `CST` | hard constraint | intent-specs | `intent.md` or `defaults.md` | root | Root entity; no upstream basis. |
-| `DEF` | repo-wide default | intent-specs | `defaults.md` | root | Derives from `CAP`/`CST` (normalized from intent). Universally binding once derived; downstream may reference without an explicit typed edge. Tech Stack entries also use `DEF`. |
-| `OBJ` | objective | product-specs | `prd.md` | root | Derives from `CAP`. |
-| `KR` | key result | product-specs | `prd.md` | root | Derives from `OBJ`. |
-| `MET` | metric | product-specs | `prd.md` | root | Derives from `KR`, `FR`, or `NFR`. |
-| `FR` | functional requirement | product-specs | `prd.md` | root | Derives from `CAP`; optionally from `OBJ`/`STORY`. EARS allowed as structured field. |
-| `NFR` | non-functional requirement | product-specs | `prd.md` | root | Derives from `CST` or `OBJ`. EARS allowed. |
-| `EPIC` | epic | product-specs | `usm.md` | root | Derives from `CAP`/`OBJ`. |
-| `FLOW` | workflow / journey | product-specs | `usm.md` | root | Derives from `EPIC`. |
-| `STORY` | story | product-specs | `usm.md` | root | Derives from `EPIC`/`FLOW`. |
-| `ACC` | acceptance criterion | product-specs | `usm.md` | per-`STORY` | Derives from `STORY`. EARS allowed. |
-| `MS` | milestone | product-specs | `usm.md` | root | Derives from `STORY` (and optionally `OBJ`). Groups `STORY`s for delivery. |
-| `TERM` | ubiquitous-language term | product-specs | `dm.md` | root | Derives from `CAP` (or `STORY`). Domain vocabulary; consumed by `BC`/`AGG`/`ENT`. |
-| `BC` | bounded context | product-specs | `dm.md` | root | **Hosted only by `domain`-layer components.** Derives from `CAP`/`STORY`. |
-| `AGG` | aggregate | product-specs | `dm.md` | per-`BC` | Lives inside one `BC`. |
-| `ENT` | entity | product-specs | `dm.md` | per-`AGG` | Lives inside one `AGG`. |
-| `VO` | value object | product-specs | `dm.md` | per-`AGG` | Lives inside one `AGG`. |
-| `INV` | invariant | product-specs | `dm.md` | per-`AGG` | Domain rule scoped to an `AGG`. |
-| `VIEW` | UX view | ux-specs | `ux.md` | root | Derives from `CAP` and/or `STORY`/`FLOW`. May cite `MOCK` as evidence. |
-| `INT` | UX interaction | ux-specs | `ux.md` | per-`VIEW` | Derives from `VIEW` (structural) and `STORY`/`ACC` (semantic basis). |
-| `UXC` | UX constraint | ux-specs | `ux.md` | root | Derives from `CST` and/or `DEF`. Cross-view design constraint. |
-| `MOCK` | mockup reference | ux-specs | `ux.md` | root | Derives from `CAP` and/or `CST` (the intent area it serves). Pointer to file under `ux-specs/mockups/`. May be cited by `VIEW`/`INT`/`UXC`/`STORY`/`ACC` as evidence (`evidence_for`). |
-| `EXT` | external actor / system | system-specs | `system.md` | root | Derives from `CAP` and/or `FR` (the capabilities and requirements that involve this external actor). System context; outside trust boundaries. |
-| `TB` | trust boundary | system-specs | `system.md` | root | Derives from `CST`, `SNFR`, or `NFR`. Crosses one or more `CONT`s. |
-| `SNFR` | system-wide NFR boundary | system-specs | `system.md` | root | Derives from `NFR` or `CST`. Global cross-cutting NFR. |
-| `CONT` | container | system-specs | `containers.md` (inventory) + per-container `container.md` | root + per-container | Derives from `FR`/`STORY`/`CAP` (capabilities and requirements driving container choice). Carries required `layer` field (`presentation` / `application` / `domain` / `infrastructure`). |
-| `CMP` | component | system-specs | `container.md` (inventory) + per-component `component.md` | per-`CONT` | Belongs to exactly one `CONT`. Layer inherited from parent `CONT`. |
-| `IF` | owned interface | system-specs (body carrier) | `component.md` | per-`CMP` | Structured content; not an independent graph node in v0.3. |
-| `DEP` | component dependency | system-specs (body carrier) | `component.md` | per-`CMP` | Structured content. |
-| `BEH` | local technical behavior | system-specs (body carrier) | `component.md` | per-`CMP` | Structured content. |
-| `NOTE` | local test/runtime note | system-specs (body carrier) | `component.md` | per-`CMP` | Structured content. |
-| `BDD` | behavioral-scenario artifact | context | `bdd.md` (one file per behavior) | per-`CMP` | One file per behavior; lives under `<container>/<component>/context/bdd/`. |
-| `SCN` | Gherkin scenario | context | `bdd.md` body | per-`BDD` | Inside a `BDD` artifact. |
-| `RUN` | run | runtime | `.vibeloom/runs/RUN-.../` | per-invocation | Append-only ID family; one per `generate`/`reconcile` invocation. |
-| `TASK` | subagent task | runtime | `.vibeloom/runs/RUN-.../tasks/TASK-.../` | per-task | Append-only. |
-| `PLAN` | dispatch plan | runtime | `.vibeloom/runs/RUN-.../plan.yaml` | per-`RUN` | Append-only. |
-| `APPROVAL` | approval trace | trace | `.vibeloom/traces/approvals.jsonl` | append-only | One entry per `approval_unit` flip from `draft` → `approved`. Schema §8.1. |
-| `SYNC` | code-sync trace | trace | `.vibeloom/traces/code-sync.jsonl` | append-only | Source-map-shaped. Schema §8.2. |
-| `GEN` | generation trace | trace | `.vibeloom/traces/generations.jsonl` | append-only | One per task result (success or failure). Schema §8.3. |
-| `EVAL` | eval trace | trace | `.vibeloom/traces/evals.jsonl` | append-only | Per-eval-run. Schema §8.4. |
-| `DEC` | decision trace | trace | `.vibeloom/traces/decisions.jsonl` | append-only | Carries `record_type` (`IDR` / `PDR` / `UDR` / `ADR` / `general`). Schema §8.5. |
-| `IMP` | import trace | trace | `.vibeloom/traces/imports.jsonl` | append-only | One per `import` invocation. Schema §8.6. |
+The **Namespace** column declares how IDs are allocated, not whether the item is a graph root:
 
-`IDR`, `PDR`, `UDR`, `ADR` are **not** independent ID prefixes — they are `record_type` values inside the unified `DEC-` family. See methodology §11.1.
+- `root` here means the ID is allocated in the **repo-wide global namespace** (no parent container). It does NOT mean "graph root."
+- `per-<PREFIX>` means the ID is allocated within the scope of a single parent item (e.g. `ACC-0001` is allocated within `STORY-0007`).
+
+The **Graph root?** column is the separate, narrower question: does the item participate as a root of the derivation DAG (no `derives_from` upstream)? Only `CAP` and `CST` are graph roots. Every other item, even ones in the `root` namespace, derives from upstream basis.
+
+| Prefix | Name | Tier | Source artifact | Namespace | Graph root? | Notes (constraints, derivation) |
+| --- | --- | --- | --- | --- | --- | --- |
+| `CAP` | capability | intent-specs | `intent.md` | root | Yes | Root entity; no upstream basis. |
+| `CST` | hard constraint | intent-specs | `intent.md` or `defaults.md` | root | Yes | Root entity; no upstream basis. |
+| `DEF` | repo-wide default | intent-specs | `defaults.md` | root | No | Derives from `CAP`/`CST` (normalized from intent). Universally binding once derived; downstream may reference without an explicit typed edge. Tech Stack entries also use `DEF`. |
+| `OBJ` | objective | product-specs | `prd.md` | root | No | Derives from `CAP`. |
+| `KR` | key result | product-specs | `prd.md` | root | No | Derives from `OBJ`. |
+| `MET` | metric | product-specs | `prd.md` | root | No | Derives from `KR`, `FR`, or `NFR`. |
+| `FR` | functional requirement | product-specs | `prd.md` | root | No | Derives from `CAP`; optionally from `OBJ`/`STORY`. EARS allowed as structured field. |
+| `NFR` | non-functional requirement | product-specs | `prd.md` | root | No | Derives from `CST` or `OBJ`. EARS allowed. |
+| `EPIC` | epic | product-specs | `usm.md` | root | No | Derives from `CAP`/`OBJ`. |
+| `FLOW` | workflow / journey | product-specs | `usm.md` | root | No | Derives from `EPIC`. |
+| `STORY` | story | product-specs | `usm.md` | root | No | Derives from `EPIC`/`FLOW`. |
+| `ACC` | acceptance criterion | product-specs | `usm.md` | per-`STORY` | No | Derives from `STORY`. EARS allowed. |
+| `MS` | milestone | product-specs | `usm.md` | root | No | Derives from `STORY` (and optionally `OBJ`). Groups `STORY`s for delivery. |
+| `TERM` | ubiquitous-language term | product-specs | `dm.md` | root | No | Derives from `CAP` (or `STORY`). Domain vocabulary; consumed by `BC`/`AGG`/`ENT`. |
+| `BC` | bounded context | product-specs | `dm.md` | root | No | **Hosted only by `domain`-layer components.** Derives from `CAP`/`STORY`. |
+| `AGG` | aggregate | product-specs | `dm.md` | per-`BC` | No | Lives inside one `BC`. |
+| `ENT` | entity | product-specs | `dm.md` | per-`AGG` | No | Lives inside one `AGG`. |
+| `VO` | value object | product-specs | `dm.md` | per-`AGG` | No | Lives inside one `AGG`. |
+| `INV` | invariant | product-specs | `dm.md` | per-`AGG` | No | Domain rule scoped to an `AGG`. |
+| `VIEW` | UX view | ux-specs | `ux.md` | root | No | Derives from `CAP` and/or `STORY`/`FLOW`. May cite `MOCK` as evidence. |
+| `INT` | UX interaction | ux-specs | `ux.md` | per-`VIEW` | No | Derives from `VIEW` (structural) and `STORY`/`ACC` (semantic basis). |
+| `UXC` | UX constraint | ux-specs | `ux.md` | root | No | Derives from `CST` and/or `DEF`. Cross-view design constraint. |
+| `MOCK` | mockup reference | ux-specs | `ux.md` | root | No | Derives from `CAP` and/or `CST` (the intent area it serves). Pointer to file under `ux-specs/mockups/`. May be cited by `VIEW`/`INT`/`UXC`/`STORY`/`ACC` as evidence (`evidence_for`). |
+| `EXT` | external actor / system | system-specs | `system.md` | root | No | Derives from `CAP` and/or `FR` (the capabilities and requirements that involve this external actor). System context; outside trust boundaries. |
+| `TB` | trust boundary | system-specs | `system.md` | root | No | Derives from `CST`, `SNFR`, or `NFR`. Crosses one or more `CONT`s. |
+| `SNFR` | system-wide NFR boundary | system-specs | `system.md` | root | No | Derives from `NFR` or `CST`. Global cross-cutting NFR. |
+| `CONT` | container | system-specs | `containers.md` (inventory) + per-container `container.md` | root + per-container | No | Derives from `FR`/`STORY`/`CAP` (capabilities and requirements driving container choice). Carries required `layer` field (`presentation` / `application` / `domain` / `infrastructure`). |
+| `CMP` | component | system-specs | `container.md` (inventory) + per-component `component.md` | per-`CONT` | No | Belongs to exactly one `CONT`. Layer inherited from parent `CONT`. |
+| `IF` | owned interface | system-specs (body carrier) | `component.md` | per-`CMP` | No | Structured content; not an independent graph node in v0.3. |
+| `DEP` | component dependency | system-specs (body carrier) | `component.md` | per-`CMP` | No | Structured content. |
+| `BEH` | local technical behavior | system-specs (body carrier) | `component.md` | per-`CMP` | No | Structured content. |
+| `NOTE` | local test/runtime note | system-specs (body carrier) | `component.md` | per-`CMP` | No | Structured content. |
+| `BDD` | behavioral-scenario artifact | context | `bdd.md` (one file per behavior) | per-`CMP` | No | One file per behavior; lives under `<container>/<component>/context/bdd/`. |
+| `SCN` | Gherkin scenario | context | `bdd.md` body | per-`BDD` | No | Inside a `BDD` artifact. |
+| `RUN` | run | runtime | `.vibeloom/runs/RUN-.../` | per-invocation | No | Append-only ID family; one per `generate`/`reconcile` invocation. |
+| `TASK` | subagent task | runtime | `.vibeloom/runs/RUN-.../tasks/TASK-.../` | per-task | No | Append-only. |
+| `PLAN` | dispatch plan | runtime | `.vibeloom/runs/RUN-.../plan.yaml` | per-`RUN` | No | Append-only. |
+| `APPROVAL` | approval trace | trace | `.vibeloom/traces/approvals.jsonl` | append-only | No | One entry per `approval_unit` flip from `draft` → `approved`. Schema §8.1. |
+| `SYNC` | code-sync trace | trace | `.vibeloom/traces/code-sync.jsonl` | append-only | No | Source-map-shaped. Schema §8.2. |
+| `GEN` | generation trace | trace | `.vibeloom/traces/generations.jsonl` | append-only | No | One per task result (success or failure). Schema §8.3. |
+| `EVAL` | eval trace | trace | `.vibeloom/traces/evals.jsonl` | append-only | No | Per-eval-run. Schema §8.4. |
+| `DEC` | decision trace | trace | `.vibeloom/traces/decisions.jsonl` | append-only | No | Carries `record_type` (`IDR` / `PDR` / `UDR` / `ADR` / `general`). Schema §8.5. |
+| `IMP` | import trace | trace | `.vibeloom/traces/imports.jsonl` | append-only | No | One per `import` invocation. Schema §8.6. |
+
+`IDR`, `PDR`, `UDR`, `ADR` are **not** independent trace prefixes — they are `record_type` values inside the unified `DEC-` trace family. They do, however, carry their own sequence-only counters for the human-facing `record_id` field (`ADR-0007`, `IDR-0003`, etc.); those counters are allocated per record_type via the id-registry (§5.2). See methodology §11.1.
 
 `IF` / `DEP` / `BEH` / `NOTE` are structured content within `component.md` rather than independent graph nodes; the engine indexes them but does not require them to carry their own derivation edges.
 
 ### 5.2 Registry
 
-Allocation state for **semantic-item ID families** (every prefix in §5.1 *except* the trace, runtime, and operation-packet families covered in §5.3) lives at `.vibeloom/traces/id-registry.json`:
+Allocation state for **semantic-item ID families** (every prefix in §5.1 *except* the trace, runtime, and operation-packet families covered in §5.3) lives at `.vibeloom/state/id-registry.json` (see §3.3 — state is durable mutable, distinct from append-only traces):
 
 ```json
 {
@@ -215,9 +243,11 @@ Allocation state for **semantic-item ID families** (every prefix in §5.1 *excep
 
 The registry is engine state, not LLM context. Subagents **propose** new semantic items; the orchestrator/engine allocates final IDs. Retired IDs are never reused.
 
+The same `{next, retired}` shape also tracks `record_id` counters per `record_type` (`ADR`, `PDR`, `UDR`, `IDR`) for the decision trace family — see §8.5. Although decision records are append-oriented (no retirement in practice), they share the registry so the engine has a single allocation primitive.
+
 ### 5.3 Trace and runtime ID allocation
 
-Trace and runtime ID families (`APPROVAL`, `SYNC`, `GEN`, `EVAL`, `DEC`, `IMP`, `RUN`, `TASK`, `PLAN`) and operation-packet IDs (`REVIEW-`, `RECON-`) use the **dated form** `<KIND>-<YYYYMMDD>-<NNN>` where `NNN` starts at `001` each calendar day per kind, monotonically increasing within the day. Examples: `APPROVAL-20260502-001`, `RUN-20260502-001`, `REVIEW-20260502-001`.
+Trace and runtime ID families (`APPROVAL`, `SYNC`, `GEN`, `EVAL`, `DEC`, `IMP`, `RUN`, `TASK`, `PLAN`) and operation-packet IDs (`REVIEW-`, `RECON-`) use the **dated form** `<KIND>-<YYYYMMDD>-<NNNN>` where `NNNN` starts at `0001` each calendar day per kind, monotonically increasing within the day. Examples: `APPROVAL-20260502-0001`, `RUN-20260502-0001`, `REVIEW-20260502-0001`.
 
 For these families the registry persists `{kind: {date: next_seq}}` rather than `{next, retired}`. Retirement does not apply — traces and runtime artifacts are append-only and IDs are never reissued.
 
@@ -289,18 +319,16 @@ owned_paths:
   - web/src/search/**
 owned_interfaces:
   - IF-0042
-hosted_bounded_contexts:
-  - BC-0003
-  - BC-0008
+bounded_context: BC-0003
 ```
 
 Rules (see methodology §6.5):
 
 - container may host multiple components,
 - component belongs to exactly one container,
-- component may host multiple bounded contexts (only in `domain`-layer containers),
-- bounded context belongs to exactly one component,
-- `hosted_bounded_contexts` must be empty for components in non-`domain` layers.
+- domain-layer component hosts **exactly one** bounded context; non-domain components do not host bounded contexts,
+- bounded context belongs to exactly one component (1:1 mapping in domain layer),
+- `bounded_context` field is required and non-empty for domain-layer components; absent (or `null`) for non-domain layers.
 
 ---
 
@@ -372,17 +400,17 @@ Trace families are defined in [methodology §11](vibeloom-methodology.md#11-trac
 
 Every trace also carries `trace_id`, `kind`, and `timestamp`. These are omitted from per-schema fields for brevity.
 
-**Reconstructability principle.** Each trace family carries the metadata to promote its implied graph relationships into actual nodes/edges later (roadmap CGKG-B). Concretely: approval traces carry per-item content fingerprints; generation traces carry `basis_ids` + `output_item_ids`; code-sync traces are source-map-shaped; eval traces carry per-finding `item_id`; decision traces carry `record_type` + `affects` + `load_bearing`; import traces summarize aggregates, with per-candidate evidence living in the resulting draft artifacts. v0.3 keeps the contract graph as a knowledge graph (instantiated ontology only); promotion is deferred, never blocked by lossy schemas.
+**Reconstructability principle.** Each trace family carries the metadata to promote its implied graph relationships into actual nodes/edges later (roadmap CGKG-B). Concretely: approval traces carry per-item content fingerprints; generation traces carry `basis_ids` + `output_item_ids`; code-sync traces are source-map-shaped; eval traces carry per-finding `item_id`; decision traces carry `record_type` + `affects` + `load_bearing`; import traces carry both an aggregate summary (`evidence_summary`, `candidates_proposed`, `confidence_distribution`) and a per-candidate map (`per_candidate: {<item_id>: {confidence, evidence_refs, uncertainty}}`) — artifacts stay clean of import-only fields, with per-candidate rationale queryable from the trace (see §8.6). v0.3 keeps the contract graph as a knowledge graph (instantiated ontology only); promotion is deferred, never blocked by lossy schemas.
 
 ### 8.1 Approval trace
 
 ```json
 {
   "schema_version": "1.0",
-  "trace_id": "APPROVAL-20260502-001",
+  "trace_id": "APPROVAL-20260502-0001",
   "kind": "approval",
   "timestamp": "2026-05-02T12:00:00Z",
-  "run_id": "RUN-20260502-001",
+  "run_id": "RUN-20260502-0001",
   "approval_unit": "product-specs",
   "approval_mode": "user",
   "items": {
@@ -403,10 +431,10 @@ Approval traces are the non-regenerable approval baseline — durable across sch
 ```json
 {
   "schema_version": "1.0",
-  "trace_id": "SYNC-20260502-001",
+  "trace_id": "SYNC-20260502-0001",
   "kind": "code-sync",
   "timestamp": "2026-05-02T13:00:00Z",
-  "run_id": "RUN-20260502-004",
+  "run_id": "RUN-20260502-0004",
   "scope": "component:web/search",
   "realizes": ["CMP-0012", "IF-0042", "BEH-0031", "VIEW-0006"],
   "basis_hashes": {
@@ -435,10 +463,10 @@ Source-map-shaped: connects generated code to contract IDs, file hashes, validat
 ```json
 {
   "schema_version": "1.0",
-  "trace_id": "GEN-20260502-007",
+  "trace_id": "GEN-20260502-0007",
   "kind": "generation",
   "timestamp": "2026-05-02T13:30:00Z",
-  "run_id": "RUN-20260502-004",
+  "run_id": "RUN-20260502-0004",
   "task_template_id": "generate-product-specs",
   "task_template_version": "0.3.1",
   "scope": "root:product-specs",
@@ -461,10 +489,10 @@ Together, `basis_ids` + `output_artifact_ids` + `output_item_ids` let any item t
 ```json
 {
   "schema_version": "1.0",
-  "trace_id": "EVAL-20260502-019",
+  "trace_id": "EVAL-20260502-0019",
   "kind": "eval",
   "timestamp": "2026-05-02T14:00:00Z",
-  "run_id": "RUN-20260502-005",
+  "run_id": "RUN-20260502-0005",
   "target": "product-specs",
   "checks_run": ["structural", "semantic"],
   "findings": [
@@ -478,10 +506,13 @@ Eval traces capture every read-only check that ran, with severity and item assoc
 
 ### 8.5 Decision trace
 
+Decision traces use a **dual-ID model**: `trace_id` is the machine-stable event identity (uniform dated `DEC-YYYYMMDD-NNNN` across the trace family — replay key, daily-counter), while `record_id` is the human-facing rendered-record identity in the sequence-only `<RECORD>-NNNN` family with `RECORD ∈ {IDR, PDR, UDR, ADR}` (absent for `general` decisions — readable label, sequence-only per record_type). The two are distinct fields and serve distinct purposes: replay vs reference. The link between them is preserved in the JSONL — every entry carries both fields — so `record_id` is queryable from `trace_id` and vice versa.
+
 ```json
 {
   "schema_version": "1.0",
-  "trace_id": "DEC-20260502-003",
+  "trace_id": "DEC-20260502-0003",
+  "record_id": "ADR-0007",
   "kind": "decision",
   "record_type": "ADR",
   "timestamp": "2026-05-02T15:00:00Z",
@@ -495,6 +526,8 @@ Eval traces capture every read-only check that ran, with severity and item assoc
 
 Schema fields:
 
+- `trace_id` (required) — event identity in the unified `DEC-YYYYMMDD-NNNN` family. Used for replay, backlinks from other traces (e.g. `decision_basis` references), and engine-internal indexing.
+- `record_id` (required for `record_type ∈ {IDR, PDR, UDR, ADR}`; absent/null for `general`) — human-facing rendered-record identity in the sequence-only `<RECORD>-NNNN` family (e.g. `ADR-0007`, `IDR-0003`). Counters allocated per record_type via the id-registry (§5.2). Names the markdown file and the human-readable section heading.
 - `record_type` (optional, enum: `IDR | PDR | UDR | ADR | general`, default `general`) — classifies the decision by primary contract tier (intent-specs / product-specs / ux-specs / system-specs respectively). `general` is for process, methodology, or operational decisions that don't change the contract. See [methodology §11.1](vibeloom-methodology.md#111-decision-trace-classification).
 - `affects` (optional, recommended) — list of contract item IDs this decision constrains. Captures multi-tier impact regardless of `record_type`. For `general` decisions this is typically empty.
 - `load_bearing` (default `false`) — flag for whether the decision still informs future generation. Active "decision context" is a queried view filtering decision traces by `load_bearing: true`.
@@ -502,17 +535,20 @@ Schema fields:
 
 Decision traces are the single home for human-authored decision history (ADR/PDR/UDR/IDR/general). Promote truly normative decisions to IDed contract items; the trace entry stays immutable. `affects` and `record_type` let a future release (roadmap CGKG-B) promote load-bearing decisions to graph nodes without re-mining prose.
 
+**Why two IDs.** A `trace_id` like `DEC-20260502-0003` is uniform across the trace family — it's how the engine indexes, how `decision_basis` references resolve, and how replay reconstructs decision history. The dated form is intrinsic: trace IDs use a per-day counter (§5.3) and the date carries forensic value. A `record_id` like `ADR-0007` is what humans cite in conversation, what the rendered markdown file is named, and what fits the conventions of tools like `adr-tools` and `log4brains` — short, sequence-only per record_type, ecosystem-compatible. The JSONL carries both fields on every entry so the link between them is queryable; collapsing them into one would force the canon to pick (replay-uniform vs human-friendly) and would lose either the per-day counter or the short filename. Two fields preserve both.
+
 #### 8.5.1 Per-record markdown rendering
 
-The JSONL stream above is canonical. Each entry is also materialized as a per-record markdown file under `/decisions/<record_type>/<TRACE_ID>-<slug>.md` (e.g. `/decisions/adr/ADR-20260502-003-tax-calculation-strategy.md`). The markdown is a **derived view** — the engine regenerates it from the JSONL whenever the trace is appended.
+The JSONL stream above is canonical. Each non-`general` entry is also materialized as a per-record markdown file under `/decisions/<record_type>/<RECORD_ID>-<slug>.md` (e.g. `/decisions/adr/ADR-0007-tax-calculation-strategy.md`). The markdown is a **derived view** — the engine regenerates it from the JSONL whenever the trace is appended. `general` traces are JSONL-only; they have no rendered record.
 
 Why two presentations: the JSONL is the append-only event log (machine-parseable, schema-versioned); the markdown is git-friendly (per-decision blame), human-readable (open in any editor), and ecosystem-compatible (`adr-tools`, `log4brains`, Structurizr ADR plugins all expect a folder of markdown files).
 
-File frontmatter mirrors a subset of the JSONL fields:
+File frontmatter mirrors a subset of the JSONL fields, carrying both IDs:
 
 ```yaml
 ---
-trace_id: DEC-20260502-003
+trace_id: DEC-20260502-0003
+record_id: ADR-0007
 kind: decision
 record_type: ADR
 timestamp: 2026-05-02T15:00:00Z
@@ -522,7 +558,7 @@ load_bearing: true
 affects: [BC-0008, FR-0042]
 ---
 
-# ADR-20260502-003 — Tax calculation strategy
+# ADR-0007 — Tax calculation strategy
 
 ## Context
 ...
@@ -543,18 +579,43 @@ The markdown files are regenerable: `vibeloom decisions render` rebuilds the ent
 
 ```json
 {
-  "schema_version": "1.0",
-  "trace_id": "IMP-20260502-001",
+  "schema_version": "1.1",
+  "trace_id": "IMP-20260502-0001",
   "kind": "import",
   "timestamp": "2026-05-02T16:00:00Z",
+  "mode": "pm",
   "evidence_summary": {"files_scanned": 1247, "tests_indexed": 312, "languages": ["typescript", "python"]},
   "candidates_proposed": {"CAP": 7, "FR": 42, "BC": 23, "CMP": 11, "VIEW": 0},
   "confidence_distribution": {"high": 38, "medium": 31, "low": 14},
+  "per_candidate": {
+    "FR-0027": {
+      "confidence": 0.74,
+      "evidence_refs": ["billing/routes/export.ts", "billing/tests/export_csv.test.ts"],
+      "uncertainty": ["No UI flow found."]
+    },
+    "MOCK-0011": {
+      "confidence": 0.92,
+      "evidence_refs": ["ux-specs/mockups/checkout-empty.png"],
+      "uncertainty": []
+    },
+    "BC-0003": {
+      "confidence": 0.81,
+      "evidence_refs": ["billing/**", "tests/billing/**"],
+      "uncertainty": ["Cohesion across billing/ and invoicing/ is ambiguous; could be split."]
+    }
+  },
   "payload": {"notes": "No UX evidence (no Figma export found, no design tokens). Recommend ux mode upgrade after first product-spec review."}
 }
 ```
 
-One import trace per `import` invocation. The aggregate counts above are the *summary*; per-candidate evidence (which files supported inferring `BC-0003`, what confidence each inference had) lives in the produced artifacts' frontmatter `derives_from` and free-form `evidence` fields. Trace + artifacts form a complete reconstructable record. Import traces also support audit ("how was this contract derived?") and the eventual import-quality learning capability.
+One import trace per `import` invocation. Two layers of detail:
+
+- **Aggregate** (`evidence_summary`, `candidates_proposed`, `confidence_distribution`) — high-level counts for status reporting and import-quality dashboards.
+- **Per-candidate** (`per_candidate: {<item_id>: {confidence, evidence_refs, uncertainty}}`) — the source-of-truth for why each draft item was inferred. Keyed by the same item IDs that appear in the produced draft artifacts. Review tooling reads this map when surfacing recently-imported items so reviewers see confidence + evidence during top-down approval, without bloating artifact frontmatter with import-only fields.
+
+Artifacts themselves stay clean: their `derives_from` cites upstream items per the standard derivation rules; the `import`-specific evidence does not enter the artifact schema. Trace + artifacts form a complete reconstructable record. Import traces also support audit ("how was this contract derived?") and the eventual import-quality learning capability.
+
+`per_candidate` is the **only** required new field for v0.3 import; an import trace without it is treated as `schema_version: 1.0` (legacy summary-only) and surfaces an advisory finding ("import trace missing per-candidate evidence; review will not show inference rationale").
 
 ### 8.7 Schema extension policy
 
@@ -640,7 +701,7 @@ Lookup is per-basis-ID, not per-approval-unit: a single item with three basis ID
 
 ```yaml
 packet_type: review
-packet_id: REVIEW-20260502-001
+packet_id: REVIEW-20260502-0001
 target: product-specs
 basis:
   approved_upstream: [CAP-0001, CST-0002]
@@ -665,7 +726,7 @@ user_notes: |
 
 ```yaml
 packet_type: reconciliation
-packet_id: RECON-20260502-001
+packet_id: RECON-20260502-0001
 target: code
 scope: component:web/search
 stale_items: [CMP-0012, IF-0042]
@@ -689,25 +750,9 @@ Packets are write-capable: the user can add findings, modify recommendations, or
 
 Task templates are structured operation instructions for subagents. **They are markdown documents, not YAML wrappers around prose.** Each template uses a consistent section structure so the engine can extract what it needs and the agent reads it as prose.
 
-The standard task template inventory (assets shipped with vibeloom):
+The task template inventory is **not** maintained here. The canonical, ground-truth inventory lives in [`vibeloom-templates.md`](./vibeloom-templates.md) (the `template:tasks/*.md` blocks); the extracted bundle lives at `vibeloom/templates/tasks/`. The skill orchestrator routes mode-operation pairs to these task templates per the routing table in this document (§17.3) and the SKILL.md template inside `vibeloom-templates.md`.
 
-```text
-assets/tasks/
-  generate-intent-specs.md
-  generate-product-specs.md
-  generate-product-specs-from-ux.md   # ux mode variant
-  generate-ux-specs.md
-  generate-system-specs.md
-  generate-component-code.md
-  eval-target.md
-  review-target.md
-  reconcile-code.md
-  reconcile-contract.md
-  infer-capabilities.md               # import-time inference task family
-  infer-functional-requirements.md
-  infer-bounded-contexts.md
-  infer-components.md
-```
+This document defines the **contract** every task template must satisfy (§12.1 below) and the **dispatch semantics** the engine enforces (§12.2). To check the current inventory, read `vibeloom-templates.md`; to validate task bodies, see §12.1.
 
 ### 12.1 Structure
 
@@ -801,7 +846,7 @@ This section defines the orchestrator-to-subagent contract that makes parallel a
 `engine.dispatch_plan(affected)` returns a plan in this shape:
 
 ```yaml
-plan_id: PLAN-20260502-004
+plan_id: PLAN-20260502-0004
 affected_set: [CAP-0001, FR-0007, STORY-0019, CMP-0012, IF-0042, VIEW-0006, BEH-0031]
 waves:
   - wave_id: W1
@@ -831,12 +876,12 @@ waves:
         kind: component-code
         owned_paths: ["web/src/search/**", "web/tests/search/**"]
         allowed_read_paths: ["**/component.md", "**/AGENTS.md"]
-        task_template_id: generate-component-code
+        task_template_id: generate-code-component
       - scope_id: component:search-api
         kind: component-code
         owned_paths: ["search-api/src/**", "search-api/tests/**"]
         allowed_read_paths: ["**/component.md", "**/AGENTS.md"]
-        task_template_id: generate-component-code
+        task_template_id: generate-code-component
     dependencies: [{from: W2, to: W3}]
 ```
 
@@ -897,8 +942,8 @@ Key properties:
 The orchestrator constructs and passes this header to each subagent. It is the **only** orchestrator-to-subagent contract; everything the subagent sees is in this header or in files referenced by it.
 
 ```yaml
-task_id: TASK-20260502-014
-run_id: RUN-20260502-004
+task_id: TASK-20260502-0014
+run_id: RUN-20260502-0004
 wave_id: W2
 template_id: generate-ux-specs
 template_version: 0.3.1
@@ -1101,8 +1146,32 @@ approve(approval_unit):
 
 ### 15.6 `status`
 
+Branches on mode. Full modes use the graph cache + per-item classification. Vibe emits a lightweight one-screen report from compact artifacts and traces, with no graph or cache write — preserving the §2.2 / §3.1 "vibe is genuinely minimal" promise.
+
 ```pseudo
 status():
+  mode = engine.detect_mode()             # from layout per §2
+
+  if mode == "vibe":
+    intent       = read_compact_artifact("intent.md")
+    last_appr    = traces.tail("approvals", filter={approval_unit: "intent-specs"})
+    last_gen     = traces.tail("generations")        # nullable
+    decisions    = traces.summary("decisions")       # count + most-recent topic
+
+    intent_state = (
+      "approved" if last_appr and last_appr.basis_hash == intent.content_hash
+      else "draft"
+    )
+    code_state = (
+      "not_yet_generated"        if last_gen is None
+      else "current"             if last_gen.basis_hash == intent.content_hash
+      else "stale_intent_changed"
+    )
+    report = compose_vibe_report(mode, intent_state, code_state, decisions)
+    report.next = recommend_next_vibe(intent_state, code_state)
+    return report                           # no cache write
+
+  # full modes (pm, dev, ux, expert)
   if cache.fresh:
     return cache.status
   graph = engine.parse_or_load(artifacts)
@@ -1126,7 +1195,7 @@ init(mode, intent_seed=None):
     create("intent.md", "system.md", "AGENTS.md", "CLAUDE.md")
   else:
     create_full_layout(mode)            # ux mode adds ux.md + ux-specs/mockups/
-  registry.initialize(.vibeloom/traces/id-registry.json)
+  registry.initialize(.vibeloom/state/id-registry.json)
   traces.write("decision", topic="init", payload={"mode": mode})
   if intent_seed:
     write("intent.md", intent_seed)     # one-line description from CLI, if provided
@@ -1136,108 +1205,115 @@ init(mode, intent_seed=None):
 
 Brownfield import is the most evidence-heavy operation. Subagents propose; the engine ranks; the user reviews top-down.
 
+Import is a **single-task subagent operation**, not a multi-wave dispatch. The per-tier inference (intent → product → ux → system) happens inside one `tasks/import.md` task, in tier order, so the subagent can let earlier-tier candidates inform later-tier candidates within one context.
+
 ```pseudo
 import(mode, root_path):
-  # 1. Scan and aggregate evidence from the existing repo
+  # 1. Engine scans the codebase to surface raw evidence
   evidence = engine.scan_codebase(root_path)
   # evidence contains: file inventory, language detection, test detection,
   #                    framework detection, possible UI surfaces (Figma exports,
   #                    storybook configs, design tokens), entry points, deps.
 
-  # 2. Plan the inference work: one task per kind, dispatched in waves
-  inference_plan = engine.import_dispatch_plan(evidence, mode)
-  # mode shapes the inference: ux mode prioritizes UX evidence; dev mode
-  # prioritizes architectural evidence; pm mode prioritizes user-facing surfaces.
+  # 2. Build a single import task header bound to the full evidence set
+  header = build_subagent_header(
+    template_id   = "import",
+    template_version = current_template_version("import"),
+    scope         = "root:import",
+    load_set_refs = {"evidence": evidence, "mode": mode},
+    allowed_write_paths = [
+      "intent.md", "defaults.md",
+      "prd.md", "usm.md", "dm.md",
+      "ux.md",
+      "system.md", "containers.md",
+      "<container>/container.md",
+      "<container>/<component>/component.md"
+    ],
+    validation_contract = ["structural-eval-per-tier"],
+    result_shape_id = "import-summary"
+  )
 
-  # 3. Run inference subagents wave by wave
-  candidates_by_kind = {}
-  for wave in inference_plan.waves:
-    tasks = []
-    for scope in wave.scopes:
-      header = build_subagent_header(scope, wave, run, inference_plan)
-      tasks.append(subagent.spawn(header))   # e.g. infer-capabilities, infer-fr, infer-bc, infer-cmp
-    results = await all(tasks)
-    for r in results:
-      candidates_by_kind[r.kind] = r.candidates
+  # 3. Spawn the single import subagent. It runs the per-tier inference inside
+  #    one task (see tasks/import.md Steps): intent-specs → product-specs →
+  #    optional ux-specs → system-specs. Mode shapes which tiers receive the
+  #    most effort: ux mode prioritizes UX evidence; dev mode prioritizes
+  #    architectural evidence; pm mode prioritizes user-facing surfaces. The
+  #    subagent returns per-candidate records with confidence, evidence_refs,
+  #    and uncertainty (see worked examples below).
+  result = subagent.spawn(header).await()
 
-  # 4. Score confidence per-candidate (rule-based + cross-evidence corroboration)
-  for kind, candidates in candidates_by_kind.items():
-    for c in candidates:
-      c.confidence = compute_confidence(c, evidence)
-      c.evidence_refs = link_evidence(c, evidence)
-      c.uncertainty = collect_uncertainty(c, evidence)
-      c.lifecycle = DRAFT
+  # 4. Validate, stage, and apply the subagent's draft patch atomically (§14)
+  orchestrator.validate_summary(result, template=task_template_for("import"))
+  orchestrator.validate_scope(result.patch, header.allowed_write_paths)
+  orchestrator.stage(result.patch)
+  orchestrator.run_validators(result)              # structural eval per tier
+  orchestrator.apply_atomic(result.patch)
 
-  # 5. Write drafts in tier order so review can proceed top-down
-  write_drafts("intent-specs", candidates_by_kind["CAP"], candidates_by_kind["CST"])
-  write_drafts("product-specs", candidates_by_kind["FR"], candidates_by_kind["NFR"], ...)
-  if mode == "ux":
-    write_drafts("ux-specs", candidates_by_kind.get("VIEW", []), candidates_by_kind.get("MOCK", []))
-  write_drafts("system-specs", candidates_by_kind["CONT"], candidates_by_kind["CMP"], ...)
-
-  # 6. Emit a single import trace summarizing the evidence and candidate distribution
+  # 5. Emit a single import trace with summary + per-candidate evidence
   traces.write("import", {
+    "schema_version": "1.1",
+    "mode": mode,
     "evidence_summary": evidence.summary(),
-    "candidates_proposed": {k: len(v) for k, v in candidates_by_kind.items()},
-    "confidence_distribution": confidence_histogram(candidates_by_kind),
-    "mode": mode
+    "candidates_proposed": result.candidates_proposed,       # {kind: count}
+    "confidence_distribution": result.confidence_distribution,
+    "per_candidate": result.per_candidate                    # {item_id: {confidence, evidence_refs, uncertainty}}
   })
 
   user.show("Import complete. Run `review intent-specs` to begin top-down approval.")
 ```
 
-**Worked examples — what step 5 produces.**
+**Worked example — what `per_candidate` looks like for a few inferred items.**
 
-An inferred functional requirement (FR-####) draft, with confidence and evidence:
-
-```yaml
-id: FR-0027
-kind: functional_requirement
-description: "User can export invoices as CSV."
-confidence: 0.74
-evidence:
-  - file: billing/routes/export.ts
-  - test: billing/tests/export_csv.test.ts
-uncertainty:
-  - "No UI flow found."
-```
-
-A mockup-evidence record (MOCK-####), produced when the import surfaces UI assets:
+The import subagent emits draft artifact rows in the standard template form (see `prd.md`, `usm.md`, `ux.md`, `dm.md`, `system.md`/`containers.md`/`container.md`/`component.md` templates) — no schema extension at the artifact tier. Per-candidate inference rationale lives only in the import trace, keyed by the IDs the orchestrator allocated to each draft:
 
 ```yaml
-id: MOCK-0011
-source: figma://...
-snapshot: ux-specs/mockups/checkout-empty.png
-evidence_for: [VIEW-0012, INT-0041, STORY-0031]
-notes: "Shows empty-cart state, disabled checkout CTA, and sign-in prompt."
+# excerpt from .vibeloom/traces/imports.jsonl, per_candidate field
+FR-0027:
+  confidence: 0.74
+  evidence_refs: [billing/routes/export.ts, billing/tests/export_csv.test.ts]
+  uncertainty: ["No UI flow found."]
+
+MOCK-0011:
+  confidence: 0.92
+  evidence_refs: [ux-specs/mockups/checkout-empty.png]
+  uncertainty: []
+
+BC-0003:
+  confidence: 0.81
+  evidence_refs: [billing/**, tests/billing/**]
+  uncertainty: ["Cohesion across billing/ and invoicing/ is ambiguous; could be split."]
 ```
 
-All inferred items remain `draft` until reviewed and approved. Mockups stay as evidence and don't become normative truth until their extracted obligations become IDed contract items (per methodology §6.3).
+Review tooling (in `review`/`reconcile` packets) joins each draft item against this map to surface confidence and evidence during top-down approval. After approval the per_candidate map stays in the trace as a durable audit record; the artifact itself is unchanged by the approval. All inferred items remain `draft` until reviewed and approved. Mockups stay as evidence and don't become normative truth until their extracted obligations become IDed contract items (per methodology §6.3).
 
 ---
 
-## 16. Acceptance checklist for v03 implementation
+## 16. Acceptance criteria for the v03 implementation
 
-- [ ] `.vibeloom/cache/` and `.vibeloom/traces/` are separated.
-- [ ] Approval baseline is trace-backed (JSONL append-only), not snapshot-backed.
-- [ ] ID registry persists retired IDs and next counters.
-- [ ] Trace families (§8.1–§8.6) have schemas with `schema_version` field.
-- [ ] Code-sync traces connect contract IDs to file hashes and validation evidence.
-- [ ] Review and reconciliation packets exist with user-notes write capability.
-- [ ] Task templates use markdown structure (Inputs / Steps / Output / Constraints / Validation), not YAML wrappers.
-- [ ] Subagent writes are patch-staged in `.vibeloom/runs/`, validated, then applied atomically.
-- [ ] Dispatch plan structure, wave-assembly rules, and parallel semantics match §13.1–§13.3.
-- [ ] Subagent task header schema (§13.4) is the only orchestrator-to-subagent contract.
-- [ ] Validation registry (`validation-registry.md`) is parsed and runners are invokable.
-- [ ] Product/UX peer generation supports mockup evidence with `MOCK-####` records.
-- [ ] `ux` mode supported as a fifth top-level mode (designer-led, PM peer reviewer).
-- [ ] Verification ladder (decidable / mechanical / heuristic) reflected in eval routing.
-- [ ] Component / container / bounded-context rules match methodology §6.5.
-- [ ] Engine validates `derives_from` per §5.1 derivation rules and §8.2 universal-trace rule (every non-root item has at least one upstream basis transitively reaching `CAP` or `CST`).
-- [ ] `status` distinguishes `current`, `stale`, `uncovered`, `dangling`, `drifted`, and `obsolete`.
-- [ ] Each operation has explicit, traceable execution semantics (§15.1–§15.8).
-- [ ] Vibe layout is genuinely minimal (no graph cache, no code-sync trace) — not a stripped full mode.
-- [ ] Templates exist only as fenced blocks in `vibeloom-templates.md`; the on-disk template tree (`templates/`, gitignored) is a build artifact materialized on demand by `extract-templates.py`. CI runs `--check` to confirm round-trip parses.
+A v03-compliant implementation must satisfy each of the following invariants. These are timeless criteria — they describe what "v03" means structurally, not the project-management status of any particular build. Live build status lives in build reports (`engine-build-report.md`, `skill-build-report.md`), not here.
+
+- The `.vibeloom/` substrate is split into four subdirectories with distinct semantics: `cache/` (regenerable derived state), `traces/` (append-only JSONL provenance), `state/` (durable mutable runtime state — id-registry), `runs/` (per-invocation subagent staging). See §3.
+- Approval baseline is trace-backed (JSONL append-only), not snapshot-backed.
+- ID registry persists retired IDs and next counters at `.vibeloom/state/id-registry.json` (not under `traces/`); also holds per-record_type counters for decision-record IDs (`ADR`/`PDR`/`UDR`/`IDR`). See §5.2 and §8.5.
+- Trace families (§8.1–§8.6) have schemas with a `schema_version` field. Trace and runtime IDs use the uniform 4-digit dated form `<KIND>-YYYYMMDD-NNNN`; rendered decision-record IDs use the sequence-only 4-digit form `<RECORD>-NNNN`.
+- Code-sync traces connect contract IDs to file hashes and validation evidence.
+- Import traces (§8.6, schema `1.1`) carry both an aggregate summary and a `per_candidate: {<item_id>: {confidence, evidence_refs, uncertainty}}` map; per-candidate inference rationale is queryable from the trace, not from artifact frontmatter (artifacts stay clean of import-only fields).
+- Review and reconciliation packets exist with user-notes write capability.
+- Task templates use markdown structure (Inputs / Steps / Output / Constraints / Validation), not YAML wrappers, and every task template carries a `task-template-version` trailer.
+- Subagent writes are patch-staged in `.vibeloom/runs/`, validated, then applied atomically.
+- Dispatch plan structure, wave-assembly rules, and parallel semantics match §13.1–§13.3.
+- Subagent task header schema (§13.4) is the only orchestrator-to-subagent contract.
+- Validation registry (`validation-registry.md`) is parsed and runners are invokable.
+- Product/UX peer generation supports mockup evidence with `MOCK-####` records.
+- `ux` mode supported as a fifth top-level mode (designer-led, PM peer reviewer).
+- Verification ladder (decidable / mechanical / heuristic) reflected in eval routing.
+- Component / container / bounded-context rules match methodology §6.5 — each domain-layer component hosts exactly one bounded context.
+- Decision traces use the dual-ID model: `trace_id: DEC-*` (event identity, dated) plus `record_id: <ADR|PDR|UDR|IDR>-*` (rendered-record identity, sequence-only per record_type, absent for `general`). See §8.5.
+- Engine validates `derives_from` per §5.1 (per-prefix derivation rules in the registry table) and methodology §8.2 (universal derivation rule — every non-root item has at least one upstream basis transitively reaching `CAP` or `CST`).
+- `status` branches on mode: full modes use the graph cache and distinguish `current`, `stale`, `uncovered`, `dangling`, `drifted`, and `obsolete`; vibe emits a lightweight one-screen report (mode, intent state, code state, decision count, recommended next) computed from `intent.md` + trace tails with no cache writes. See §15.6.
+- Each operation has explicit, traceable execution semantics (§15.1–§15.8).
+- Vibe layout is genuinely minimal — approval and decision traces and the `state/id-registry.json` (initialized at `init`) are durable; graph cache and status cache are not. Vibe `status` is recomputed on each invocation from artifacts and trace tails — it never writes a status snapshot.
+- Templates exist only as fenced blocks in `vibeloom-templates.md`; the on-disk template tree (`templates/`, gitignored) is a build artifact materialized on demand by `extract-templates.py`. CI runs `--check` to confirm round-trip parses.
 
 ---
 
@@ -1280,7 +1356,7 @@ The extractor writes everything between the opener and closer, verbatim, to `<de
 
 ### 17.3 Inventory and contracts
 
-`vibeloom-templates.md` defines 41 templates in five families. Each family has a contract: a set of structural rules every template in that family must satisfy. Templates may add prose, examples, and craft beyond the contract; they may not omit what the contract requires.
+`vibeloom-templates.md` defines 41 templates in six families. Each family has a contract: a set of structural rules every template in that family must satisfy. Templates may add prose, examples, and craft beyond the contract; they may not omit what the contract requires.
 
 | Family | Path prefix (in extracted tree) | Count | Contract (every template in this family must…) |
 | --- | --- | --- | --- |
@@ -1288,8 +1364,8 @@ The extractor writes everything between the opener and closer, verbatim, to `<de
 | Subagent prompt | `skill/subagent-prompt.md` | 1 | Body shape that wraps the canonical subagent task header (§13.4) into a working prompt; includes load-set, allowed-paths, validation-contract sections. |
 | Skill references | `skill/references/*.md` | 6 | Load-on-demand condensations of methodology + implementation. Each is self-contained for its operation; canonical-source pointer in the header. Files: `operations.md`, `modes.md`, `runtime.md`, `artifacts.md`, `eval.md`, `troubleshooting.md`. |
 | Task templates | `tasks/*.md` | 14 | Canonical Design-by-Contract structure (10 sections): `## Purpose`, `## Inputs`, `## Preconditions`, `## Steps` (numbered), `## Output` (named result shape with required fields), `## Postconditions`, `## Constraints`, `## Invariants`, `## Validation`, `## Failure modes`. See §12.1. Trailer carries `task-template-version`. |
-| Artifact templates | `artifacts/**/*.md` | 18 | YAML frontmatter (`artifact_type`, `tier`, `scope_kind`, `scope_id`, `derives_from`, plus contract-artifact-only `status` and `approval_unit`). Body uses the prefix families defined in §5.1. Tables for IDed items use canonical column conventions (see the `skill/references/artifacts.md` template). |
-| Project-level meta | `artifacts/validation-registry.md`, plus README | 2 | Validation registry per §7. README documents the directory layout. |
+| Artifact templates | `artifacts/**/*.md` | 18 | YAML frontmatter (`artifact_type`, `tier`, `scope_kind`, `scope_id`, `derives_from`, plus contract-artifact-only `status` and `approval_unit`). Body uses the prefix families defined in §5.1. Tables for IDed items use canonical column conventions (see the `skill/references/artifacts.md` template). Includes `validation-registry.md` per §7 and the per-record `decision-trace.md`. |
+| README | `README.md` | 1 | Documents the extracted `templates/` tree layout, conventions, and how the skill consumes the bundle. Per-tree readme; no frontmatter. |
 
 When adding a new template:
 1. Add the body inside a fenced block in `vibeloom-templates.md` (with a TOC entry up top).

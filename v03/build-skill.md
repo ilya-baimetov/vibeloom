@@ -1,5 +1,7 @@
 # Build the v0.3 vibeloom skill bundle
 
+> **Historical from-scratch prompt.** This document is the original prompt that produced the current `v03/templates/` skill bundle. It was written assuming a **greenfield build** — i.e. no `templates/` directory exists. The extracted bundle now exists. For ongoing maintenance, edit `v03/vibeloom-templates.md` (the canonical source) and re-run `python3 v03/extract-templates.py`. Use this prompt only for full v0.4+ rebuilds against a future spec.
+
 A prompt for Claude Code (or any equivalent agentic coding tool). The agent extracts templates, validates the skill manifest (statically — Step 10a), smoke-tests against fresh repos in two modes, packages the deployable bundle, and queues the live Claude Code load test for the human (Step 10b).
 
 This prompt names **what** must happen, not how. Bundle layout, manifest format choices, packaging strategy, smoke-test orchestration — those are the agent's call. The agent should consult `vibeloom-implementation.md`, `vibeloom-methodology.md`, and the templates source as the authoritative inputs.
@@ -34,7 +36,7 @@ Assemble the v0.3 vibeloom skill bundle from canonical sources: the engine (buil
 
 ## Steps
 
-1. **Extract templates and verify round-trip.** Use `extract-templates.py` in default mode then `--check` mode. Drift must be zero. The expected template count is declared in impl §17.3 line 1271 (currently 41, but **the spec evolves and that count may be different at your run-time**).
+1. **Extract templates and verify round-trip.** Use `extract-templates.py` in default mode then `--check` mode. Drift must be zero. The expected template count is declared in impl [§17.3 Templates inventory](vibeloom-implementation.md#173-templates-inventory) (currently 41, but **the spec evolves and that count may be different at your run-time** — trust the section, not this prompt's frozen number).
 
    When the extracted count doesn't match §17.3:
    - **If §17.3 was recently updated** (newer than the extracted-count expectation in your scratchpad): the spec changed; trust the spec; update your expectation; proceed.

@@ -103,7 +103,7 @@ A mode controls contract depth, approval gates, and UX surface.
 
 | Mode | Lead | User-owned approval stops | Delegated tiers | Internal structure |
 | --- | --- | --- | --- | --- |
-| `vibe` | solo | `intent-specs` | system + code | minimal — no graph, no code-sync, no formal status |
+| `vibe` | solo | `intent-specs` | system + code | minimal — no graph, no code-sync, no per-item status (lightweight `where am I?` status report only) |
 | `pm` | product | `intent-specs`, `product-specs`, optionally `ux-specs` | `system-specs` | full graph + traces |
 | `dev` | tech | `intent-specs`, `system-specs` | `product-specs`, optionally `ux-specs` | full graph + traces |
 | `ux` | design | `intent-specs`, `ux-specs`, optionally `product-specs` | `system-specs` | full graph + traces |
@@ -113,7 +113,7 @@ A mode controls contract depth, approval gates, and UX surface.
 
 ### 5.1 vibe is intentionally minimal
 
-`vibe` is not a stripped-down full mode — it's a different operating point. The compact stack: `intent.md`, an inferred flat `system.md`, an `AGENTS.md` for the model. No IDed graph, no code-sync trace, no formal status. A modern model keeps the small system coherent on its own.
+`vibe` is not a stripped-down full mode — it's a different operating point. The compact stack: `intent.md`, an inferred flat `system.md`, an `AGENTS.md` for the model. No IDed graph, no code-sync trace, no per-item status taxonomy; `status` in vibe is a lightweight one-screen "where am I?" report computed from intent + trace tails (see implementation §15.6). A modern model keeps the small system coherent on its own.
 
 vibe still emits approval traces — approval provenance survives for the future upgrade — but skips the heavyweight machinery.
 
@@ -147,25 +147,7 @@ In `ux` mode:
 
 `intent` is the only root source of user-authored semantic intent. Free prose is allowed; structured capabilities and constraints are IDed.
 
-**Tech Stack section in `defaults`.** `defaults` includes a structured Tech Stack section organized by DDD architectural layer. Each sub-section names the binding choices for that layer; empty fields signal "agent decides reasonably given other constraints."
-
-```
-## Tech stack
-
-### Presentation
-- Framework, meta-framework, styling, state management, component library
-
-### Application
-- API style (REST / GraphQL / tRPC / RPC), backend framework, auth pattern, validation
-
-### Domain
-- Language, decomposition (monolith / multi-service), aggregate pattern, domain event style
-
-### Infrastructure
-- Cloud platform, database, cache, queue, storage, compute pattern
-```
-
-Stack choices made here are inherited by all containers in the matching layer; per-container overrides are allowed.
+**Tech Stack section in `defaults`.** `defaults` includes a structured Tech Stack section organized by DDD architectural layer (Presentation / Application / Domain / Infrastructure). Each layer names its binding choices; empty fields signal "agent decides reasonably given other constraints." Stack choices made here are inherited by all containers in the matching layer; per-container overrides are allowed. Per-layer field shape is normative in [`vibeloom-implementation.md §6`](./vibeloom-implementation.md) and the `defaults.md` template in `vibeloom-templates.md`.
 
 ### 6.2 Product-specs
 
@@ -207,10 +189,10 @@ Every container carries a `layer` field — a required enum drawn from the DDD a
 | --- | --- | --- | --- |
 | `presentation` | No | UI components (pages, layouts, widgets) | Inherits stack choices from `defaults` Presentation section. Typically one container; micro-frontends are a minority pattern. |
 | `application` | No | API surfaces, orchestration handlers, BFF endpoints | Inherits Application stack. Often one container per UI surface (web, mobile, admin); changes with screens, so not a "microservice" in the autonomous-business-capability sense — more a thin orchestration layer. |
-| `domain` | **Yes** | Service-shaped components hosting bounded contexts | Inherits Domain stack. Decomposition: `monolith` (all BCs in one container) or `multi-service` (one container per BC = canonical microservices). |
+| `domain` | **Yes** | Service-shaped components, each hosting exactly one bounded context | Inherits Domain stack. Decomposition: `monolith` (all components in one container, one BC per component) or `multi-service` (one container per component = canonical microservices). |
 | `infrastructure` | No | No internal components — declares consumed platform services as dependencies | Inherits Infrastructure stack. |
 
-**Key invariants.** Component is the smallest owned technical boundary for generation, communication, and change. Bounded contexts are domain partitions inside components, not runtime deployment units. (Containment chain: container ⊇ component ⊇ bounded context, with BCs only inside `domain`-layer components.)
+**Key invariants.** Component is the smallest owned technical boundary for generation, communication, and change. **Each domain-layer component hosts exactly one bounded context**; each bounded context belongs to exactly one component (1:1 mapping in the domain layer). Bounded contexts are domain partitions, not runtime deployment units.
 
 Bounded-context relationships (Customer-Supplier, Conformist, Anti-Corruption Layer) and cross-layer interaction graphs are tracked in the [roadmap](roadmap.md#c2-ddd-context-maps) for a future version.
 
@@ -277,7 +259,9 @@ Use distinct categories instead of overloading "stale":
 
 ## 10. Cognitive surface
 
-The cognitive-surface argument is made visually in [manifesto §5](codæ-manifesto.html#surface) (108K-LOC system vs 24% contract column). Item-count compression as a measurable per-cycle metric — review compression ratio, review time per packet, defect-detection rate at review vs after merge, downstream-rework frequency per approval — is a roadmap target, not yet operational. See [roadmap A4](roadmap.md#a4-cognitive-surface-instrumentation).
+The **cognitive surface** of a project is the set of items a human must hold in working memory to govern it: contract items in the affected review cut — capabilities, constraints, requirements, flows, bounded contexts, interfaces, behaviors, decisions, obligations — as opposed to code items (files, classes, functions, branches, tests, dependency edges) in the corresponding implementation. Working memory is hard-bounded (Brooks's essential complexity thesis; Miller's 7±2 constraint), so the only durable lever is to keep the *governed* set small enough to fit while the *generated* set scales with features.
+
+VibeLoom's bet — and the codæ partition — is that the contract surface stays at human scale while implementation grows under it. The empirical anchor is in [manifesto §5](codæ-manifesto.html#surface): a 108K-LOC C# system governed by a contract surface roughly 24% of the code volume (Vasilopoulos 2026). v0.3 surfaces this as an architectural principle; **item-count compression as a measurable per-cycle metric** — review compression ratio, review time per packet, defect-detection rate at review vs after merge, downstream-rework frequency per approval — is engine-side instrumentation deferred to v04+ ([roadmap A4](roadmap.md#a4-cognitive-surface-instrumentation)).
 
 ---
 
@@ -295,7 +279,8 @@ Canonical trace families:
 | `code-sync` | source-map-like connection from code paths/hashes to contract IDs and validation evidence |
 | `decision` | human-authored decision history (ADR / PDR / UDR / IDR / general) |
 | `import` | evidence and confidence for brownfield inference |
-| `id-registry` | allocation state and retired IDs |
+
+ID allocation state and retired IDs are not a trace family — they are durable mutable state under `.vibeloom/state/id-registry.json`. See implementation §3.3 and §5.2.
 
 Traces can propose improvements via mediated proposals ([roadmap §D](roadmap.md#d-trace-derived-learning)) but never become contract truth without review and approval.
 

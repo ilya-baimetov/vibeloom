@@ -156,7 +156,7 @@ For an end-to-end demonstration that the templates produce real, usable artifact
 - Tech Stack section in `defaults.md` organized per DDD layer (presentation / application / domain / infrastructure).
 - Decision traces classified by `record_type` (IDR / PDR / UDR / ADR / general); single template, materialized per record into `decisions/<record_type>/<RECORD>-<NNNN>-<slug>.md`.
 - No `context/decisions/` folder — decisions are anchored in the `decision` trace family (JSONL, append-only) with `load_bearing` flag; per-record markdown renderings under `/decisions/<record_type>/` are derived views (see implementation §8.5.1).
-- All trace schemas designed for future graph promotion (see roadmap CGKG-B).
+- All trace schemas designed for future graph promotion (a v0.4+ capability).
 
 ## Versioning
 
@@ -254,27 +254,39 @@ All engine commands emit JSON on stdout. The engine makes NO semantic judgments 
 
 ## Substrate
 
-The cooperating substrate at `.vibeloom/` is split:
+The cooperating substrate at `.vibeloom/` is a four-part split:
 
-- **`.vibeloom/cache/`** — regenerable state (Contract Graph, status). Safe to delete; engine rebuilds.
-- **`.vibeloom/traces/`** — durable provenance (append-only JSONL). Never silently regenerated; missing traces require explicit re-baselining.
+- **`.vibeloom/cache/`** — regenerable derived state (Contract Graph, status). Safe to delete; engine rebuilds.
+- **`.vibeloom/traces/`** — durable provenance event streams (append-only JSONL). Never silently regenerated; missing traces require explicit re-baselining.
+- **`.vibeloom/state/`** — durable mutable runtime state (id-registry). Read-modify-write JSON; recoverable from traces in principle but never auto-rebuilt.
+- **`.vibeloom/runs/`** — per-invocation subagent staging (patches, summaries). Cleaned up after retention window.
 
-Trace families: `approval`, `generation`, `eval`, `code-sync`, `decision`, `import`, plus the `id-registry.json` structured exception. See implementation §8 for schemas.
+Trace families: `approval`, `generation`, `eval`, `code-sync`, `decision`, `import`. See implementation §8 for schemas; implementation §3.3 for state.
 
 Decision traces classify by `record_type`: `IDR` (intent-specs), `PDR` (product-specs), `UDR` (ux-specs), `ADR` (system-specs), or `general` (process / methodology / operational decisions that don't change the contract). The active load-bearing subset is a queried view, not a duplicated folder.
 
 ## Command routing
 
-On any operation invocation, load `references/operations.md` first for parameters and preconditions; then load the relevant subset of references and the task template:
+On any operation invocation, load `references/operations.md` first for parameters and preconditions; then load the relevant subset of references and the task template. The routing below is **explicit and exhaustive** — do not infer task names from operation strings:
 
-| Operation | First load | Then |
-|---|---|---|
-| `init`, `import` | `operations.md`, `modes.md` | `tasks/init.md` or `tasks/import.md` + initial templates |
-| `generate <target>` | `operations.md`, `runtime.md` | `tasks/generate-<target>.md` + target-tier templates + graph cache |
-| `eval <target>`, `review <target>` | `operations.md`, `runtime.md`, `eval.md` | `tasks/eval.md` or `tasks/review.md` + target artifacts |
-| `reconcile <target>` | `operations.md`, `runtime.md`, `eval.md` | `tasks/reconcile.md` + downstream artifacts + graph + traces |
-| `approve <target>` | `operations.md`, `modes.md`, `eval.md` | `tasks/approve.md` + target artifacts |
-| `status` | `artifacts.md` | `tasks/status.md` + graph cache |
+| Command | First load | Task template | Notes |
+|---|---|---|---|
+| `init` | `operations.md`, `modes.md` | `tasks/init.md` | Plus initial artifact templates per mode. |
+| `import` | `operations.md`, `modes.md` | `tasks/import.md` | Plus initial artifact templates per mode. |
+| `generate intent-specs` | `operations.md`, `runtime.md` | `tasks/generate-intent-specs.md` | Plus `intent.md` / `defaults.md` templates. |
+| `generate product-specs` | `operations.md`, `runtime.md` | `tasks/generate-product-specs.md` | `pm`/`dev`/`expert` modes. Plus product-specs templates + graph cache. |
+| `generate product-specs` (in `ux` mode) | `operations.md`, `runtime.md` | `tasks/generate-product-specs-from-ux.md` | `ux`-mode variant that uses approved ux-specs as evidence. |
+| `generate ux-specs` | `operations.md`, `runtime.md` | `tasks/generate-ux-specs.md` | Plus `ux.md` template + graph cache. |
+| `generate system-specs` | `operations.md`, `runtime.md` | `tasks/generate-system-specs.md` | Plus system-specs templates + graph cache. |
+| `generate context` | `operations.md`, `runtime.md` | `tasks/generate-context.md` | Plus context templates (`AGENTS.md`/`CLAUDE.md`, `bdd.md`). |
+| `generate code` | `operations.md`, `runtime.md` | `tasks/generate-code-component.md` | One subagent per affected component; layer-aware. |
+| `eval <target>` | `operations.md`, `runtime.md`, `eval.md` | `tasks/eval.md` | Plus target artifacts. |
+| `review <target>` | `operations.md`, `runtime.md`, `eval.md` | `tasks/review.md` | Plus target artifacts. |
+| `reconcile <target>` | `operations.md`, `runtime.md`, `eval.md` | `tasks/reconcile.md` | Plus downstream artifacts + graph + traces. |
+| `approve <target>` | `operations.md`, `modes.md`, `eval.md` | `tasks/approve.md` | Plus target artifacts. |
+| `status` | `artifacts.md` | `tasks/status.md` | Branches on mode: full modes use graph cache; vibe reads compact artifacts + traces (no cache). |
+
+Decision-record rendering (`render-decisions` or equivalent) is an engine-side concern; the skill does not own a separate task template for it. Rendered `.md` decision records are materialized by the engine from `decisions.jsonl` traces per implementation §8.5.1.
 
 **Failure recovery:** load `references/troubleshooting.md` reactively when any of its covered failure modes appears — cache corruption, lifecycle drift, breaking change, partial wave failure, late-fetch overflow. Do not pre-load it on every operation.
 
@@ -291,7 +303,7 @@ Consult `references/modes.md` to help the user pick a mode. Default recommendati
 
 - **Approval gates**: never bypass. When a contract tier is a user stop in the current mode, halt and surface findings.
 - **Methodology authoritative**: if this skill file disagrees with the methodology, follow the methodology and flag the drift.
-- **No invented schema**: don't introduce entity types, ID prefixes, or derivation edges. The valid set is in the methodology's Contract Graph (§5.1 derivation rules + §8 graph).
+- **No invented schema**: don't introduce entity types, ID prefixes, or derivation edges. The valid set is in the methodology's Contract Graph (§8, with derivation rules in §8.2) and the implementation's ID prefix registry (§5.1).
 - **Layer-aware**: containers carry a `layer` field (presentation / application / domain / infrastructure). Bounded contexts ONLY in domain-layer containers. Tech stack inherited from `defaults.md` per layer.
 - **Decisions live in traces**: ADRs / PDRs / UDRs / IDRs are decision-trace entries with `record_type`. There is no `context/decisions/` folder. Active "decision context" is a queried view over traces filtered by `load_bearing: true`.
 - **Subagent load sets**: scoped only — never load the skill, methodology, or implementation docs into a subagent's context. Subagents see baseline + owned scope + foreign IF slices + relevant context.
@@ -477,6 +489,7 @@ Artifact layout, frontmatter shapes, ID schema, and derivation rules. Authoritat
       code-sync.jsonl
       decisions.jsonl
       imports.jsonl
+    state/
       id-registry.json
     runs/
       RUN-.../
@@ -552,7 +565,7 @@ Every contract artifact includes:
 | `scope_id` | string | `root` or the governing scope slug |
 | `status` | enum | `draft` \| `approved` |
 | `timestamp` | string | ISO 8601 of the last change |
-| `approval_mode` | enum | `user` \| `delegated`. Set at approval time only; absent on drafts. |
+| `approval_unit` | string | The contract tier this artifact participates in (`intent-specs`, `product-specs`, `ux-specs`, `system-specs`). Identifies the approval unit; advances together. |
 | `derives_from` | string[] | Upstream short item IDs that materially constrain this artifact |
 
 Additional required fields:
@@ -582,17 +595,18 @@ Extras:
 
 - **`config`** artifacts: `assistant` (e.g., `claude`, `codex`)
 
-Context artifacts do **not** carry `status` or `approval_mode`.
+Context artifacts do **not** carry `status` or `approval_unit`.
 
 ---
 
 ## Decision-trace frontmatter
 
-Decision traces are persisted in the append-only stream at `.vibeloom/traces/decisions.jsonl`. Per-record markdown files in `decisions/<record_type>/` are the human-readable rendering. Frontmatter shape:
+Decision traces are persisted in the append-only stream at `.vibeloom/traces/decisions.jsonl`. Per-record markdown files in `decisions/<record_type>/` are the human-readable rendering. Frontmatter uses the **dual-ID model**: `trace_id` (event identity, uniform `DEC-*`, replay key) and `record_id` (rendered-record identity, `<ADR|PDR|UDR|IDR>-*`, human label). See implementation §8.5 for the rationale.
 
 | Field | Type | Notes |
 |---|---|---|
-| `trace_id` | string | `<RECORD>-<YYYYMMDD>-<NNNN>` (e.g. `ADR-20260512-0007`) |
+| `trace_id` | string | `DEC-<YYYYMMDD>-<NNNN>` (e.g. `DEC-20260512-0007`). Event identity in the unified decision trace family. |
+| `record_id` | string | `<RECORD>-<NNNN>` (e.g. `ADR-0007`, `IDR-0003`). Sequence-only per `record_type`; ecosystem-compatible filename (adr-tools convention). Absent for `record_type: general`. |
 | `kind` | string | Always `decision` |
 | `record_type` | enum | `IDR` \| `PDR` \| `UDR` \| `ADR` \| `general` (default `general`) |
 | `load_bearing` | bool | Whether decision still informs future generation. Default `false`. |
@@ -671,7 +685,8 @@ Canonical source: [implementation §5.1](../../../vibeloom-implementation.md#51-
 | component config | `config.component.<container-slug>.<component-slug>.<assistant-slug>` |
 | validation-registry | `validation-registry` |
 | `bdd` | `BDD-####` |
-| decision trace | `<RECORD>-<YYYYMMDD>-<NNNN>` (e.g. `ADR-20260512-0007`) |
+| decision trace event | `trace_id: DEC-<YYYYMMDD>-<NNNN>` (e.g. `DEC-20260512-0007`) — event identity, replay key |
+| decision trace record | `record_id: <RECORD>-<NNNN>` (e.g. `ADR-0007`) — human-facing rendered-record identity, sequence-only per record_type; absent for `general` decisions |
 
 ---
 
@@ -735,7 +750,7 @@ Load on demand during `eval`, `review`, `reconcile`, and `approve` when the targ
 
 ## The verification ladder
 
-The three tiers (Decidable / Mechanical / Heuristic) and the per-tier check inventory are canonically defined in [methodology §14.3](../../vibeloom-methodology.md#143-verification-ladder). This reference covers the **heuristic tier** only — agent-judged semantic dimensions, where guidance is needed. The decidable and mechanical tiers are engine-driven and don't require this file.
+The three tiers (Decidable / Mechanical / Heuristic) and the per-tier check inventory are canonically defined in [methodology §14.3](../../../vibeloom-methodology.md#143-verification-ladder). This reference covers the **heuristic tier** only — agent-judged semantic dimensions, where guidance is needed. The decidable and mechanical tiers are engine-driven and don't require this file.
 
 The codæ trajectory is to promote checks upward as the engine matures — heuristic dimensions become mechanical runners; mechanical runners become structural rules. The decidable share grows over time.
 
@@ -749,7 +764,8 @@ Every semantic finding is a JSON object with these fields:
 
 | Field | Type | Notes |
 |---|---|---|
-| `severity` | `breaking` \| `advisory` | See Severity Classification below |
+| `severity` | `breaking` \| `advisory` | Semantic axis — see Severity Classification below |
+| `gate_effect` | `blocking` \| `non-blocking` | Policy axis — whether this finding gates approval. Defaults: `breaking` ⇒ `blocking`, `advisory` ⇒ `non-blocking`. Orchestrator may override. |
 | `dimension` | enum | `faithful-representation`, `naming-consistency`, `implicit-dependencies`, `capability-gap`, `ux-product-mismatch`, `mockup-extraction-gap`, `target-platform-mismatch`, `other` |
 | `upstream_id` | string \| null | The upstream item the downstream was checked against; null if not tied to a single upstream |
 | `downstream_id` | string | The item or artifact being evaluated |
@@ -762,8 +778,15 @@ If no findings for a check, return an empty list. Do not invent severities, dime
 
 ## Severity Classification
 
-- **`breaking`** — the finding alters the meaning of an approved upstream item (narrowing, widening, reversing) or represents a capability entirely unaddressed. Breaking findings block delegated auto-advance in `pm` / `dev` modes and escalate to explicit user review (methodology ## Generation ### Approval And Auto-Advance).
-- **`advisory`** — worth surfacing, but does not reliably indicate a spec defect. Naming drift, suggested implicit edges, and partial capability coverage are typically advisory.
+VibeLoom uses a **two-axis** model:
+
+- **Semantic severity (`severity`)** — what the finding asserts about meaning. Values: `breaking` | `advisory`.
+- **Gate effect (`gate_effect`)** — what the finding does to the approval gate at evaluation time. Values: `blocking` | `non-blocking`.
+
+The two are correlated but distinct: by default, `breaking` ⇒ `blocking` and `advisory` ⇒ `non-blocking`. The orchestrator may override `gate_effect` per project policy (e.g., promote a recurring advisory to blocking until addressed). Older eval traces that emit only `severity` SHOULD be read as `severity=blocking` ⇔ `severity=breaking`; new traces SHOULD set both fields.
+
+- **`breaking`** — the finding alters the meaning of an approved upstream item (narrowing, widening, reversing) or represents a capability entirely unaddressed. Breaking findings are `blocking` by default; they block delegated auto-advance in `pm` / `dev` modes and escalate to explicit user review (methodology ## Generation ### Approval And Auto-Advance).
+- **`advisory`** — worth surfacing, but does not reliably indicate a spec defect. Naming drift, suggested implicit edges, and partial capability coverage are typically advisory and `non-blocking`.
 
 When in doubt, classify as `breaking`. False advisories cost a review cycle; false-negative breaking findings let meaning drift past an approval gate.
 
@@ -889,7 +912,7 @@ An approval unit is one contract tier.
 
 - **User owns:** all contract tiers (`intent-specs`, `product-specs`, `ux-specs`, `system-specs`).
 - **Delegated:** none.
-- **Public surface:** `generate`, `review`, `eval`, `reconcile`, `approve`, `status`, `help`, each accepting any target tier.
+- **Public surface:** `generate`, `review`, `eval`, `reconcile`, `approve`, `status`, each accepting any target tier.
 - **Normal stops:** every contract tier pauses for explicit user review and approval.
 
 ### `pm`
@@ -922,7 +945,7 @@ Designer-led counterpart to `pm`. The designer drives discovery from intent + mo
 
 ### `vibe`
 
-Simplified ceremony for small or early-stage projects. Contract stack collapses to `intent` + `defaults` + flat `system`. No graph, no code-sync, no formal status.
+Simplified ceremony for small or early-stage projects. Contract stack collapses to `intent` + `defaults` + flat `system`. No graph, no code-sync, no per-item status taxonomy. `status` is a lightweight one-screen "where am I?" report (see implementation §15.6 and `tasks/status.md` vibe branch).
 
 - **Artifacts present:** `intent` (with product summary section), `defaults`, `system` (flat), root `config`, `source`, `tests`, `runtime`.
 - **Artifacts absent:** `prd`, `usm`, `dm`, `ux`, `containers`, per-container `container`, per-component `component`, `decision-trace.md`, `bdd`, container/component-scoped config.
@@ -937,7 +960,7 @@ Simplified ceremony for small or early-stage projects. Contract stack collapses 
   - `review intent-specs`, `eval intent-specs`
   - `review context`, `eval context`
   - `review code`, `eval code`
-  - `status`, `help`
+  - `status`
 - **Normal stops:** only `intent-specs` is a public user stop. Compact `system-specs` never becomes a public approval stop.
 - **System-specs handling:** the engine may target `system-specs` internally, but it is not publicly reviewable.
 
@@ -1060,7 +1083,7 @@ Quick runtime reference for VibeLoom operations. Authoritative semantics live in
 
 ## `reconcile`
 
-- **Purpose:** Remediation loop for drift in all forms (structural, lifecycle, semantic — see [`../../../vibeloom-methodology.md`](../../../vibeloom-methodology.md) §11). Inspects existing downstream artifacts, surfaces conflicts, selectively regenerates after user direction. Interactive shell on `generate`.
+- **Purpose:** Remediation loop for drift in all forms (structural, lifecycle, semantic — see [`../../../vibeloom-methodology.md`](../../../vibeloom-methodology.md) §15 (drift classification) and §16 (workflow shapes for reconciliation)). Inspects existing downstream artifacts, surfaces conflicts, selectively regenerates after user direction. Interactive shell on `generate`.
 - **Parameter:** Optional target scope (`product-specs` | `ux-specs` | `system-specs` | `context` | `code`). When omitted, reconciles from the highest changed tier downward through `code`.
 - **Precondition:** At least one drift form is present — approved upstream has changed (structural), an approved artifact was edited outside the flow (lifecycle), or semantic eval surfaced content divergence.
 - **Postcondition:** Drift resolved; affected artifacts regenerated via `generate`.
@@ -1105,7 +1128,7 @@ See [`runtime.md`](runtime.md) for dispatch mechanics and [`modes.md`](modes.md)
 ````template:skill/references/runtime.md
 # Runtime Reference
 
-Dispatch mechanics for the skill. Authoritative semantics live in [`vibeloom-implementation.md`](../vibeloom-implementation.md). This file is a load-on-demand condensation focused on what the orchestrator needs at runtime.
+Dispatch mechanics for the skill. Authoritative semantics live in [`vibeloom-implementation.md`](../../../vibeloom-implementation.md). This file is a load-on-demand condensation focused on what the orchestrator needs at runtime.
 
 ---
 
@@ -1231,9 +1254,13 @@ If validation fails and failing outputs can be localized, only affected tasks ar
 
 ## Context loading
 
-### Orchestrator
+### Orchestrator (full modes)
 
 Loads: skill instructions, status snapshot, graph cache, and only the artifacts needed for planning. After dispatch, retains graph + status + dispatch plan + subagent summaries. Reopens artifacts only for targeted spot validation.
+
+### Orchestrator (vibe)
+
+Loads: skill instructions, current `intent.md`, recent tails of `approvals.jsonl` / `generations.jsonl` / `decisions.jsonl`. No graph or status cache exists; nothing to load there. Vibe operations rarely dispatch subagents (most are single-task or orchestrator-local), so post-dispatch retention is minimal.
 
 ### Subagent load sets (full modes)
 
@@ -1352,7 +1379,7 @@ Common failure modes and recovery paths. Load on demand when the normal flow hit
 
 ## Breaking semantic change during delegated auto-advance
 
-**Symptom:** In `pm` or `dev`, a delegated tier's eval detects a breaking change (see [`../vibeloom-methodology.md ## Generation ### Breaking-Change Detection`](../vibeloom-methodology.md) for the classification table).
+**Symptom:** In `pm` or `dev`, a delegated tier's eval detects a breaking change (see [`vibeloom-methodology.md ## Generation ### Breaking-Change Detection`](../../../vibeloom-methodology.md) for the classification table).
 
 **Action:** Escalate. Explicit user review and approval of that tier become required before the run can complete. Surface the breaking signal with item IDs, both approved and draft statements, and the conflict description.
 
@@ -1498,14 +1525,14 @@ Advance a reviewed contract approval unit from `draft` to `approved`. Records an
    - run_id, timestamp, author
 6. Update each artifact's frontmatter status from `draft` to `approved`.
 7. Refresh Contract Graph cache.
-8. If auto-advance is configured for the next tier in current mode (and structural + semantic eval would pass for it), automatically invoke the next `generate-*` task.
+
+> **Note on auto-advance:** the `approve` task itself does NOT invoke downstream generation. Auto-advance to the next tier is an **orchestrator policy** (see methodology §5, "Delegated auto-advance" in `references/modes.md`). The orchestrator may, after `approve` returns successfully, schedule the next `generate-*` operation if the current mode delegates the downstream tier and conditions hold. Approval and generation remain distinct operations with distinct traces.
 
 ## Output
 
 - Each artifact in the approval unit: status updated to `approved`.
 - New approval trace entry in .vibeloom/traces/approvals.jsonl.
 - Contract Graph cache refreshed.
-- (Optional) Auto-advance kicked off for next tier.
 
 ## Postconditions
 
@@ -1539,6 +1566,8 @@ Advance a reviewed contract approval unit from `draft` to `approved`. Records an
 - Hash computation fails (non-deterministic content): surface error; user must address (typically a frontmatter formatting issue).
 - Auto-advance trigger fires but the next tier has its own findings: surface findings + halt auto-advance; user resolves.
 - Concurrent edit during approval (artifact mtime changes between hash and write): abort with "concurrent edit detected; re-run approve."
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/eval.md`
@@ -1571,7 +1600,7 @@ Read-only validation of a target against approved upstream truth across the veri
 ## Steps
 
 1. Build/refresh Contract Graph via engine `parse + graph`.
-2. **Decidable tier (engine, structural)**: run the engine's structural checks for the target. The check inventory is canonical in [methodology §14.3](../../vibeloom-methodology.md#143-verification-ladder); the engine knows what to run. Notable inclusion: `derives_from` validation per implementation §5.1 derivation rules and §8.2 universal-trace rule (every non-root item must cite valid upstream basis transitively reaching `CAP` or `CST`).
+2. **Decidable tier (engine, structural)**: run the engine's structural checks for the target. The check inventory is canonical in [methodology §14.3](../../vibeloom-methodology.md#143-verification-ladder); the engine knows what to run. Notable inclusion: `derives_from` validation per implementation §5.1 (per-prefix derivation rules in the registry table) and methodology §8.2 (universal derivation rule — every non-root item must cite valid upstream basis transitively reaching `CAP` or `CST`).
 3. **Mechanical tier (engine + runners)**: invoke validation runners declared in `validation-registry.md` that are in scope for the target. Aggregate pass/fail per runner.
 4. **Heuristic tier (agent, semantic)**: agent runs the heuristic dimensions defined in [`references/eval.md`](../skill/references/eval.md) (canonical dimension list in methodology §14.2) against items in scope.
 5. Categorize findings: `blocking` (must address before approval) or `advisory` (worth noting, not gating).
@@ -1611,6 +1640,8 @@ Read-only validation of a target against approved upstream truth across the veri
 - Engine parse fails: surface parse errors first; halt before structural checks.
 - A mechanical runner times out: surface as advisory; the rest of the runners proceed.
 - Heuristic eval cost exceeds budget: surface advisory ("eval truncated due to context budget"); the rest of decidable + mechanical results stand.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/generate-code-component.md`
@@ -1714,6 +1745,8 @@ Generate or repair the code for one component, with bounded write scope, layer-a
 - Late-fetch limit exceeded: subagent fails the task with a "context insufficient" finding for human review.
 - Stack constraints violated: subagent fails; orchestrator reopens with explicit stack reminder.
 - Foreign IF contract changes during the run (concurrent change): wave fails; orchestrator restarts wave from current basis.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/generate-context.md`
@@ -1795,6 +1828,8 @@ Generate or repair context artifacts (root + per-container + per-component AGENT
 - Missing approved contract: abort, surface "approve all contract tiers in scope first."
 - Per-component context too large (exceeds practical token budget): surface advisory; consider decomposing the component.
 - BDD generation produces redundant or contradictory scenarios: surface as findings; user resolves via review.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/generate-intent-specs.md`
@@ -1880,6 +1915,8 @@ Regenerate or repair `intent-specs` (intent.md + defaults.md) from user intent p
 - Insufficient intent prose: surface "intent prose too thin to extract capabilities"; ask user to expand.
 - Contradictions between intent prose and existing CSTs: surface conflict finding; user resolves via `review intent-specs`.
 - Tech Stack inference ambiguity (e.g. multiple framework hints): leave field empty + surface advisory.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/generate-product-specs-from-ux.md`
@@ -1973,6 +2010,8 @@ Designer-led generation: derive product-specs (prd + usm + dm) from approved int
 - ux-specs not approved: abort, surface "approve ux-specs first (designer flow)."
 - Mockup vision analysis fails: degrade gracefully — generate from VIEW/INT/UXC text without mockup content; surface advisory.
 - PM peer-review is rejected: items revert to draft; surface diff between PM expectations and ux-derived items; user (designer + PM) reconcile.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/generate-product-specs.md`
@@ -2069,6 +2108,8 @@ Generate or repair `product-specs` (prd.md + usm.md + dm.md) from approved inten
 - Missing approved upstream: abort, surface "approve intent-specs first."
 - Contradictions between FR and CAP: surface as semantic blocking finding.
 - BC inferred but no clear aggregate root: surface advisory; user adds during review.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/generate-system-specs.md`
@@ -2127,14 +2168,14 @@ Generate or repair `system-specs` (system.md + containers.md + per-container con
    - Resident bounded contexts (DOMAIN ONLY).
    - Component inventory.
    - Local dependency edges.
-   - Cross-layer interactions (prose; structural in v0.4 per roadmap).
+   - Cross-layer interactions (prose; structural in v0.4).
 6. Generate per-component `<container>/<component>/component.md` files:
    - `bounded_context` field populated for domain components; null for others.
    - IF-#### per provided interface (derives from FR, STORY, ACC).
    - DEP-#### per consumed dependency.
    - BEH-#### per local behavior contract (derives from STORY, ACC, INV).
    - NOTE-#### per local concern.
-7. Run engine `parse + eval --target system-specs` for structural checks (including layer-aware constraints: hosted_bounded_contexts non-empty only for domain layer).
+7. Run engine `parse + eval --target system-specs` for structural checks (including layer-aware constraints: `bounded_context` populated only for domain-layer components, exactly one per component).
 8. Run heuristic semantic eval (faithful representation, naming consistency, implicit dependencies, capability gaps, target-platform mismatch — flags if Tech Stack and inferred container layer don't agree).
 9. Emit a `generation` trace recording basis_ids, output_artifact_ids (system, containers, all per-container + per-component files), output_item_ids.
 
@@ -2181,6 +2222,8 @@ Generate or repair `system-specs` (system.md + containers.md + per-container con
 - Defaults Tech Stack incomplete (e.g. no domain decomposition choice): surface advisory; ask user to fill Tech Stack before generating system-specs.
 - Bounded context too large to fit in one component: surface decomposition advisory; user splits BC during review.
 - Inferred deployment target conflicts with declared platform: surface as semantic finding.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/generate-ux-specs.md`
@@ -2263,6 +2306,8 @@ Generate or repair `ux-specs` (ux.md + mockup index) from approved intent-specs 
 - Missing approved upstream: abort, surface "approve intent-specs (and product-specs if applicable) first."
 - No mockup files but stories imply heavy visual content: surface advisory ("consider adding designer mockups to ux-specs/mockups/ for richer ux-specs").
 - Designer rejects peer-review: items revert to draft; user runs `reconcile ux-specs` to negotiate direction.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/import.md`
@@ -2302,24 +2347,24 @@ Bootstrap from existing code. Produce candidate contract artifacts in `draft` wi
    b. **product-specs**: infer FRs from API endpoints + user flows; STORYs from observed user journeys; BCs from cohesive code modules.
    c. **ux-specs** (if presentation code present): infer VIEWs from page/route definitions, INTs from event handlers, UXCs from i18n + accessibility configs.
    d. **system-specs**: infer CONT from deployment topology, CMP from cohesive code modules, IF from public API surfaces, DEP from import graph, BEH from test descriptions, `layer` from heuristic (presentation = frontend bundle / static; application = API/server; domain = service workload; infrastructure = IaC).
-4. Confidence scoring per candidate (high / medium / low) based on evidence quality (multiple corroborating signals = high; single weak signal = low).
-5. Evidence linking: each draft item carries `derives_from` plus a free-form `evidence` field pointing at source paths.
-6. Draft writing in batches: intent → product → ux → system. Each batch is its own `generate` invocation under the hood.
-7. Emit one `import` trace per invocation summarizing aggregate counts and confidence distribution; per-candidate evidence lives in the draft artifacts' frontmatter.
+4. Confidence scoring per candidate (numeric 0–1) and uncertainty list, based on evidence quality (multiple corroborating signals = high; single weak signal = low).
+5. Evidence collection per candidate: collect `evidence_refs` (file paths, test paths, config locations) for each candidate item ID. **Do not** add `evidence`/`confidence`/`uncertainty` fields to artifact rows — these live only in the import trace.
+6. Draft writing in tier order (intent → product → ux → system) using the standard artifact templates with `derives_from` per the §5.1 derivation rules. Artifact rows stay clean of import-only fields.
+7. Emit one `import` trace per invocation carrying both aggregate summary (`evidence_summary`, `candidates_proposed`, `confidence_distribution`) and `per_candidate: {<item_id>: {confidence, evidence_refs, uncertainty}}` — see implementation §8.6 for the schema. Review tooling joins draft items against this map to surface confidence and evidence during top-down approval.
 8. Run structural eval; surface coverage gaps (uncovered upstream items, dangling references) as findings.
 9. Surface review packets to the user, top-down (intent first).
 
 ## Output
 
-- Draft artifacts at every tier in scope for the target mode (status: `draft`).
-- Trace entry in `.vibeloom/traces/imports.jsonl` with aggregate evidence summary.
+- Draft artifacts at every tier in scope for the target mode (status: `draft`), in the standard artifact-template shape (no import-only fields on rows).
+- Trace entry in `.vibeloom/traces/imports.jsonl` with `schema_version: 1.1`, aggregate summary, and `per_candidate` map keyed by allocated item IDs.
 - `.vibeloom/cache/contract-graph.json` initialized with candidate items + edges.
-- Per-tier review packets with confidence indicators.
+- Per-tier review packets that join draft items against `per_candidate` so reviewers see confidence and evidence inline.
 
 ## Postconditions
 
-- Candidate contract artifacts exist as `draft` with confidence scores and evidence pointers.
-- One `import` trace written summarizing evidence and candidate distribution.
+- Candidate contract artifacts exist as `draft` in the standard template shape; per-candidate confidence and evidence are queryable from `.vibeloom/traces/imports.jsonl.per_candidate` keyed by item ID.
+- One `import` trace written with both aggregate distribution and per-candidate map.
 - ID registry initialized; no IDs allocated yet to imported candidates (engine assigns final IDs at approval time).
 
 ## Constraints
@@ -2347,6 +2392,8 @@ Bootstrap from existing code. Produce candidate contract artifacts in `draft` wi
 - Mixed-language codebase exceeding agent context: scan in chunks; surface a "scan-only-this-subtree" suggestion.
 - Conflicting evidence (e.g. both REST and GraphQL endpoints): emit ambiguity finding; user picks during review.
 - Missing test coverage: import proceeds but FRs lacking ACC are flagged as low-confidence.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/init.md`
@@ -2386,23 +2433,22 @@ Bootstrap an ungoverned repo with a draft `intent-specs` tier in the chosen mode
 3. Materialize `defaults.md` from `templates/artifacts/intent-specs/defaults.md`. Pre-fill the Tech Stack section with empty fields (the user fills in or the agent infers from intent prose).
 4. For `ux` mode: also create empty `ux-specs/mockups/` directory.
 5. For full modes (pm/dev/ux/expert): create empty `prd.md`, `usm.md`, `dm.md` (and `ux.md` for ux mode), `system.md`, `containers.md` placeholders to make the structure visible.
-6. Run engine `parse` to extract IDed items from the new `intent.md` and `defaults.md`.
-7. Run engine `eval --target intent-specs` for structural checks.
-8. Emit a generation trace recording the init invocation.
-9. Surface findings to user; recommend next operation (`/vibeloom review intent-specs` or `/vibeloom approve intent-specs` if eval is clean).
+6. For full modes (pm/dev/ux/expert): run engine `parse` to extract IDed items from the new `intent.md` and `defaults.md` into the contract-graph cache; then run engine `eval --target intent-specs` for structural checks. For `vibe`: skip `parse` (no graph cache in vibe — see implementation §3); skip structural eval (no graph yet).
+7. Emit a generation trace recording the init invocation (full modes only; vibe writes only approval and decision traces — see implementation §3).
+8. Surface findings to user; recommend next operation (`/vibeloom review intent-specs` or `/vibeloom approve intent-specs` if eval is clean).
 
 ## Output
 
 - New artifacts: `intent.md`, `defaults.md`, mode-specific placeholders, optional `ux-specs/mockups/`.
-- New trace entry in `.vibeloom/traces/generations.jsonl`.
-- `.vibeloom/cache/contract-graph.json` updated.
-- Status report.
+- New trace entry in `.vibeloom/traces/generations.jsonl` (full modes only — vibe omits this).
+- `.vibeloom/cache/contract-graph.json` updated (full modes only — vibe writes no graph cache).
+- Status report (may be emitted ephemerally in vibe; not written to cache).
 
 ## Postconditions
 
 - Mode is set; selected layout (full or compact per implementation §2) is scaffolded.
 - Draft `intent.md` and `defaults.md` exist (or seeded from `--upgrade` source).
-- ID registry is initialized at `.vibeloom/traces/id-registry.json` with empty next-counters.
+- ID registry is initialized at `.vibeloom/state/id-registry.json` with empty next-counters.
 - One `decision` trace written with `record_type: general`, `topic: init`, `payload: {mode}`.
 
 ## Constraints
@@ -2427,6 +2473,8 @@ Bootstrap an ungoverned repo with a draft `intent-specs` tier in the chosen mode
 - Existing `intent.md` and not `--upgrade`: surface conflict, abort.
 - Mode invalid: surface error, list valid modes.
 - Engine parse fails: surface parse error with line numbers, abort before writing further artifacts.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/reconcile.md`
@@ -2515,6 +2563,8 @@ Interactive stale/drift loop. Surface conflict cases with item-ID anchors; prese
 - User picks `amend_contract` but the upstream amendment introduces new conflicts: cascade as further reconciliation cases.
 - All directions for a case rejected by the user: surface "no direction chosen; case remains drifted" and continue with other cases.
 - Reconciliation produces oscillation (item flips between stale and current across iterations): detect cycle; surface as "reconciliation loop detected — consider promoting the underlying decision to a load-bearing decision trace."
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/review.md`
@@ -2539,7 +2589,8 @@ Interactive findings loop on a single target. Surface eval findings; propose bou
 
 ## Preconditions
 
-- Target exists and is in `draft` status (review on `approved` items first auto-reopens to draft, surfacing the implication for downstream).
+- Target exists.
+- Target is in `draft` status. If the target is `approved`, the user must first explicitly reopen it via the orchestrator-policy "reopen-on-edit" flow (an approved target detected as edited is reclassified to `draft` by the engine's lifecycle rules — see implementation §9; reviewing an already-`draft` item is the normal case). The `review` task itself does not mutate `approved` → `draft`.
 
 ## Steps
 
@@ -2599,6 +2650,8 @@ Interactive findings loop on a single target. Surface eval findings; propose bou
 - Findings are all blocking and proposed fixes are all rejected: surface "review cannot complete; consider `reconcile <target>` to negotiate direction."
 - User edits a fix in a way that introduces NEW findings: surface them on the next iteration; loop continues.
 - Target has no findings at all: complete immediately; recommend `approve <target>`.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ### `tasks/status.md`
@@ -2614,20 +2667,25 @@ Invoked by: SKILL.md when user runs `/vibeloom status` or as preamble to other o
 
 ## Purpose
 
-Read-only report across lifecycle, freshness, coverage, drift, and current mode. Recommends the next operation.
+Read-only report across lifecycle, freshness, coverage, drift, and current mode. Recommends the next operation. Branches on mode: full modes use the graph cache; vibe emits a lightweight one-screen "where am I?" report from compact artifacts and traces.
 
 ## Inputs
 
 - (none — operates on current repo state)
-- `--target` (optional): scope-narrow the report.
-- `--verbose` (optional): include per-item detail; default is per-artifact summary.
+- `--target` (optional, full modes only): scope-narrow the report.
+- `--verbose` (optional, full modes only): include per-item detail; default is per-artifact summary.
 
 ## Preconditions
 
-- `.vibeloom/cache/contract-graph.json` exists or can be rebuilt.
-- `.vibeloom/traces/approvals.jsonl` exists (otherwise: "no approvals yet — run `/vibeloom init` to start").
+- Mode is detectable from repo state (presence of compact vs full layout per implementation §2).
+- For full modes (`pm`, `dev`, `ux`, `expert`): `.vibeloom/cache/contract-graph.json` exists or can be rebuilt.
+- For all modes: `.vibeloom/traces/approvals.jsonl` is readable when present (absent ⇒ "no approvals yet — run `/vibeloom init` to start").
 
 ## Steps
+
+**Branch on mode.**
+
+### Full modes (`pm`, `dev`, `ux`, `expert`)
 
 1. Build/refresh Contract Graph via engine `parse + graph` (cheap if cache is current).
 2. Compute per-item status by category:
@@ -2644,28 +2702,51 @@ Read-only report across lifecycle, freshness, coverage, drift, and current mode.
 7. Aggregate into a status report with recommended next operation.
 8. Persist status snapshot to `.vibeloom/cache/status.json`.
 
+### Vibe mode
+
+1. Read `intent.md` content + mtime + content hash.
+2. Read tail of `.vibeloom/traces/approvals.jsonl` to find the most recent intent-specs approval (if any) and its approved hash.
+3. Compute intent state: `approved (date)` if approved hash matches current content hash; `draft (last-modified date)` if mtime > last-approval timestamp or approved hash mismatch.
+4. Read tail of `.vibeloom/traces/generations.jsonl` if present to find the most recent code-generation event for the project.
+5. Compute code state: `not yet generated` (no generation trace), `generated against current intent` (last gen basis hash matches current intent hash), or `intent changed since last codegen — regen recommended`.
+6. Read `.vibeloom/traces/decisions.jsonl` line count and most recent topic.
+7. Recommend next operation: `approve intent-specs` (intent is draft) | `generate code` (intent approved, code stale or absent) | `consider upgrade to pm/dev/expert` (intent has grown beyond ~30 IDed items or compact intent is dense).
+8. Render one-screen report. **Do not** build a graph cache. **Do not** persist a status snapshot — vibe status is recomputed on each invocation.
+
 ## Output
 
+### Full modes
 - Status report (rendered to user).
 - `.vibeloom/cache/status.json` updated.
 - Recommended next operation (e.g. "review intent-specs (1 advisory finding)" or "approve product-specs (clean)" or "reconcile code (3 stale, 1 drifted)").
 
+### Vibe
+- One-screen report containing: current mode, intent state, code state, decision count + last topic, recommended next operation.
+- No cache writes.
+
 ## Postconditions
 
+### Full modes
 - A read-only report is emitted covering: per-tier lifecycle, per-item status (`current` / `stale` / `uncovered` / `dangling` / `drifted` / `obsolete`), affected scope, mode, and recommended next operation.
 - The status cache (`.vibeloom/cache/status.json`) is updated.
+
+### Vibe
+- A one-screen report is emitted covering: mode, intent state, code state, decision count, recommended next operation.
+- No `.vibeloom/cache/` directory is created or modified.
 
 ## Constraints
 
 - Read-only — modifies no contract artifacts and no traces.
-- May refresh `.vibeloom/cache/` files (status.json, contract-graph.json).
-- Status categories are taxonomy from methodology §9 — applied per-item, not per-artifact.
+- Full modes: may refresh `.vibeloom/cache/` files (status.json, contract-graph.json).
+- Vibe mode: never builds or writes graph or status cache (preserves "vibe is genuinely minimal" per methodology §5.1 and implementation §2.2/§3.1).
+- Status categories (`current` / `stale` / ...) are taxonomy from methodology §9 — applied per-item in full modes; not used in vibe (no IDed items to classify).
 - Recommendation is best-effort; never auto-invokes the recommended operation.
 
 ## Invariants
 
 - Read-only operation: no contract, context, code, or trace is modified.
-- Cache rebuild is allowed and idempotent — the cache is regenerable from artifacts + traces.
+- Full modes: cache rebuild is allowed and idempotent — the cache is regenerable from artifacts + traces.
+- Vibe: no cache exists or is created.
 
 ## Validation
 
@@ -2673,9 +2754,11 @@ Read-only report across lifecycle, freshness, coverage, drift, and current mode.
 
 ## Failure modes
 
-- Cache corrupt: rebuild from artifacts and traces; surface "cache rebuilt" notice.
-- Approval traces missing: surface "no approvals — run init" advisory.
+- (Full modes) Cache corrupt: rebuild from artifacts and traces; surface "cache rebuilt" notice.
+- Approval traces missing: surface "no approvals — run init" advisory; vibe path still emits mode + intent state.
 - Trace files unreadable: surface integrity warning; status proceeds with reduced fidelity.
+
+<!-- task-template-version: 0.3.0 -->
 ````
 
 ## Artifact templates — intent-specs
@@ -3302,7 +3385,7 @@ Derivation rules (per §5.1) for the component itself:
 - infrastructure-layer component: derives from CONT and platform service declarations
 
 Layer-aware constraint:
-- `bounded_context` and `hosted_bounded_contexts` apply ONLY to domain-layer components.
+- `bounded_context` (singular, exactly one) applies ONLY to domain-layer components.
 - For non-domain components (presentation / application / infrastructure), the `bounded_context` frontmatter field MUST be empty (or set to `null`). The structural eval enforces this.
 
 Generator guidance:
@@ -3488,7 +3571,7 @@ Authoritative list of components inside this container.
 ## Cross-layer interactions
 
 <!--
-How this container talks to containers in other layers (out-of-scope details for v0.3 cross-layer interaction graph; see roadmap C0a). For v0.3 list inter-container dependencies as prose; the per-call interface contracts live on the called component's IF-#### items.
+How this container talks to containers in other layers (structured cross-layer modeling is a v0.4+ capability). For v0.3 list inter-container dependencies as prose; the per-call interface contracts live on the called component's IF-#### items.
 
 Example:
 - presentation/web-app calls application/notes-api (REST) for note CRUD
@@ -4197,11 +4280,12 @@ Generator guidance:
 - `general` is for decisions that don't change contract content (process conventions, methodology choices, operations). These typically have empty `affects` and stay `load_bearing: false`.
 - `load_bearing: true` only when the decision still informs future generation (preserve / avoid / why-still-binding / which-rejected-alternative).
 - Truly normative decisions should be promoted to IDed contract items; the trace entry remains immutable.
-- Fill `affects: [item_ids]` with the contract item IDs this decision constrains. This is what enables the future v0.4+ promotion to graph nodes (see roadmap CGKG-B).
+- Fill `affects: [item_ids]` with the contract item IDs this decision constrains. This is what enables the future v0.4+ promotion to graph nodes.
 -->
 
 ---
-trace_id: <RECORD>-<YYYYMMDD>-<NNNN>      # ADR-20260512-0007 etc.
+trace_id: DEC-<YYYYMMDD>-<NNNN>            # event identity, replay key (e.g. DEC-20260512-0007)
+record_id: <RECORD>-<NNNN>                 # rendered-record identity (e.g. ADR-0007); omit for record_type: general
 kind: decision
 record_type: <IDR | PDR | UDR | ADR | general>
 load_bearing: <true | false>
