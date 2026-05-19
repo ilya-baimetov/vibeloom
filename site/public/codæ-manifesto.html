@@ -5,12 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>codæ — Contract-Driven Agentic Engineering · Dark-Factory AI Coding</title>
 
-<meta name="description" content="The full whitepaper for codæ — contract-driven agentic engineering for dark-factory AI coding. 32 cited references including Storey, Anthropic, Kos'myna, Fowler, Faye. ~16 min read. The short essay version is at /codae.">
+<meta name="description" content="A 2026 manifesto for codæ: contract-driven agentic engineering for dark-factory AI coding. Contract in, production system out. Humans mend the contract; agents operate the factory. Grounded in 2026 evidence from Spotify, BCG Platinion, Anthropic, Sequoia, Karpathy.">
 <meta name="author" content="Ilya Baimetov">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#ffffff">
-<link rel="canonical" href="https://vibeloom.ai/cod%C3%A6-manifesto">
-<link rel="alternate" type="text/html" href="https://vibeloom.ai/codae" title="Short essay (5-min read)">
 
 <meta property="og:type" content="article">
 <meta property="og:title" content="codæ — Contract-Driven Agentic Engineering · Dark-Factory AI Coding">
@@ -931,7 +929,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         </div>
 
         <p>
-          The contract inherits two foundational lineages. Its <strong>domain layer</strong> — bounded contexts, ubiquitous language, aggregates, invariants — extends Eric Evans's Domain-Driven Design vocabulary<sup class="cite"><a href="#ref-30">30</a></sup>: the model humans agree on is the model the code is generated to satisfy. Its <strong>form</strong> — structured artifacts with typed obligations and a graph of derivations — extends the Domain-Specific Languages tradition traced by Fowler and Parsons<sup class="cite"><a href="#ref-29">29</a></sup>: the canonical answer to <em>"how do you write a specification more rigorous than prose but cheaper than first-order logic?"</em> A <span class="codae">cod<span class="ae">æ</span></span> contract is a multi-tier internal DSL, with each tier (intent, product, UX, system, runtime) a small, opinionated language for one aspect of what the system must be — designed for human authors and machine consumers at once.
+          The contract inherits two foundational lineages. Its <strong>domain layer</strong> — bounded contexts, ubiquitous language, aggregates, invariants — extends Eric Evans's Domain-Driven Design vocabulary<sup class="cite"><a href="#ref-32">32</a></sup>: the model humans agree on is the model the code is generated to satisfy. Its <strong>form</strong> — structured artifacts with typed obligations and a graph of derivations — extends the Domain-Specific Languages tradition traced by Fowler and Parsons<sup class="cite"><a href="#ref-31">31</a></sup>: the canonical answer to <em>"how do you write a specification more rigorous than prose but cheaper than first-order logic?"</em> A <span class="codae">cod<span class="ae">æ</span></span> contract is a multi-tier internal DSL, with each tier (intent, product, UX, system, runtime) a small, opinionated language for one aspect of what the system must be — designed for human authors and machine consumers at once.
         </p>
 
         <p>
@@ -1070,7 +1068,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         </p>
 
         <p>
-          Code grows as features × accumulation: every branch, retry path, glue layer, integration adds items. Human comprehension does not scale linearly with it. The working-memory ceiling is hard — humans plateau around 7±2 elements. Brooks's classic distinction between the <em>essential</em> complexity of specifying what a system must do and the <em>accidental</em> complexity of implementing it<sup class="cite"><a href="#ref-31">31</a></sup> names the partition the contract relies on: the contract holds the essential at human scale; agents handle the accidental.
+          Code grows as features × accumulation: every branch, retry path, glue layer, integration adds items. Human comprehension does not scale linearly with it. The working-memory ceiling is hard — humans plateau around 7±2 elements. Brooks's classic distinction between the <em>essential</em> complexity of specifying what a system must do and the <em>accidental</em> complexity of implementing it<sup class="cite"><a href="#ref-33">33</a></sup> names the partition the contract relies on: the contract holds the essential at human scale; agents handle the accidental.
         </p>
 
         <p>
@@ -1219,7 +1217,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         <h2><span class="num">§7 — The ladder</span>Toward a decidable contract.</h2>
 
         <p>
-          <span class="codae">cod<span class="ae">æ</span></span> is an hommage to Bertrand Meyer's Design by Contract<sup class="cite"><a href="#ref-32">32</a></sup>, not an equivalence. Meyer made obligations explicit between software elements through preconditions, postconditions, and invariants — and made many of those obligations <em>decidable</em>: boolean-checkable at runtime, sound for the property they encoded. <span class="codae">cod<span class="ae">æ</span></span> inherits the discipline of explicit obligations and the principle that downstream artifacts must satisfy upstream contracts. Full decidability is not inherited yet — the trajectory is to climb toward it.
+          <span class="codae">cod<span class="ae">æ</span></span> is an hommage to Bertrand Meyer's Design by Contract<sup class="cite"><a href="#ref-34">34</a></sup>, not an equivalence. Meyer made obligations explicit between software elements through preconditions, postconditions, and invariants — and made many of those obligations <em>decidable</em>: boolean-checkable at runtime, sound for the property they encoded. <span class="codae">cod<span class="ae">æ</span></span> inherits the discipline of explicit obligations and the principle that downstream artifacts must satisfy upstream contracts. Full decidability is not inherited yet — the trajectory is to climb toward it.
         </p>
 
         <div class="ladder" aria-label="Verification ladder">
@@ -1288,7 +1286,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         </div>
 
         <p>
-          The methodology spells out how each property is implemented at the artifact level — see <a class="linky" href="methodology.html">methodology</a> (or the <a class="linky" href="https://github.com/ilya-baimetov/vibeloom/blob/main/v03/vibeloom-methodology.md" target="_blank" rel="noopener">canonical source</a> on GitHub). This manifesto stops at the paradigm.
+          The methodology spells out how each property is implemented at the artifact level — see <a class="linky" href="vibeloom-methodology.md"><code>vibeloom-methodology.md</code></a>. This manifesto stops at the paradigm.
         </p>
       </section>
 
@@ -1298,6 +1296,10 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
 
         <p class="refs-note">
           Most citations are 2026; Chroma's <em>Context Rot</em> (July 2025) is included because nothing comparable has appeared since. arXiv items are preprints unless a peer-reviewed venue is named. Older draft figures (e.g. earlier AI-debt counts) were updated to current numbers. List reflects May 2026.
+        </p>
+
+        <p class="refs-note" style="margin-top: 8px;">
+          <strong>Dated-evidence policy.</strong> Contemporary citations are dated and may age out. When a figure is superseded by newer data, the citation is updated in place rather than versioned. The thesis itself is intentionally separable from any single citation — no claim in §§1–7 depends on a single source. If you are reading this after late 2027 and the Contemporary set has not been refreshed, treat it as historical rather than current.
         </p>
 
                 <h3 style="margin: 14px 0 18px 0; font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-5); font-weight: 700;">Contemporary · 2025–2026</h3>
@@ -1441,26 +1443,36 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
             Lee, H.-P. et al. (Microsoft Research + Carnegie Mellon). Survey of 319 knowledge workers. Higher AI reliance correlates with reduced critical thinking and less diverse outcomes.
             <span class="meta">CHI 2025 · 2025-02 · coverage: <a href="https://www.404media.co/microsoft-study-finds-ai-makes-human-cognition-atrophied-and-unprepared-3/" target="_blank" rel="noopener">404media.co/microsoft-study-finds-ai-makes-human-cognition-atrophied-and-unprepared-3/</a></span>
           </li>
+          <li id="ref-29">
+            <span class="title">Shift-Up: A Framework for Software Engineering Guardrails in AI-native Software Development — Initial Findings.</span>
+            Lipsanen, P., Rannikko, L., Christophe, F., Kalliokoski, K., Stirbu, V., Mikkonen, T. Accepted at VibeX 2026 (International Workshop on Vibe Coding and Vibe Researching). Reframes BDD-style executable requirements, C4 architectural models, and ADRs as machine-readable structural guardrails for GenAI-native development; reports that embedding these artifacts stabilizes agent behavior, reduces implementation drift, and shifts human effort toward design and validation versus unstructured vibe coding and prompt engineering.
+            <span class="meta">VibeX 2026 · arXiv:2604.20436 · 2026-04-22 · <a href="https://arxiv.org/abs/2604.20436" target="_blank" rel="noopener">arxiv.org/abs/2604.20436</a></span>
+          </li>
+          <li id="ref-30">
+            <span class="title">Constitutional Spec-Driven Development: Enforcing Security by Construction in AI-Assisted Code Generation.</span>
+            Marri, S.R. Introduces a versioned, machine-readable <em>Constitution</em> that encodes non-negotiable security constraints — derived from the CWE/MITRE Top 25 and regulatory frameworks — into the specification layer rather than the review layer. A banking-microservices case study reports a 73% reduction in security defects versus unconstrained AI generation while preserving developer velocity.
+            <span class="meta">arXiv:2602.02584 · 2026-01-31 · <a href="https://arxiv.org/abs/2602.02584" target="_blank" rel="noopener">arxiv.org/abs/2602.02584</a></span>
+          </li>
         </ol>
 
         <h3 style="margin: 32px 0 18px 0; font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-5); font-weight: 700;">Foundations</h3>
-        <ol start="29">
-          <li id="ref-29">
+        <ol start="31">
+          <li id="ref-31">
             <span class="title">Domain-Specific Languages.</span>
             Fowler, M. &amp; Parsons, R. (Addison-Wesley, 2010). The canonical book-length treatment of DSLs as structured languages purpose-built to capture intent in a form more rigorous than prose and cheaper than full formal specification — the technical lineage the codæ contract belongs to.
             <span class="meta">2010 · <a href="https://martinfowler.com/books/dsl.html" target="_blank" rel="noopener">martinfowler.com/books/dsl.html</a></span>
           </li>
-          <li id="ref-30">
+          <li id="ref-32">
             <span class="title">Domain-Driven Design: Tackling Complexity in the Heart of Software.</span>
             Evans, E. (Addison-Wesley, 2003). The lineage for bounded contexts, ubiquitous language, aggregates, and the broader vocabulary the contract stack uses to give a system its domain shape.
             <span class="meta">2003 · <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">domainlanguage.com/ddd</a></span>
           </li>
-          <li id="ref-31">
+          <li id="ref-33">
             <span class="title">No Silver Bullet — Essence and Accident in Software Engineering.</span>
             Brooks, F.P. (IEEE Computer, 1987; reprinted in <em>The Mythical Man-Month, 20th Anniversary Edition</em>, 1995). Distinguishes the essential complexity of specifying what a system must do from the accidental complexity of implementing it — the foundational argument behind the cognitive-surface case for contracts.
             <span class="meta">1986/1995 · <a href="https://en.wikipedia.org/wiki/No_Silver_Bullet" target="_blank" rel="noopener">No Silver Bullet — overview</a></span>
           </li>
-          <li id="ref-32">
+          <li id="ref-34">
             <span class="title">Design by Contract.</span>
             Meyer, B. (Eiffel Software). The foundational discipline of explicit obligations between software elements via preconditions, postconditions, and invariants — the contract pattern <span class="codae">cod<span class="ae">æ</span></span> generalizes from routine scope to system scope.
             <span class="meta"><a href="https://www.eiffel.com/values/design-by-contract/" target="_blank" rel="noopener">eiffel.com/values/design-by-contract</a></span>

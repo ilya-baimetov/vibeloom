@@ -234,11 +234,11 @@
         <tbody>
           <tr><td><code>presentation</code></td><td>No</td><td>UI components — pages, layouts, widgets</td><td>Inherits Presentation stack. Typically one container; micro-frontends are minority.</td></tr>
           <tr><td><code>application</code></td><td>No</td><td>API surfaces, orchestration handlers, BFF endpoints</td><td>Often one container per UI surface (web, mobile, admin); thin orchestration, not a "microservice" in the autonomous-capability sense.</td></tr>
-          <tr><td><code>domain</code></td><td><strong>Yes</strong></td><td>Service-shaped components hosting bounded contexts</td><td>Decomposition is <em>monolith</em> (all BCs in one container) or <em>multi-service</em> (one container per BC = canonical microservices).</td></tr>
+          <tr><td><code>domain</code></td><td><strong>Yes</strong></td><td>Service-shaped components, each hosting exactly one bounded context</td><td>Decomposition is <em>monolith</em> (all components in one container, one BC per component) or <em>multi-service</em> (one container per component = canonical microservices).</td></tr>
           <tr><td><code>infrastructure</code></td><td>No</td><td>No internal components — declares consumed platform services as dependencies</td><td>DB, cache, queue, storage, compute platform.</td></tr>
         </tbody>
       </table>
-      <p>Bounded contexts live exclusively in <code>domain</code> containers. The <code>presentation</code> and <code>application</code> layers have components but no BCs. The <code>infrastructure</code> layer declares dependencies, not internal components.</p>
+      <p>Bounded contexts live exclusively in <code>domain</code> containers. <strong>Each domain-layer component hosts exactly one bounded context</strong>; each bounded context belongs to exactly one component (1:1 mapping in the domain layer). The <code>presentation</code> and <code>application</code> layers have components but no BCs. The <code>infrastructure</code> layer declares dependencies, not internal components.</p>
 
       <hr>
 
@@ -346,7 +346,7 @@
       <p><strong>Drift forms</strong> describe how mismatches arise: <em>structural</em> (upstream item changed since downstream synchronized), <em>lifecycle</em> (approved file edited outside the flow), <em>semantic</em> (downstream meaning shifted even when structure passes). Each form maps to a different detection mechanism in the engine.</p>
       <p><strong>Status categories</strong> describe item lifecycle states at any moment: <code>current</code>, <code>stale</code>, <code>uncovered</code>, <code>dangling</code>, <code>drifted</code>, <code>obsolete</code>. <code>uncovered</code> is distinct from <code>stale</code> — newly approved upstream creates downstream obligations that no downstream item can yet depend on.</p>
       <p>Both taxonomies are VibeLoom-specific. Other framings exist (Rath's semantic/coordination/behavioral for agent-to-agent drift; VentureBeat's "context decay" for silent failure). VibeLoom's framework targets contract-vs-code drift specifically.</p>
-      <p>Detection mechanism + state diagrams: see <a class="linky" href="implementation.html#snapshot">Implementation · Approval traces and drift detection</a>.</p>
+      <p>Detection mechanism + state diagrams: see <a class="linky" href="implementation.html#approval-traces">Implementation · Approval traces and drift detection</a>.</p>
 
       <hr>
 
