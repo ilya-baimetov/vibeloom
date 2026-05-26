@@ -99,23 +99,25 @@ traces run alongside as durable provenance.
 
 ## 5. Modes
 
-A mode controls contract depth, approval gates, and UX surface.
+A mode controls contract depth, approval gates, and user-facing ceremony.
 
-| Mode | Lead | User-owned approval stops | Delegated tiers | Internal structure |
+| Mode | Lead | User-owned approval stops | Delegated tiers | User-facing ceremony |
 | --- | --- | --- | --- | --- |
-| `vibe` | solo | `intent-specs` | system + code | minimal — no graph, no code-sync, no per-item status (lightweight `where am I?` status report only) |
-| `pm` | product | `intent-specs`, `product-specs`, optionally `ux-specs` | `system-specs` | full graph + traces |
-| `dev` | tech | `intent-specs`, `system-specs` | `product-specs`, optionally `ux-specs` | full graph + traces |
-| `ux` | design | `intent-specs`, `ux-specs`, optionally `product-specs` | `system-specs` | full graph + traces |
-| `expert` | architect | all contract tiers | none | full graph + traces |
+| `vibe` | solo | `intent-specs` | system + code | minimal — user approves outcomes, not intermediate specs; graph/status/code-sync machinery is not exposed as required ceremony |
+| `pm` | product | `intent-specs`, `product-specs`, optionally `ux-specs` | `system-specs` | full tiered review over graph + traces |
+| `dev` | tech | `intent-specs`, `system-specs` | `product-specs`, optionally `ux-specs` | full tiered review over graph + traces |
+| `ux` | design | `intent-specs`, `ux-specs`, optionally `product-specs` | `system-specs` | full tiered review over graph + traces |
+| `expert` | architect | all contract tiers | none | full tiered review over graph + traces |
 
 `intent-specs` are always user-owned. Delegated auto-advance is allowed only when structural eval passes and no semantic judgment requires escalation.
 
-### 5.1 vibe is intentionally minimal
+### 5.1 vibe minimizes ceremony
 
-`vibe` is not a stripped-down full mode — it's a different operating point. The compact stack: `intent.md`, an inferred flat `system.md`, an `AGENTS.md` for the model. No IDed graph, no code-sync trace, no per-item status taxonomy; `status` in vibe is a lightweight one-screen "where am I?" report computed from intent + trace tails (see implementation §15.6). A modern model keeps the small system coherent on its own.
+`vibe` is not a stripped-down full mode — it's a different operating point. The compact visible stack is `intent.md`, `defaults.md`, an inferred flat `system.md`, root assistant guidance, and code. The user approves outcomes, not every intermediate specification. For small projects, the premise is that a modern model can make reasonable product/system choices without the user curating PRDs, domain models, component specs, or per-item status.
 
-vibe still emits approval traces — approval provenance survives for the future upgrade — but skips the heavyweight machinery.
+The invariant is surface simplicity, not internal absence. The agent or engine may derive private scaffolding — graph-like structure, cache entries, status summaries, code-sync-like evidence, or component guesses — when useful for generation quality, repair, replay, or future upgrade. That scaffolding is not user-owned canon, not an approval gate, and not required reading during normal vibe use. `status` in vibe is a lightweight one-screen "where am I?" report, not the full per-item taxonomy (see implementation §15.6).
+
+vibe still emits cheap provenance traces, especially approvals, generations, and decisions. Provenance survives for repair and future upgrade, while the ceremonial surface stays close to vibe coding.
 
 ### 5.2 Upgrade is a feature
 

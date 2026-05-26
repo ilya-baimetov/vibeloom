@@ -70,7 +70,7 @@ The engine never judges product meaning or approval outcome. The skill never han
 
 ### 2.2 Compact `vibe` layout
 
-See [methodology §5.1](vibeloom-methodology.md#51-vibe-is-intentionally-minimal) for the design rationale (vibe as a *different operating point*, not a stripped-down full mode). The on-disk layout is:
+See [methodology §5.1](vibeloom-methodology.md#51-vibe-minimizes-ceremony) for the design rationale (vibe as a low-ceremony operating point, not a stripped-down full mode). The required user-facing contract layout is:
 
 ```text
 /
@@ -82,12 +82,13 @@ See [methodology §5.1](vibeloom-methodology.md#51-vibe-is-intentionally-minimal
   .vibeloom/
     traces/
       approvals.jsonl
+      generations.jsonl
       decisions.jsonl
     state/
       id-registry.json
 ```
 
-No graph cache. No code-sync trace. No status cache — vibe `status` is recomputed on each invocation from `intent.md` content + tail of `approvals.jsonl` / `generations.jsonl` / `decisions.jsonl`; see §15.6 for the algorithm. Approval traces remain — cheap and useful even at vibe scale, and the substrate the future upgrade migration runs on. The `state/id-registry.json` is initialized at `init` time with empty counters (per §15.7) and grows as intent's CAP/CST items are allocated; vibe never grows it past intent unless the user upgrades.
+This is a surface contract, not a ban on private runtime scaffolding. The engine may create derived cache, run, or code-sync-like evidence under `.vibeloom/` when useful for generation quality, repair, replay, or upgrade. Such files are private runtime data: they are regenerable or trace-derived, are not approval units, and must not require the user to curate graph nodes, component specs, or per-item status. Vibe `status` reports orientation from compact artifacts plus trace tails; see §15.6. Approval, generation, and decision traces remain cheap and useful even at vibe scale. The `state/id-registry.json` is initialized at `init` time with empty counters (per §15.7) and grows as durable IDs are allocated.
 
 ---
 
@@ -1146,7 +1147,7 @@ approve(approval_unit):
 
 ### 15.6 `status`
 
-Branches on mode. Full modes use the graph cache + per-item classification. Vibe emits a lightweight one-screen report from compact artifacts and traces, with no graph or cache write — preserving the §2.2 / §3.1 "vibe is genuinely minimal" promise.
+Branches on mode. Full modes use the graph cache + per-item classification. Vibe emits a lightweight one-screen report from compact artifacts and traces. It may consult or memoize private derived scaffolding, but the report never exposes graph nodes, component ownership, or per-item status as user ceremony.
 
 ```pseudo
 status():
@@ -1169,7 +1170,8 @@ status():
     )
     report = compose_vibe_report(mode, intent_state, code_state, decisions)
     report.next = recommend_next_vibe(intent_state, code_state)
-    return report                           # no cache write
+    engine.maybe_memoize_private("vibe-status", report)
+    return report                           # no user-facing status artifact
 
   # full modes (pm, dev, ux, expert)
   if cache.fresh:
@@ -1310,9 +1312,9 @@ A v03-compliant implementation must satisfy each of the following invariants. Th
 - Component / container / bounded-context rules match methodology §6.5 — each domain-layer component hosts exactly one bounded context.
 - Decision traces use the dual-ID model: `trace_id: DEC-*` (event identity, dated) plus `record_id: <ADR|PDR|UDR|IDR>-*` (rendered-record identity, sequence-only per record_type, absent for `general`). See §8.5.
 - Engine validates `derives_from` per §5.1 (per-prefix derivation rules in the registry table) and methodology §8.2 (universal derivation rule — every non-root item has at least one upstream basis transitively reaching `CAP` or `CST`).
-- `status` branches on mode: full modes use the graph cache and distinguish `current`, `stale`, `uncovered`, `dangling`, `drifted`, and `obsolete`; vibe emits a lightweight one-screen report (mode, intent state, code state, decision count, recommended next) computed from `intent.md` + trace tails with no cache writes. See §15.6.
+- `status` branches on mode: full modes use the graph cache and distinguish `current`, `stale`, `uncovered`, `dangling`, `drifted`, and `obsolete`; vibe emits a lightweight one-screen report (mode, intent state, code state, decision count, recommended next) computed from compact artifacts + trace tails. Any cache/memoization in vibe is private runtime scaffolding, not a user-facing status artifact. See §15.6.
 - Each operation has explicit, traceable execution semantics (§15.1–§15.8).
-- Vibe layout is genuinely minimal — approval and decision traces and the `state/id-registry.json` (initialized at `init`) are durable; graph cache and status cache are not. Vibe `status` is recomputed on each invocation from artifacts and trace tails — it never writes a status snapshot.
+- Vibe layout is ceremonially minimal — approval, generation, and decision traces plus `state/id-registry.json` are durable. Graph/cache/status/code-sync-like files may exist only as private runtime scaffolding; the user-facing compact contract remains `intent.md`, `defaults.md`, `system.md`, root assistant guidance, and code.
 - Templates exist only as fenced blocks in `vibeloom-templates.md`; the on-disk template tree (`templates/`, gitignored) is a build artifact materialized on demand by `extract-templates.py`. CI runs `--check` to confirm round-trip parses.
 
 ---

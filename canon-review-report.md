@@ -7,8 +7,37 @@ This report covers three consecutive walks against the v0.3 canon:
 - **Walk 1 (May 14)** — 11 findings (CANON-201..211). Closed; see Appendix A.
 - **Walk 2 (May 15)** — 6 findings (CANON-001..006). Closed; see Walk-2 dispositions below. Surfaced defects that included two regressions from Walk-1's incomplete fixes (CANON-002 cleanup of CANON-208; CANON-005 cleanup of CANON-211).
 - **Walk 3 (May 15)** — 5 findings (CANON-301..305). Closed; see Walk-3 dispositions below. Specifically targeted Walk-2 regression risk; surfaced 3 propagation gaps (CANON-301/303/304 — Walk-2 fixes that didn't cascade to all related prose) and 2 self-introduced defects (CANON-302/305 — claims I added in Walk-2 that turned out to be wrong on closer reading).
+- **Walk 4 (May 18)** — 8 findings (CANON-001..008). In progress. Refresh after user edits; starts by resolving the frozen-v03 vs direct-fix workflow gate.
 
 **Convention.** Disposition keys: **fixed** (issue closed by edit), **revised** (the underlying issue is real but was reframed during the walk), **kept-as-is** (issue acknowledged, design choice retained), **subsumed** (resolved as a side-effect of another finding's fix), **deferred** (entry kept; no edit this pass).
+
+---
+
+## Walk 4 dispositions
+
+| ID | Severity | User choice | Disposition | One-line |
+|---|---|---|---|---|
+| CANON-008 | Medium | Option 2 | fixed | Added an explicit one-time frozen-v03 exception to `v03/review-canon.md`; this walk may apply approved fixes directly to v03, but the repo-level frozen-version policy remains unchanged. |
+
+### CANON-008 · Medium · v03 review/fix workflow conflicts with frozen-version model
+
+**Disposition:** fixed (Option 2 — explicit one-time v03 exception).
+
+**Rationale:** User chose to keep editing `v03/` in this session. The fix makes that choice explicit instead of silently contradicting the repo-level model where v01-v03 are normally frozen and v04+ is mutable.
+
+**Applied changes:**
+
+- **`v03/review-canon.md`** — added `Frozen-Version Exception`, allowing approved fixes to target `v03/` only when the user explicitly grants the exception during the interactive walk.
+- **`v03/review-canon.md` constraints** — changed the frozen-baseline constraint so the one-time v03 exception is visible and bounded.
+
+**Verification:**
+
+- The prompt now names both behaviors: report-only/default for frozen v03 unless an explicit exception is granted; direct v03 edits only under that exception.
+- This report records the exception and does not modify `file-layout.md` or `vibeloom-dev/SKILL.md`.
+
+**Downstream impact.**
+- No site or skill propagation from this issue.
+- Future maintainer workflow still needs v04+ for normal mutable-version work.
 
 ---
 

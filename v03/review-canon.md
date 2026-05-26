@@ -19,6 +19,12 @@ Audit the v03 canon:
 
 Produce a prioritized adversarial issue packet. Each issue must explain why it matters, present 2-3 bounded fix options, recommend one option with rationale, and define how the fix will be verified. Then walk the user through every issue before applying edits.
 
+## Frozen-Version Exception
+
+Repo-level maintainer docs treat `v03/` as frozen. This legacy v03 review prompt may still apply approved fixes directly to `v03/` only when the user explicitly grants a one-time exception during the interactive walk.
+
+If the exception is not granted, keep this prompt report-only for `v03/` and apply accepted fixes to the next mutable version instead. If the exception is granted, record it in `canon-review-report.md`, scope edits to approved findings only, and do not treat the exception as a general change to the repo-level frozen-version policy.
+
 ## Authority Model
 
 Use ownership by concern, not "lower tier wins."
@@ -162,7 +168,7 @@ If an accepted fix changes canonical ownership, update downstream-impact notes b
 - Do not commit unless explicitly requested.
 - Do not fix the site or skill from this prompt.
 - Do not fix canon to match implementation if implementation is wrong; surface the authority decision.
-- Preserve frozen baselines and unrelated user changes.
+- Preserve frozen baselines and unrelated user changes unless the user has explicitly granted the one-time v03 exception described above.
 
 ## Validation Gates
 

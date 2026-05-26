@@ -126,5 +126,5 @@ Produce/update `vNN/skill/` from current `vNN/canon/vibeloom-implementation.md` 
 - After step 2: `python3 vibeloom-dev/scripts/extract-templates.py --check --source vNN/canon/vibeloom-templates.md --dest vNN/skill/` exits 0.
 - After step 2: `find vNN/skill -type f -name "*.md" | wc -l` matches the count of `template:` fenced blocks in templates.md.
 - After step 4 (if engine regenerated): `python3 -m vibeloom_engine --help` succeeds.
-- After step 5: SKILL.md's argument-hint frontmatter line parses as a single string.
+- After step 5: SKILL.md frontmatter validates with the target skill loaders.
 - Summary's counts match actual file counts.

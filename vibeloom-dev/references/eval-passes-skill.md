@@ -21,7 +21,7 @@ The skill bundle includes:
 ## Source map (build first)
 
 For the skill bundle, extract:
-- SKILL.md frontmatter (name, description, argument-hint).
+- SKILL.md frontmatter (name, description, and any loader-supported metadata).
 - Authoritative sources block (which canon files it cites).
 - Runtime references list and what each covers.
 - Templates inventory (artifact + task + helper).
@@ -70,7 +70,7 @@ For the skill bundle, extract:
 ### F. Known failure probes
 
 - SKILL.md frontmatter is valid YAML (parses without error).
-- argument-hint is a single string (not a list, not nested).
+- SKILL.md has no unsupported frontmatter keys for the target loaders.
 - Every link in SKILL.md (markdown link `[text](path)`) resolves to an existing file.
 - Engine package imports cleanly (`from vibeloom_engine import X` works in tests).
 - Engine `python3 -m vibeloom_engine --help` runs without exception.

@@ -240,13 +240,13 @@ Available commands:
 | Engine command | Purpose |
 |---|---|
 | `parse --repo <path>` | Parse all artifacts; emit JSON inventory |
-| `graph --repo <path>` | Build + persist `.vibeloom/cache/contract-graph.json` |
+| `graph --repo <path>` | Build + persist the full-mode `.vibeloom/cache/contract-graph.json` |
 | `eval --repo <path> [--target <tier>]` | Run structural checks; non-zero exit on blockers |
 | `affected --repo <path> --ids <IDs...>` | Compute affected set from changed item IDs |
 | `staleness --repo <path>` | Per-item hash diff vs approval traces; forward DAG walk |
 | `detect-edits --repo <path>` | mtime fast-filter + per-item hash confirmation |
 | `dispatch --repo <path> --affected <IDs>` | Build dispatch plan with wave assembly |
-| `status --repo <path>` | Emit + persist status across all axes |
+| `status --repo <path>` | Emit status; full modes may persist cache, vibe emits a one-screen report |
 
 All engine commands emit JSON on stdout. The engine makes NO semantic judgments — it parses, validates structure, computes the graph, plans dispatch, and reports. Semantic judgment and user interaction remain with the skill.
 
@@ -256,7 +256,7 @@ All engine commands emit JSON on stdout. The engine makes NO semantic judgments 
 
 The cooperating substrate at `.vibeloom/` is a four-part split:
 
-- **`.vibeloom/cache/`** — regenerable derived state (Contract Graph, status). Safe to delete; engine rebuilds.
+- **`.vibeloom/cache/`** — regenerable derived state (full-mode Contract Graph/status, plus optional private vibe scaffolding). Safe to delete; engine rebuilds.
 - **`.vibeloom/traces/`** — durable provenance event streams (append-only JSONL). Never silently regenerated; missing traces require explicit re-baselining.
 - **`.vibeloom/state/`** — durable mutable runtime state (id-registry). Read-modify-write JSON; recoverable from traces in principle but never auto-rebuilt.
 - **`.vibeloom/runs/`** — per-invocation subagent staging (patches, summaries). Cleaned up after retention window.
@@ -279,12 +279,12 @@ On any operation invocation, load `references/operations.md` first for parameter
 | `generate ux-specs` | `operations.md`, `runtime.md` | `tasks/generate-ux-specs.md` | Plus `ux.md` template + graph cache. |
 | `generate system-specs` | `operations.md`, `runtime.md` | `tasks/generate-system-specs.md` | Plus system-specs templates + graph cache. |
 | `generate context` | `operations.md`, `runtime.md` | `tasks/generate-context.md` | Plus context templates (`AGENTS.md`/`CLAUDE.md`, `bdd.md`). |
-| `generate code` | `operations.md`, `runtime.md` | `tasks/generate-code-component.md` | One subagent per affected component; layer-aware. |
+| `generate code` | `operations.md`, `runtime.md` | `tasks/generate-code-component.md` | Full modes: one subagent per affected component. Vibe: user-visible command is root-scoped; orchestrator may derive private component scopes internally. |
 | `eval <target>` | `operations.md`, `runtime.md`, `eval.md` | `tasks/eval.md` | Plus target artifacts. |
 | `review <target>` | `operations.md`, `runtime.md`, `eval.md` | `tasks/review.md` | Plus target artifacts. |
 | `reconcile <target>` | `operations.md`, `runtime.md`, `eval.md` | `tasks/reconcile.md` | Plus downstream artifacts + graph + traces. |
 | `approve <target>` | `operations.md`, `modes.md`, `eval.md` | `tasks/approve.md` | Plus target artifacts. |
-| `status` | `artifacts.md` | `tasks/status.md` | Branches on mode: full modes use graph cache; vibe reads compact artifacts + traces (no cache). |
+| `status` | `artifacts.md` | `tasks/status.md` | Branches on mode: full modes expose graph-backed status; vibe reads compact artifacts + traces and may use private scaffolding. |
 
 Decision-record rendering (`render-decisions` or equivalent) is an engine-side concern; the skill does not own a separate task template for it. Rendered `.md` decision records are materialized by the engine from `decisions.jsonl` traces per implementation §8.5.1.
 
@@ -511,10 +511,13 @@ Artifact layout, frontmatter shapes, ID schema, and derivation rules. Authoritat
   .vibeloom/
     traces/
       approvals.jsonl
+      generations.jsonl
       decisions.jsonl
+    state/
+      id-registry.json
 ```
 
-No cache, no graph, no code-sync. Approval traces remain (cheap; enable future upgrade migration).
+No user-facing graph, per-item status, or component-spec ceremony. The engine may create private cache, run, or code-sync-like scaffolding under `.vibeloom/` when useful; users do not curate it. Approval, generation, and decision traces remain cheap and enable repair and future upgrade migration.
 
 Filesystem is a navigation aid and consistency check, not the semantic source of truth.
 
@@ -945,14 +948,14 @@ Designer-led counterpart to `pm`. The designer drives discovery from intent + mo
 
 ### `vibe`
 
-Simplified ceremony for small or early-stage projects. Contract stack collapses to `intent` + `defaults` + flat `system`. No graph, no code-sync, no per-item status taxonomy. `status` is a lightweight one-screen "where am I?" report (see implementation §15.6 and `tasks/status.md` vibe branch).
+Simplified ceremony for small or early-stage projects. Visible contract stack collapses to `intent` + `defaults` + flat `system`; the user approves outcomes, not intermediate specs. Graph/cache/code-sync-like machinery may exist internally when useful, but it is not a user-owned approval surface. `status` is a lightweight one-screen "where am I?" report, not the full per-item taxonomy (see implementation §15.6 and `tasks/status.md` vibe branch).
 
 - **Artifacts present:** `intent` (with product summary section), `defaults`, `system` (flat), root `config`, `source`, `tests`, `runtime`.
 - **Artifacts absent:** `prd`, `usm`, `dm`, `ux`, `containers`, per-container `container`, per-component `component`, `decision-trace.md`, `bdd`, container/component-scoped config.
 - **Tier order:** `intent-specs` → `system-specs` → `context` (root config only) → `code`.
 - **User owns:** `intent-specs` only.
 - **Delegated:** `system-specs` auto-advances when structural blockers clear.
-- **Traces:** vibe still emits approval traces (preserves provenance for the future upgrade migration). Decision traces also supported but rare in vibe scale.
+- **Traces:** vibe still emits cheap provenance traces, especially approvals, generations, and decisions. These preserve repair/debug context and future upgrade migration.
 - **Public surface:**
   - `approve intent-specs`
   - `generate code`
@@ -1260,7 +1263,7 @@ Loads: skill instructions, status snapshot, graph cache, and only the artifacts 
 
 ### Orchestrator (vibe)
 
-Loads: skill instructions, current `intent.md`, recent tails of `approvals.jsonl` / `generations.jsonl` / `decisions.jsonl`. No graph or status cache exists; nothing to load there. Vibe operations rarely dispatch subagents (most are single-task or orchestrator-local), so post-dispatch retention is minimal.
+Loads: skill instructions, current `intent.md`, compact `system.md` when present, and recent tails of `approvals.jsonl` / `generations.jsonl` / `decisions.jsonl`. The orchestrator may derive private graph/cache/status/code-sync-like scaffolding, but it must not expose that scaffolding as user-managed contract or approval ceremony. Vibe operations rarely dispatch many subagents; post-dispatch retention is minimal.
 
 ### Subagent load sets (full modes)
 
@@ -1502,12 +1505,13 @@ Advance a reviewed contract approval unit from `draft` to `approved`. Records an
 - `<approval-unit>`: required. One contract tier: `intent-specs | product-specs | ux-specs | system-specs`.
 - `--mode` (optional): `user` or `delegated` (engine fills in based on current mode + tier ownership rules).
 - Approval-unit artifacts at `draft` status with structural eval clean.
+- Current project mode (`vibe | pm | dev | ux | expert`).
 
 ## Preconditions
 
 - Approval unit exists.
 - All artifacts in the approval unit are `draft` (or already `approved` — in which case approve is a no-op).
-- Structural eval passes (decidable tier of verification ladder).
+- Structural eval passes for full modes. In vibe, compact structural checks pass for the visible artifact being approved.
 - All blocking findings from semantic eval are addressed (no `blocking` findings remain in the most recent eval trace).
 - For mode-delegated approval: current mode allows delegated approval for this tier (e.g. system-specs in pm mode auto-advances when conditions met).
 
@@ -1515,7 +1519,9 @@ Advance a reviewed contract approval unit from `draft` to `approved`. Records an
 
 1. Run `eval --target <approval-unit>` to confirm clean.
 2. If any blocking finding: abort, surface "approval cannot proceed; address findings first via review."
-3. Compute per-item content fingerprints (SHA-256 canonical hashes) for every IDed item in the approval unit.
+3. Compute fingerprints:
+   - Full modes: per-item content fingerprints (SHA-256 canonical hashes) for every IDed item in the approval unit.
+   - Vibe: compact artifact fingerprints for the visible approval surface (`intent.md` for user approval); private scaffolding, if any, is not an approval unit.
 4. Compute per-artifact hashes alongside items.
 5. Append an `approval` trace entry to .vibeloom/traces/approvals.jsonl with:
    - approval_unit (the tier)
@@ -1524,7 +1530,9 @@ Advance a reviewed contract approval unit from `draft` to `approved`. Records an
    - artifacts: { artifact_id: hash } per artifact in the unit
    - run_id, timestamp, author
 6. Update each artifact's frontmatter status from `draft` to `approved`.
-7. Refresh Contract Graph cache.
+7. Refresh derived runtime state:
+   - Full modes: refresh Contract Graph cache.
+   - Vibe: do not expose graph refresh as ceremony; private scaffolding may be refreshed if the engine uses it.
 
 > **Note on auto-advance:** the `approve` task itself does NOT invoke downstream generation. Auto-advance to the next tier is an **orchestrator policy** (see methodology §5, "Delegated auto-advance" in `references/modes.md`). The orchestrator may, after `approve` returns successfully, schedule the next `generate-*` operation if the current mode delegates the downstream tier and conditions hold. Approval and generation remain distinct operations with distinct traces.
 
@@ -1532,7 +1540,7 @@ Advance a reviewed contract approval unit from `draft` to `approved`. Records an
 
 - Each artifact in the approval unit: status updated to `approved`.
 - New approval trace entry in .vibeloom/traces/approvals.jsonl.
-- Contract Graph cache refreshed.
+- Derived runtime state refreshed as appropriate for the mode.
 
 ## Postconditions
 
@@ -1588,19 +1596,23 @@ Read-only validation of a target against approved upstream truth across the veri
 ## Inputs
 
 - `--target` (optional): tier or specific scope to eval (e.g. `intent-specs`, `product-specs`, `web/search`). Default: full repo.
-- Approved contract via .vibeloom/cache/contract-graph.json + .vibeloom/traces/approvals.jsonl.
+- Approved basis via `.vibeloom/traces/approvals.jsonl`; full modes also use `.vibeloom/cache/contract-graph.json`.
 - Validation registry at validation-registry.md.
+- Current project mode (`vibe | pm | dev | ux | expert`).
 
 ## Preconditions
 
-- `.vibeloom/cache/contract-graph.json` exists or can be rebuilt.
+- Full modes: `.vibeloom/cache/contract-graph.json` exists or can be rebuilt.
+- Vibe: compact artifacts exist; private scaffolding may be rebuilt if the engine uses it, but no public graph is required.
 - For mechanical-tier checks: validation runners in registry are executable.
 - For heuristic-tier checks: agent has access to the items in scope.
 
 ## Steps
 
-1. Build/refresh Contract Graph via engine `parse + graph`.
-2. **Decidable tier (engine, structural)**: run the engine's structural checks for the target. The check inventory is canonical in [methodology §14.3](../../vibeloom-methodology.md#143-verification-ladder); the engine knows what to run. Notable inclusion: `derives_from` validation per implementation §5.1 (per-prefix derivation rules in the registry table) and methodology §8.2 (universal derivation rule — every non-root item must cite valid upstream basis transitively reaching `CAP` or `CST`).
+1. Build/refresh the structural basis:
+   - Full modes: Contract Graph via engine `parse + graph`.
+   - Vibe: compact artifact inventory from `intent.md`, `defaults.md`, `system.md`, and any private scaffolding the engine chooses to derive.
+2. **Decidable tier (engine, structural)**: run the engine's structural checks for the target. Full modes use the canonical check inventory in [methodology §14.3](../../vibeloom-methodology.md#143-verification-ladder), including `derives_from` validation per implementation §5.1 and methodology §8.2. Vibe runs compact checks only: required visible files, parseable frontmatter/sections, approval hash consistency, validation registry presence, and upgrade recommendation heuristics.
 3. **Mechanical tier (engine + runners)**: invoke validation runners declared in `validation-registry.md` that are in scope for the target. Aggregate pass/fail per runner.
 4. **Heuristic tier (agent, semantic)**: agent runs the heuristic dimensions defined in [`references/eval.md`](../skill/references/eval.md) (canonical dimension list in methodology §14.2) against items in scope.
 5. Categorize findings: `blocking` (must address before approval) or `advisory` (worth noting, not gating).
@@ -1649,36 +1661,37 @@ Read-only validation of a target against approved upstream truth across the veri
 ````template:tasks/generate-code-component.md
 <!--
 VibeLoom task template: generate-code-component
-Operation: generate (per-component code generation, the leaf task in the dispatch plan)
-Invoked by: SKILL.md as a subagent task within a wave; one invocation per affected component
+Operation: generate (code generation; full modes use one leaf task per affected component)
+Invoked by: SKILL.md as a subagent task within a wave; in full modes, one invocation per affected component; in vibe, only after the orchestrator derives private internal scopes from compact artifacts
 -->
 
 # Task: generate-code-component
 
 ## Purpose
 
-Generate or repair the code for one component, with bounded write scope, layer-aware codegen patterns, and full validation contract.
+Generate or repair code with bounded write scope, layer-aware codegen patterns, and validation. In full modes the scope is a public component. In vibe the scope may be a private orchestrator-derived slice; it must not force the user to curate component specs.
 
 ## Inputs
 
 - `task_id`, `run_id`, `wave_id`, `template_version` (from subagent task header — see canonical implementation §13.4)
-- `scope`: the target component, e.g. `web/search` or `notes-service/notes`
-- `component_id`: CMP-#### of the target
-- `container_id`, `layer`: from container.md frontmatter (drives codegen pattern)
+- `scope`: the target component or private vibe slice, e.g. `web/search` or `notes-service/notes`
+- `component_id`: CMP-#### of the target in full modes; optional/private in vibe
+- `container_id`, `layer`: from container.md frontmatter in full modes; inferred private scaffolding in vibe
 - `load_set_refs`: items the subagent receives in its load (baseline + owned scope + foreign IF slices + relevant context)
 - `foreign_refs`: IF-#### contracts of dependencies (read-only — never used to expand write scope)
 - `allowed_read_paths`: globs the subagent may read
 - `allowed_write_paths`: globs the subagent may write (always disjoint from other subagents in the same wave)
 - `validation_contract`: list of runner_ids the orchestrator will invoke against the subagent's output
 - `result_shape_id`: expected shape of the subagent's return (for orchestrator validation)
-- Approved upstream: full contract for the component's lineage (CAP → FR → STORY → BC → CMP).
+- Approved upstream: full contract for the component's lineage (CAP → FR → STORY → BC → CMP) in full modes; approved compact intent + inferred flat system in vibe.
 - Tech stack inherited from defaults.md (per layer).
 
 ## Preconditions
 
-- `system-specs` is `approved` for the target component.
-- `context` is generated and current for the component.
-- Container's `layer` field is set.
+- Full modes: `system-specs` is `approved` for the target component.
+- Full modes: `context` is generated and current for the component.
+- Full modes: container's `layer` field is set.
+- Vibe: intent is approved; compact `system.md` and root assistant guidance exist or can be regenerated.
 - Validation registry declares the runners listed in `validation_contract`.
 
 ## Steps
@@ -1713,7 +1726,8 @@ Generate or repair the code for one component, with bounded write scope, layer-a
 ## Postconditions
 
 - Code files exist within the component's `owned_paths` and pass the validation runners declared in `validation-registry.md`.
-- A `code-sync` trace is written linking the generated files (and their hashes) to the component's contract IDs (`CMP`, `IF`, `BEH`, `VIEW`, etc.).
+- Full modes: a `code-sync` trace is written linking generated files (and hashes) to component contract IDs (`CMP`, `IF`, `BEH`, `VIEW`, etc.).
+- Vibe: generation provenance is recorded; code-sync-like evidence may be private runtime scaffolding and must not require public component IDs.
 - Generation trace written; on validator failure, a generation trace records FAILED and the patch is not applied to the working tree.
 
 ## Constraints
@@ -1762,24 +1776,27 @@ Invoked by: SKILL.md when user runs `/vibeloom generate context` or as part of a
 
 ## Purpose
 
-Generate or repair context artifacts (root + per-container + per-component AGENTS.md / CLAUDE.md, plus per-component BDD scenarios) from approved contract. Context is regenerable from approved contract — never approved as its own tier.
+Generate or repair context artifacts from approved contract. Full modes generate root + per-container + per-component AGENTS.md / CLAUDE.md plus per-component BDD scenarios. Vibe generates only root assistant guidance from compact artifacts. Context is regenerable from approved contract — never approved as its own tier.
 
 ## Inputs
 
 - `target_tier`: `context` (fixed)
 - `mode`: pm / dev / ux / expert (any full mode; in vibe, only root AGENTS.md is generated, no BDD)
 - `affected_ids`: optional. Item IDs that triggered the regeneration.
-- Approved upstream: full contract (intent, defaults, prd, usm, dm, ux, system, containers, container.md per container, component.md per component).
+- Approved upstream: full contract in full modes; compact intent/defaults/system in vibe.
 - Mode-specific assistant slugs (e.g. `claude`, `codex`) for which to generate config files.
 
 ## Preconditions
 
 - All contract tiers in scope for the mode are `approved`.
-- Working directory contains the materialized container/component directory tree.
+- Full modes: working directory contains the materialized container/component directory tree.
+- Vibe: root project directory exists; no public container/component tree is required.
 
 ## Steps
 
-1. Load approved contract via engine `parse + graph`.
+1. Load approved contract:
+   - Full modes: via engine `parse + graph`.
+   - Vibe: from compact artifacts; private scaffolding may help generation but is not user-facing contract.
 2. For each (assistant slug × scope), generate the corresponding config artifact:
    - **root**: `AGENTS.md`, `CLAUDE.md` (one per assistant) at repo root. Includes governance summary, mode, contract inventory pointers, current run state.
    - **per-container**: `<container>/AGENTS.md`, `<container>/CLAUDE.md`. Includes container layer + deployment target + resident BCs (domain only) + component inventory + dependency edges.
@@ -1787,7 +1804,9 @@ Generate or repair context artifacts (root + per-container + per-component AGENT
 3. For each component (full modes only — not vibe), generate per-behavior `<container>/<component>/context/bdd/BEH-####.md` Gherkin scenarios:
    - SCN-#### derives from ACC, INV, BEH, STORY.
    - Non-executable Gherkin (Given / When / Then) — runnable later via the contract-conformance or bdd validation runners.
-4. Run engine `parse + eval --target context` for structural checks (frontmatter validity, derives_from references resolve to approved upstream).
+4. Run structural checks:
+   - Full modes: engine `parse + eval --target context` (frontmatter validity, derives_from references resolve to approved upstream).
+   - Vibe: root assistant guidance references compact intent/defaults/system and stays concise.
 5. Run heuristic semantic eval for context-sufficiency (does each component have enough context for a subagent to act in scope without late-fetching?).
 6. Emit a `generation` trace recording basis_ids, output_artifact_ids (the config + bdd files generated).
 
@@ -1796,13 +1815,14 @@ Generate or repair context artifacts (root + per-container + per-component AGENT
 - AGENTS.md, CLAUDE.md at root + per container + per component.
 - BDD scenario files in <container>/<component>/context/bdd/.
 - New trace entry in .vibeloom/traces/generations.jsonl.
-- Contract Graph updated.
+- Derived runtime state updated as appropriate for the mode.
 - Findings.
 
 ## Postconditions
 
 - Scope-appropriate `AGENTS.md` / `CLAUDE.md` files exist for the targeted scopes (root, container, component).
-- BDD scenarios materialized as `BDD-####-<slug>.md` files under `<container>/<component>/context/bdd/` for relevant components.
+- Full modes: BDD scenarios materialized as `BDD-####-<slug>.md` files under `<container>/<component>/context/bdd/` for relevant components.
+- Vibe: no BDD files are generated.
 - Generation trace written.
 
 ## Constraints
@@ -2323,7 +2343,7 @@ Invoked by: SKILL.md when user runs `/vibeloom import --mode <mode>`
 
 ## Purpose
 
-Bootstrap from existing code. Produce candidate contract artifacts in `draft` with confidence scores and evidence pointers; user reviews top-down before approving.
+Bootstrap from existing code. Produce candidate contract artifacts in `draft` with confidence scores and evidence pointers. Full modes import into the full tiered contract; vibe imports into compact intent/defaults/system and keeps deeper structure private unless the user upgrades.
 
 ## Inputs
 
@@ -2342,23 +2362,25 @@ Bootstrap from existing code. Produce candidate contract artifacts in `draft` wi
 
 1. Codebase scan: enumerate languages, frameworks, dependencies, test files, config files.
 2. Aggregate evidence: per-language entry points, declared interfaces, dependency graph, observed deployment hints (Dockerfile, package.json scripts, CI configs).
-3. Per-tier candidate inference (in order):
-   a. **intent-specs**: infer capabilities (CAP) from observable user-facing functionality, constraints (CST) from configs and dependencies. Tech stack inferred from frameworks → populates Tech Stack section in `defaults.md`.
-   b. **product-specs**: infer FRs from API endpoints + user flows; STORYs from observed user journeys; BCs from cohesive code modules.
-   c. **ux-specs** (if presentation code present): infer VIEWs from page/route definitions, INTs from event handlers, UXCs from i18n + accessibility configs.
-   d. **system-specs**: infer CONT from deployment topology, CMP from cohesive code modules, IF from public API surfaces, DEP from import graph, BEH from test descriptions, `layer` from heuristic (presentation = frontend bundle / static; application = API/server; domain = service workload; infrastructure = IaC).
+3. Per-tier candidate inference:
+   - In vibe: infer compact `intent.md`, `defaults.md`, and flat `system.md`; deeper product/system partitions may be kept as private scaffolding for confidence and upgrade, not as user-reviewed artifacts.
+   - In full modes, infer in tier order:
+     a. **intent-specs**: infer capabilities (CAP) from observable user-facing functionality, constraints (CST) from configs and dependencies. Tech stack inferred from frameworks → populates Tech Stack section in `defaults.md`.
+     b. **product-specs**: infer FRs from API endpoints + user flows; STORYs from observed user journeys; BCs from cohesive code modules.
+     c. **ux-specs** (if presentation code present): infer VIEWs from page/route definitions, INTs from event handlers, UXCs from i18n + accessibility configs.
+     d. **system-specs**: infer CONT from deployment topology, CMP from cohesive code modules, IF from public API surfaces, DEP from import graph, BEH from test descriptions, `layer` from heuristic (presentation = frontend bundle / static; application = API/server; domain = service workload; infrastructure = IaC).
 4. Confidence scoring per candidate (numeric 0–1) and uncertainty list, based on evidence quality (multiple corroborating signals = high; single weak signal = low).
 5. Evidence collection per candidate: collect `evidence_refs` (file paths, test paths, config locations) for each candidate item ID. **Do not** add `evidence`/`confidence`/`uncertainty` fields to artifact rows — these live only in the import trace.
-6. Draft writing in tier order (intent → product → ux → system) using the standard artifact templates with `derives_from` per the §5.1 derivation rules. Artifact rows stay clean of import-only fields.
+6. Draft writing: compact artifacts only in vibe; tier order (intent → product → ux → system) in full modes. Use the standard artifact templates with `derives_from` per the §5.1 derivation rules where public IDs are materialized. Artifact rows stay clean of import-only fields.
 7. Emit one `import` trace per invocation carrying both aggregate summary (`evidence_summary`, `candidates_proposed`, `confidence_distribution`) and `per_candidate: {<item_id>: {confidence, evidence_refs, uncertainty}}` — see implementation §8.6 for the schema. Review tooling joins draft items against this map to surface confidence and evidence during top-down approval.
-8. Run structural eval; surface coverage gaps (uncovered upstream items, dangling references) as findings.
+8. Run structural eval appropriate to the mode; surface coverage gaps (uncovered upstream items, dangling references) as findings in full modes and compact-consistency findings in vibe.
 9. Surface review packets to the user, top-down (intent first).
 
 ## Output
 
-- Draft artifacts at every tier in scope for the target mode (status: `draft`), in the standard artifact-template shape (no import-only fields on rows).
+- Draft artifacts at every tier in scope for the target mode (status: `draft`), in the standard artifact-template shape (no import-only fields on rows). In vibe, this means compact artifacts only.
 - Trace entry in `.vibeloom/traces/imports.jsonl` with `schema_version: 1.1`, aggregate summary, and `per_candidate` map keyed by allocated item IDs.
-- `.vibeloom/cache/contract-graph.json` initialized with candidate items + edges.
+- Full modes: `.vibeloom/cache/contract-graph.json` initialized with candidate items + edges. Vibe: optional private scaffolding may be initialized, but no public graph review surface is created.
 - Per-tier review packets that join draft items against `per_candidate` so reviewers see confidence and evidence inline.
 
 ## Postconditions
@@ -2433,16 +2455,16 @@ Bootstrap an ungoverned repo with a draft `intent-specs` tier in the chosen mode
 3. Materialize `defaults.md` from `templates/artifacts/intent-specs/defaults.md`. Pre-fill the Tech Stack section with empty fields (the user fills in or the agent infers from intent prose).
 4. For `ux` mode: also create empty `ux-specs/mockups/` directory.
 5. For full modes (pm/dev/ux/expert): create empty `prd.md`, `usm.md`, `dm.md` (and `ux.md` for ux mode), `system.md`, `containers.md` placeholders to make the structure visible.
-6. For full modes (pm/dev/ux/expert): run engine `parse` to extract IDed items from the new `intent.md` and `defaults.md` into the contract-graph cache; then run engine `eval --target intent-specs` for structural checks. For `vibe`: skip `parse` (no graph cache in vibe — see implementation §3); skip structural eval (no graph yet).
-7. Emit a generation trace recording the init invocation (full modes only; vibe writes only approval and decision traces — see implementation §3).
+6. For full modes (pm/dev/ux/expert): run engine `parse` to extract IDed items from the new `intent.md` and `defaults.md` into the contract-graph cache; then run engine `eval --target intent-specs` for structural checks. For `vibe`: run compact checks over visible artifacts; the engine may derive private scaffolding, but no public graph is exposed.
+7. Emit traces recording the init invocation. Full modes record generation plus decision provenance; vibe at minimum records the init decision and may record generation/private-scaffold provenance if produced.
 8. Surface findings to user; recommend next operation (`/vibeloom review intent-specs` or `/vibeloom approve intent-specs` if eval is clean).
 
 ## Output
 
 - New artifacts: `intent.md`, `defaults.md`, mode-specific placeholders, optional `ux-specs/mockups/`.
-- New trace entry in `.vibeloom/traces/generations.jsonl` (full modes only — vibe omits this).
-- `.vibeloom/cache/contract-graph.json` updated (full modes only — vibe writes no graph cache).
-- Status report (may be emitted ephemerally in vibe; not written to cache).
+- New trace entry in `.vibeloom/traces/generations.jsonl` when generation/scaffolding work is performed.
+- Full modes: `.vibeloom/cache/contract-graph.json` updated. Vibe: optional private scaffolding may be updated, but no public graph surface is created.
+- Status report emitted; in vibe it remains a one-screen orientation report.
 
 ## Postconditions
 
@@ -2667,7 +2689,7 @@ Invoked by: SKILL.md when user runs `/vibeloom status` or as preamble to other o
 
 ## Purpose
 
-Read-only report across lifecycle, freshness, coverage, drift, and current mode. Recommends the next operation. Branches on mode: full modes use the graph cache; vibe emits a lightweight one-screen "where am I?" report from compact artifacts and traces.
+Read-only report across lifecycle, freshness, coverage, drift, and current mode. Recommends the next operation. Branches on mode: full modes expose graph-backed status; vibe emits a lightweight one-screen "where am I?" report from compact artifacts, traces, and optional private scaffolding.
 
 ## Inputs
 
@@ -2679,6 +2701,7 @@ Read-only report across lifecycle, freshness, coverage, drift, and current mode.
 
 - Mode is detectable from repo state (presence of compact vs full layout per implementation §2).
 - For full modes (`pm`, `dev`, `ux`, `expert`): `.vibeloom/cache/contract-graph.json` exists or can be rebuilt.
+- For vibe: compact artifacts exist; private scaffolding may be rebuilt if used.
 - For all modes: `.vibeloom/traces/approvals.jsonl` is readable when present (absent ⇒ "no approvals yet — run `/vibeloom init` to start").
 
 ## Steps
@@ -2710,8 +2733,9 @@ Read-only report across lifecycle, freshness, coverage, drift, and current mode.
 4. Read tail of `.vibeloom/traces/generations.jsonl` if present to find the most recent code-generation event for the project.
 5. Compute code state: `not yet generated` (no generation trace), `generated against current intent` (last gen basis hash matches current intent hash), or `intent changed since last codegen — regen recommended`.
 6. Read `.vibeloom/traces/decisions.jsonl` line count and most recent topic.
-7. Recommend next operation: `approve intent-specs` (intent is draft) | `generate code` (intent approved, code stale or absent) | `consider upgrade to pm/dev/expert` (intent has grown beyond ~30 IDed items or compact intent is dense).
-8. Render one-screen report. **Do not** build a graph cache. **Do not** persist a status snapshot — vibe status is recomputed on each invocation.
+7. Optionally consult private scaffolding for complexity and repair signals; do not expose per-item graph/status as the report surface.
+8. Recommend next operation: `approve intent-specs` (intent is draft) | `generate code` (intent approved, code stale or absent) | `consider upgrade to pm/dev/expert` (intent has grown beyond ~30 IDed items, compact intent is dense, or private scaffolding indicates repeated repair pain).
+9. Render one-screen report. Any memoization is private runtime data; the user-facing output remains the report, not a cache artifact.
 
 ## Output
 
@@ -2722,7 +2746,7 @@ Read-only report across lifecycle, freshness, coverage, drift, and current mode.
 
 ### Vibe
 - One-screen report containing: current mode, intent state, code state, decision count + last topic, recommended next operation.
-- No cache writes.
+- No user-facing graph/status artifact.
 
 ## Postconditions
 
@@ -2732,21 +2756,21 @@ Read-only report across lifecycle, freshness, coverage, drift, and current mode.
 
 ### Vibe
 - A one-screen report is emitted covering: mode, intent state, code state, decision count, recommended next operation.
-- No `.vibeloom/cache/` directory is created or modified.
+- No graph/status cache is exposed as user-managed ceremony.
 
 ## Constraints
 
 - Read-only — modifies no contract artifacts and no traces.
 - Full modes: may refresh `.vibeloom/cache/` files (status.json, contract-graph.json).
-- Vibe mode: never builds or writes graph or status cache (preserves "vibe is genuinely minimal" per methodology §5.1 and implementation §2.2/§3.1).
-- Status categories (`current` / `stale` / ...) are taxonomy from methodology §9 — applied per-item in full modes; not used in vibe (no IDed items to classify).
+- Vibe mode: may use private derived scaffolding, but never requires the user to manage graph/status/cache artifacts.
+- Status categories (`current` / `stale` / ...) are taxonomy from methodology §9 — applied per-item in full modes; vibe surfaces coarse intent/code orientation instead.
 - Recommendation is best-effort; never auto-invokes the recommended operation.
 
 ## Invariants
 
 - Read-only operation: no contract, context, code, or trace is modified.
 - Full modes: cache rebuild is allowed and idempotent — the cache is regenerable from artifacts + traces.
-- Vibe: no cache exists or is created.
+- Vibe: deleting private cache/scaffolding cannot remove the compact contract; the engine rebuilds or ignores it.
 
 ## Validation
 
@@ -4339,4 +4363,3 @@ topic: "<short slug or title>"
 - **Status:** <proposed | accepted | superseded | deprecated>
 - **Superseded by:** <DEC-id, if applicable>
 ````
-

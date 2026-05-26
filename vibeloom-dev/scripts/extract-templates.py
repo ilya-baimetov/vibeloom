@@ -23,17 +23,19 @@ needed.
 
 Usage
 -----
-    python3 extract-templates.py            # extract: writes templates/ from templates.md
-    python3 extract-templates.py --check    # drift check: non-zero exit if extracted
-                                            # content differs from templates/
-    python3 extract-templates.py --dest X   # override destination (default: templates/)
+    python3 vibeloom-dev/scripts/extract-templates.py \
+      --source vNN/canon/vibeloom-templates.md \
+      --dest vNN/skill/
+
+    python3 vibeloom-dev/scripts/extract-templates.py --check \
+      --source vNN/canon/vibeloom-templates.md \
+      --dest vNN/skill/
 
 Both modes are idempotent. --check reads the source, builds the would-be tree
 in memory, and diffs against the on-disk tree without writing anything.
 
-The default destination is `templates/` — a build artifact, not source. The
-`templates/` directory is gitignored. Templates are regenerated on demand;
-they are never committed to the repo.
+The destination is always explicit. This script lives in `vibeloom-dev/`, while
+the template source and destination belong to a specific version tree.
 """
 
 from __future__ import annotations
@@ -156,14 +158,14 @@ def main() -> int:
     parser.add_argument(
         "--source",
         type=Path,
-        default=Path(__file__).parent / "vibeloom-templates.md",
-        help="path to vibeloom-templates.md (default: alongside this script)",
+        required=True,
+        help="path to the versioned vibeloom-templates.md source",
     )
     parser.add_argument(
         "--dest",
         type=Path,
-        default=Path(__file__).parent / "templates",
-        help="destination root for extracted templates (default: templates/ next to source; gitignored)",
+        required=True,
+        help="destination root for extracted templates",
     )
     parser.add_argument(
         "--check",
