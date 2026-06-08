@@ -929,7 +929,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         </div>
 
         <p>
-          The contract inherits two foundational lineages. Its <strong>domain layer</strong> — bounded contexts, ubiquitous language, aggregates, invariants — extends Eric Evans's Domain-Driven Design vocabulary<sup class="cite"><a href="#ref-32">32</a></sup>: the model humans agree on is the model the code is generated to satisfy. Its <strong>form</strong> — structured artifacts with typed obligations and a graph of derivations — extends the Domain-Specific Languages tradition traced by Fowler and Parsons<sup class="cite"><a href="#ref-31">31</a></sup>: the canonical answer to <em>"how do you write a specification more rigorous than prose but cheaper than first-order logic?"</em> A <span class="codae">cod<span class="ae">æ</span></span> contract is a multi-tier internal DSL, with each tier (intent, product, UX, system, runtime) a small, opinionated language for one aspect of what the system must be — designed for human authors and machine consumers at once.
+          The contract inherits two foundational lineages. Its <strong>domain layer</strong> — bounded contexts, ubiquitous language, aggregates, invariants — extends Eric Evans's Domain-Driven Design vocabulary<sup class="cite"><a href="#ref-44">44</a></sup>: the model humans agree on is the model the code is generated to satisfy. Its <strong>form</strong> — structured artifacts with typed obligations and a graph of derivations — extends the Domain-Specific Languages tradition traced by Fowler and Parsons<sup class="cite"><a href="#ref-43">43</a></sup>: the canonical answer to <em>"how do you write a specification more rigorous than prose but cheaper than first-order logic?"</em> A <span class="codae">cod<span class="ae">æ</span></span> contract is a multi-tier internal DSL, with each tier (intent, product, UX, system, runtime) a small, opinionated language for one aspect of what the system must be — designed for human authors and machine consumers at once.
         </p>
 
         <p>
@@ -1068,7 +1068,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         </p>
 
         <p>
-          Code grows as features × accumulation: every branch, retry path, glue layer, integration adds items. Human comprehension does not scale linearly with it. The working-memory ceiling is hard — humans plateau around 7±2 elements. Brooks's classic distinction between the <em>essential</em> complexity of specifying what a system must do and the <em>accidental</em> complexity of implementing it<sup class="cite"><a href="#ref-33">33</a></sup> names the partition the contract relies on: the contract holds the essential at human scale; agents handle the accidental.
+          Code grows as features × accumulation: every branch, retry path, glue layer, integration adds items. Human comprehension does not scale linearly with it. The working-memory ceiling is hard — humans plateau around 7±2 elements. Brooks's classic distinction between the <em>essential</em> complexity of specifying what a system must do and the <em>accidental</em> complexity of implementing it<sup class="cite"><a href="#ref-45">45</a></sup> names the partition the contract relies on: the contract holds the essential at human scale; agents handle the accidental.
         </p>
 
         <p>
@@ -1217,7 +1217,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         <h2><span class="num">§7 — The ladder</span>Toward a decidable contract.</h2>
 
         <p>
-          <span class="codae">cod<span class="ae">æ</span></span> is an hommage to Bertrand Meyer's Design by Contract<sup class="cite"><a href="#ref-34">34</a></sup>, not an equivalence. Meyer made obligations explicit between software elements through preconditions, postconditions, and invariants — and made many of those obligations <em>decidable</em>: boolean-checkable at runtime, sound for the property they encoded. <span class="codae">cod<span class="ae">æ</span></span> inherits the discipline of explicit obligations and the principle that downstream artifacts must satisfy upstream contracts. Full decidability is not inherited yet — the trajectory is to climb toward it.
+          <span class="codae">cod<span class="ae">æ</span></span> is an hommage to Bertrand Meyer's Design by Contract<sup class="cite"><a href="#ref-46">46</a></sup>, not an equivalence. Meyer made obligations explicit between software elements through preconditions, postconditions, and invariants — and made many of those obligations <em>decidable</em>: boolean-checkable at runtime, sound for the property they encoded. <span class="codae">cod<span class="ae">æ</span></span> inherits the discipline of explicit obligations and the principle that downstream artifacts must satisfy upstream contracts. Full decidability is not inherited yet — the trajectory is to climb toward it.
         </p>
 
         <div class="ladder" aria-label="Verification ladder">
@@ -1295,7 +1295,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         <h2><span class="num">References</span>Primary, verified, mostly 2026.</h2>
 
         <p class="refs-note">
-          Most citations are 2026; Chroma's <em>Context Rot</em> (July 2025) is included because nothing comparable has appeared since. arXiv items are preprints unless a peer-reviewed venue is named. Older draft figures (e.g. earlier AI-debt counts) were updated to current numbers. List reflects May 2026.
+          Most citations are 2026; Chroma's <em>Context Rot</em> (July 2025) is included because nothing comparable has appeared since. arXiv items are preprints unless a peer-reviewed venue is named. Older draft figures (e.g. earlier AI-debt counts) were updated to current numbers. List reflects June 2026.
         </p>
 
         <p class="refs-note" style="margin-top: 8px;">
@@ -1356,7 +1356,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
           </li>
           <li id="ref-11">
             <span class="title">The Dark Software Factory: A New Era of Autonomous Software Delivery.</span>
-            BCG Platinion (Schatlowski, Griewel, Lipska et al.). <em>"As few as three engineers can run a software factory where humans no longer write code… The moat is not the code. The moat is the specification and the scenario architecture that validates it."</em>
+            BCG Platinion (Schatlowski, Griewel, Lipska et al.). <em>"As few as three engineers can run a software factory where humans no longer write code."</em> On where advantage moves: <em>"the moat moves upstream: to proprietary data, deep domain knowledge, strength of ecosystem and go-to-market, and the quality of intent your organization can produce. The companies that win are not those that build the best software, but those that know best what to build and can refine it fastest."</em>
             <span class="meta">2026-03 · <a href="https://www.bcgplatinion.com/insights/the-dark-software-factory" target="_blank" rel="noopener">bcgplatinion.com/insights/the-dark-software-factory</a></span>
           </li>
           <li id="ref-12">
@@ -1453,26 +1453,86 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
             Marri, S.R. Introduces a versioned, machine-readable <em>Constitution</em> that encodes non-negotiable security constraints — derived from the CWE/MITRE Top 25 and regulatory frameworks — into the specification layer rather than the review layer. A banking-microservices case study reports a 73% reduction in security defects versus unconstrained AI generation while preserving developer velocity.
             <span class="meta">arXiv:2602.02584 · 2026-01-31 · <a href="https://arxiv.org/abs/2602.02584" target="_blank" rel="noopener">arxiv.org/abs/2602.02584</a></span>
           </li>
+          <li id="ref-31">
+            <span class="title">AIDev: Studying AI Coding Agents on GitHub.</span>
+            A large-scale dataset of 932,791 agent-authored pull requests across 116,211 repositories and 72,189 developers (Codex, Devin, Copilot, Cursor, Claude Code), quantifying the scale at which ungoverned agentic code is already entering production.
+            <span class="meta">arXiv:2602.09185 · 2026-02 · <a href="https://arxiv.org/abs/2602.09185" target="_blank" rel="noopener">arxiv.org/abs/2602.09185</a></span>
+          </li>
+          <li id="ref-32">
+            <span class="title">Configuring Agentic AI Coding Tools: An Exploratory Study.</span>
+            Galster et al. A study of 2,853 GitHub repositories cataloguing eight configuration mechanisms; context files (CLAUDE.md, AGENTS.md) dominate, with <em>AGENTS.md</em> emerging bottom-up as a tool-agnostic standard. Code-level governance is normalizing — while executable verification stays shallowly adopted.
+            <span class="meta">arXiv:2602.14690 · 2026-02 · <a href="https://arxiv.org/abs/2602.14690" target="_blank" rel="noopener">arxiv.org/abs/2602.14690</a></span>
+          </li>
+          <li id="ref-33">
+            <span class="title">VibeGuard: A Security Gate Framework for AI-Generated Code.</span>
+            Xie, Y. (Kennesaw State). Motivated by the March 2026 Claude Code source-map leak (~512,000 lines of proprietary TypeScript exposed by a packaging misconfiguration in a vibe-coded tool). A pre-publish gate of "negative checks" — what must be <em>absent</em> — reaches 100% recall / 89.47% precision on its test suite: the <span class="codae">cod<span class="ae">æ</span></span> enforcement pattern as a hard gate rather than human review.
+            <span class="meta">arXiv:2604.01052 · 2026-04-01 · <a href="https://arxiv.org/abs/2604.01052" target="_blank" rel="noopener">arxiv.org/abs/2604.01052</a></span>
+          </li>
+          <li id="ref-34">
+            <span class="title">Coding Agents Don't Know When to Act (FixedBench).</span>
+            Gloaguen, Mündler, Müller, Raychev, Vechev (ETH Zürich). On 200 already-resolved issues where the correct output is an empty patch, state-of-the-art agents instead edit working code in <em>35–65% of cases</em> — an "action bias" that a per-task contract defining "done" is meant to govern.
+            <span class="meta">arXiv:2605.07769 · 2026-05-08 · <a href="https://arxiv.org/abs/2605.07769" target="_blank" rel="noopener">arxiv.org/abs/2605.07769</a></span>
+          </li>
+          <li id="ref-35">
+            <span class="title">Spec Kit Agents: Context-Grounded Agentic Workflows.</span>
+            Taghavi &amp; Bhavani. Wrapping the Specify→Plan→Tasks→Implement pipeline in read-only discovery and validation hooks that ground each stage in real repository evidence lifts SWE-bench Lite Pass@1 to 58.2% at ~100% repo-test compatibility — grounding in specs + repo context beats ungrounded generation.
+            <span class="meta">arXiv:2604.05278 · 2026-04 · <a href="https://arxiv.org/abs/2604.05278" target="_blank" rel="noopener">arxiv.org/abs/2604.05278</a></span>
+          </li>
+          <li id="ref-36">
+            <span class="title">TDAD: Test-Driven Agentic Development — Reducing Code Regressions via Graph-Based Impact Analysis.</span>
+            An AST-derived code–test dependency graph, shipped to the agent as a lightweight skill, tells it which tests a change endangers before commit — cutting regressions <em>70%</em> (6.08%→1.82%) and lifting issue resolution 24%→32%. Procedural TDD prompting alone made regressions worse; the structural contract is what works.
+            <span class="meta">arXiv:2603.17973 · 2026-03 · <a href="https://arxiv.org/abs/2603.17973" target="_blank" rel="noopener">arxiv.org/abs/2603.17973</a></span>
+          </li>
+          <li id="ref-37">
+            <span class="title">The Specification as Quality Gate: Three Hypotheses on AI-Assisted Code Review.</span>
+            Zietsman, C. Argues AI reviewing AI is "structurally circular" without an executable spec — generator and reviewer share a training distribution, so their errors <em>"echo rather than cancel."</em> Implied architecture: specifications first, deterministic verification second, AI review only for the structural residual.
+            <span class="meta">arXiv:2603.25773 · 2026-03-26 · <a href="https://arxiv.org/abs/2603.25773" target="_blank" rel="noopener">arxiv.org/abs/2603.25773</a></span>
+          </li>
+          <li id="ref-38">
+            <span class="title">Shepherd: A Runtime Substrate Empowering Meta-Agents with a Formalized Execution Trace.</span>
+            Yu, Chong, Nandi, Soylu, Sun, Manning, Shi (Stanford). A Lean-mechanized, Git-like typed execution trace makes agent runs forkable and replayable; live supervision raises pair-coding pass rate from <em>28.8% to 54.7%</em> on CooperBench — "contract-as-trace," where governance measurably beats opaque autonomy.
+            <span class="meta">arXiv:2605.10913 · 2026-05-11 · <a href="https://arxiv.org/abs/2605.10913" target="_blank" rel="noopener">arxiv.org/abs/2605.10913</a></span>
+          </li>
+          <li id="ref-39">
+            <span class="title">Meta-Engineering Harnesses for AI-Native Software Production: A Contract-Driven Adversarial Verification Architecture.</span>
+            Sengupta, Briggs, Myshakivskyi. An independent team converges on the <span class="codae">cod<span class="ae">æ</span></span> design — requirements compiled into explicit contracts, role-specialized agents, independent and adversarial verification, an outer calibration loop — reported running in production across 17 features. External validation of the paradigm; its in-app payments case study independently surfaces the incomplete-contract risk.
+            <span class="meta">arXiv:2605.25665 · 2026-05-25 · <a href="https://arxiv.org/abs/2605.25665" target="_blank" rel="noopener">arxiv.org/abs/2605.25665</a></span>
+          </li>
+          <li id="ref-40">
+            <span class="title">cURL ends its bug-bounty program over AI slop.</span>
+            Stenberg, D. (coverage: The New Stack, BleepingComputer, The Register). A named piece of load-bearing internet infrastructure shut its HackerOne bounty in January 2026 because AI-generated "slop" reports — "seven Hackerone issues within a sixteen hour period," none valid — overwhelmed a small security team. Human triage does not scale against machine-speed slop.
+            <span class="meta">2026-01-21 · <a href="https://thenewstack.io/drowning-in-ai-slop-reports-curl-ends-bug-bounties/" target="_blank" rel="noopener">thenewstack.io/…drowning-in-ai-slop-reports-curl-ends-bug-bounties</a></span>
+          </li>
+          <li id="ref-41">
+            <span class="title">How Endava is redesigning software delivery around AI agents.</span>
+            OpenAI case study. An ~11,000-person software-services firm rebuilt delivery as "DavaFlow": specs produced first, agents implement, humans "oversee the work" at each phase — cutting requirements analysis from weeks to hours. The governed agentic workflow at enterprise scale (vendor case study; figures self-reported).
+            <span class="meta">2026-06-04 · <a href="https://openai.com/index/endava-frontiers/" target="_blank" rel="noopener">openai.com/index/endava-frontiers</a></span>
+          </li>
+          <li id="ref-42">
+            <span class="title">Learning on the Shop floor — Shopify's "River" agent.</span>
+            Willison, S. (on Tobias Lütke). Shopify's internal coding agent operates only in public Slack channels by design, making every session an observable learning event. Governance-by-default lifted River's merge rate from <em>36% to 77%</em> in roughly two months with no model retraining — purely organizational learning.
+            <span class="meta">2026-05-11 · <a href="https://simonwillison.net/2026/May/11/learning-on-the-shop-floor/" target="_blank" rel="noopener">simonwillison.net/…learning-on-the-shop-floor</a></span>
+          </li>
         </ol>
 
         <h3 style="margin: 32px 0 18px 0; font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-5); font-weight: 700;">Foundations</h3>
-        <ol start="31">
-          <li id="ref-31">
+        <ol start="43">
+          <li id="ref-43">
             <span class="title">Domain-Specific Languages.</span>
             Fowler, M. &amp; Parsons, R. (Addison-Wesley, 2010). The canonical book-length treatment of DSLs as structured languages purpose-built to capture intent in a form more rigorous than prose and cheaper than full formal specification — the technical lineage the codæ contract belongs to.
             <span class="meta">2010 · <a href="https://martinfowler.com/books/dsl.html" target="_blank" rel="noopener">martinfowler.com/books/dsl.html</a></span>
           </li>
-          <li id="ref-32">
+          <li id="ref-44">
             <span class="title">Domain-Driven Design: Tackling Complexity in the Heart of Software.</span>
             Evans, E. (Addison-Wesley, 2003). The lineage for bounded contexts, ubiquitous language, aggregates, and the broader vocabulary the contract stack uses to give a system its domain shape.
             <span class="meta">2003 · <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">domainlanguage.com/ddd</a></span>
           </li>
-          <li id="ref-33">
+          <li id="ref-45">
             <span class="title">No Silver Bullet — Essence and Accident in Software Engineering.</span>
             Brooks, F.P. (IEEE Computer, 1987; reprinted in <em>The Mythical Man-Month, 20th Anniversary Edition</em>, 1995). Distinguishes the essential complexity of specifying what a system must do from the accidental complexity of implementing it — the foundational argument behind the cognitive-surface case for contracts.
             <span class="meta">1986/1995 · <a href="https://en.wikipedia.org/wiki/No_Silver_Bullet" target="_blank" rel="noopener">No Silver Bullet — overview</a></span>
           </li>
-          <li id="ref-34">
+          <li id="ref-46">
             <span class="title">Design by Contract.</span>
             Meyer, B. (Eiffel Software). The foundational discipline of explicit obligations between software elements via preconditions, postconditions, and invariants — the contract pattern <span class="codae">cod<span class="ae">æ</span></span> generalizes from routine scope to system scope.
             <span class="meta"><a href="https://www.eiffel.com/values/design-by-contract/" target="_blank" rel="noopener">eiffel.com/values/design-by-contract</a></span>
