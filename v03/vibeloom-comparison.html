@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>From spec-driven to contract-driven — SDD and codæ · Whitepaper</title>
 
-<meta name="description" content="A 2026 methodology-level comparison of three spec-driven development tools (AWS Kiro, GitHub Spec Kit, BMAD Method) and codæ — the contract-driven paradigm instantiated by VibeLoom. With sidebars on Tessl (now context/skills infrastructure) and Pythagora (app-generator lineage).">
+<meta name="description" content="A methodology-level comparison of four spec-driven development tools (AWS Kiro, GitHub Spec Kit, OpenSpec, BMAD Method) and codæ — the contract-driven paradigm instantiated by VibeLoom. Revised September 2026. With sidebars on Tessl (agent-skills registry and enablement) and Pythagora→Pazi (app-generator lineage).">
 <meta name="author" content="Ilya Baimetov">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#ffffff">
 
 <meta property="og:type" content="article">
 <meta property="og:title" content="From spec-driven to contract-driven — SDD and codæ">
-<meta property="og:description" content="Methodology-level comparison of Kiro, Spec Kit, BMAD, and codæ. Tessl and Pythagora as sidebars.">
+<meta property="og:description" content="Methodology-level comparison of Kiro, Spec Kit, OpenSpec, BMAD, and codæ. Revised September 2026. Tessl and Pazi as sidebars.">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="From spec-driven to contract-driven — SDD and codæ">
-<meta name="twitter:description" content="Two families: SDD with three flavors, and codæ as the next level.">
+<meta name="twitter:description" content="Two families: SDD with four flavors, and codæ as the next level.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -385,7 +385,7 @@ blockquote.pull cite {
 }
 .cmp-table {
   width: 100%;
-  min-width: 720px;
+  min-width: 880px;
   border-collapse: collapse;
   font-size: 0.88rem;
 }
@@ -456,7 +456,7 @@ blockquote.pull cite {
   margin: 28px 0;
   padding: 22px 24px;
   background: var(--c-bg-soft);
-  border-left: 3px solid var(--c-line-3);
+  border-left: 3px solid var(--c-line-2);
   border-radius: 0 10px 10px 0;
 }
 .sidebar-block h3 {
@@ -599,7 +599,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
   <div class="wrap hero-inner">
     <h1>From spec-driven to contract-driven.</h1>
 
-    <p class="sub">SDD has three flavors — Kiro, Spec Kit, BMAD. <span class="codae">cod<span class="ae">æ</span></span> is the next level.</p>
+    <p class="sub">SDD has four flavors — Kiro, Spec Kit, OpenSpec, BMAD. <span class="codae">cod<span class="ae">æ</span></span> is the next level.</p>
 
     <p class="lead">
       Spec-driven development (SDD) moved AI coding off raw prompting —
@@ -607,16 +607,17 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
       specs of SDD become a durable, traceable, approval-gated
       <em>contract</em> — a graph of mutually-derived specs that
       governs the lifecycle, not a one-off planning artifact. This
-      whitepaper compares the three main SDD tools at the methodology
-      level and positions <span class="codae">cod<span class="ae">æ</span></span> against them. Tessl and Pythagora appear
-      as sidebars.
+      whitepaper compares the four main SDD tools at the methodology
+      level and positions <span class="codae">cod<span class="ae">æ</span></span> against them. Tessl and Pythagora
+      (now Pazi) appear as sidebars.
     </p>
 
     <div class="hero-meta">
       <span><strong>Author</strong> Ilya Baimetov</span>
       <span><strong>Published</strong> v0.3 · May 2026</span>
-      <span><strong>Read time</strong> ~12 min</span>
-      <span><strong>Sources</strong> primary, verified</span>
+      <span><strong>Revised</strong> September 2026</span>
+      <span><strong>Read time</strong> ~14 min</span>
+      <span><strong>Sources</strong> primary, re-verified 2026-09</span>
     </div>
   </div>
 </header>
@@ -648,14 +649,18 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         <p>
           Spec-driven development is now a recognized family. AWS
           Kiro<sup class="cite"><a href="#ref-1">1</a></sup> turns
-          natural prompts into structured requirements (EARS notation),
-          design, and tasks — anchored in an IDE with steering files
-          and lifecycle hooks. GitHub Spec Kit<sup class="cite"><a href="#ref-3">3</a></sup>
+          natural prompts into structured requirements, design, and
+          tasks — anchored in an IDE, now flanked by CLI, web, and
+          cloud surfaces, with steering files and lifecycle hooks.
+          GitHub Spec Kit<sup class="cite"><a href="#ref-4">4</a></sup>
           makes specifications executable through a constitution +
-          spec/plan/tasks/implement workflow. BMAD Method<sup class="cite"><a href="#ref-5">5</a></sup>
+          spec/plan/tasks/implement workflow. OpenSpec<sup class="cite"><a href="#ref-6">6</a></sup>
+          keeps a persistent spec set in the repository and evolves it
+          through delta-marked change folders — propose, apply,
+          archive. BMAD Method<sup class="cite"><a href="#ref-7">7</a></sup>
           organizes ideation through implementation around specialized
           agents (analyst, PM, architect, developer, UX) and adaptive
-          workflows. Three angles on the same problem.
+          workflows. Four angles on the same problem.
         </p>
 
         <p>
@@ -664,7 +669,10 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
           cycle. The specification stack must become a <strong>contract</strong> —
           persistent, derivation-aware, approval-gated, traceable, and
           used across the lifecycle as both memory and eval surface.
-          VibeLoom is one concrete instantiation.
+          VibeLoom is one concrete instantiation — v0.3 is the
+          specification of this level, while the shipped engine
+          implements v0.2; stated so the comparison stays honest in
+          both directions.
         </p>
 
         <blockquote class="pull">
@@ -672,12 +680,14 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         </blockquote>
 
         <p>
-          This piece compares the three SDD tools at the methodology
+          This piece compares the four SDD tools at the methodology
           level — what each treats as source of truth, who governs
           change, how drift is handled — and shows where <span class="codae">cod<span class="ae">æ</span></span> extends
-          the family. Tessl and Pythagora are real participants in the
-          broader landscape but not main SDD methodology comparators in
-          May 2026 — see the sidebars in §9.
+          the family. Tessl and Pythagora remain real participants in
+          the broader landscape but not SDD methodology comparators in
+          September 2026 — one now sells agent-skills infrastructure,
+          the other has left developer tooling altogether. See the
+          sidebars in §9.
         </p>
       </section>
 
@@ -687,27 +697,38 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         <h3 id="m-kiro"><span class="tool-tag">AWS Kiro</span>IDE-anchored SDD.</h3>
 
         <p>
-          Kiro is an agentic AI development environment — IDE plus CLI
-          — built around three pillars: <strong>specs</strong>
-          (per-feature triplets of <code>requirements.md</code> in EARS
-          notation, <code>design.md</code>, <code>tasks.md</code>;
-          <code>bugfix.md</code> for fixes), <strong>steering</strong>
-          (persistent project/workspace knowledge in
+          Kiro is an agentic AI development environment built around
+          three pillars: <strong>specs</strong> (per-feature triplets
+          of <code>requirements.md</code> — user stories with
+          acceptance criteria — <code>design.md</code>, and
+          <code>tasks.md</code>; <code>bugfix.md</code> for fixes;
+          Requirements-First, Design-First, and gate-free Quick Spec
+          variants; the EARS-notation framing of early Kiro has receded
+          from current docs), <strong>steering</strong> (persistent
+          project/workspace knowledge in
           <code>.kiro/steering/*.md</code> with always/conditional/
-          manual/auto inclusion modes; AGENTS.md is supported), and
-          <strong>hooks</strong> (event-driven agent prompts or shell
-          commands that fire on file save, prompt submission, tool use,
-          and spec task execution).<sup class="cite"><a href="#ref-1">1</a></sup>
-          <sup class="cite"><a href="#ref-2">2</a></sup>
+          manual/auto inclusion modes; the AGENTS.md standard is
+          supported as always-on steering), and <strong>hooks</strong>
+          (event-driven agent prompts or shell commands).<sup class="cite"><a href="#ref-1">1</a></sup>
+          Task execution is dependency-aware: independent tasks run
+          concurrently in waves.<sup class="cite"><a href="#ref-1">1</a></sup>
         </p>
 
         <p>
           The methodology bet underneath: developers will adopt spec
-          discipline when it embeds in the IDE workflow they already
-          live in. Kiro's GA milestone added property-based testing for
-          spec correctness, checkpointing, CLI surfaces, and team
-          plans — extending validation rigor while keeping the IDE as
-          home base.
+          discipline when it embeds in the workflow they already live
+          in. Through 2026, "the workflow" stopped meaning just the
+          IDE: Kiro now spans a CLI with third-generation spec runs,
+          spec-review screens, and voice input; opt-in cloud sessions
+          that keep an agent working after you disconnect; a web
+          surface with enterprise SSO; and Crew, a multi-agent
+          orchestration app reachable over messaging
+          channels.<sup class="cite"><a href="#ref-3">3</a></sup> GA
+          had already added property-based testing for spec
+          correctness, checkpointing, and team
+          plans.<sup class="cite"><a href="#ref-2">2</a></sup> The
+          spec/steering/hooks spine is unchanged; the surfaces around
+          it multiplied.
         </p>
 
         <h3 id="m-speckit"><span class="tool-tag">GitHub Spec Kit</span>Constitution + per-feature artifact bundle.</h3>
@@ -716,7 +737,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
           Spec Kit's official documentation defines spec-driven
           development as making specifications <em>executable</em>,
           directly generating working implementation rather than only
-          guiding it.<sup class="cite"><a href="#ref-3">3</a></sup>
+          guiding it.<sup class="cite"><a href="#ref-4">4</a></sup>
           The core command flow is
           <code>/speckit.constitution</code>,
           <code>/speckit.specify</code>, <code>/speckit.plan</code>,
@@ -724,30 +745,75 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
           with optional <code>/speckit.clarify</code>,
           <code>/speckit.analyze</code>, and <code>/speckit.checklist</code>
           to catch drift and ambiguity at the artifact layer before
-          code is generated. Spec Kit supports integrations,
-          extensions, presets, workflows, and project-local overrides.
+          code is generated. The set keeps growing:
+          <code>/speckit.taskstoissues</code> turns tasks into GitHub
+          issues, and <code>/speckit.converge</code> assesses an
+          existing codebase against its specs.<sup class="cite"><a href="#ref-5">5</a></sup>
+          Around the core sit 138+ community extensions, 25+ presets,
+          shareable bundles, and a skills mode for agents that prefer
+          skills over slash commands, across 30+ supported
+          agents.<sup class="cite"><a href="#ref-4">4</a></sup>
+          <sup class="cite"><a href="#ref-5">5</a></sup>
         </p>
 
         <p>
           The methodology bet underneath: a constitution plus per-feature
           executable specs plus extensible process machinery can make AI
-          generation more predictable. The structural gap is post-merge
-          spec persistence — branch-scoped feature artifacts don't
-          compound into a system-level description, which bites on
-          mature codebases.
+          generation more predictable. The structural gap this paper
+          named in May 2026 — branch-scoped feature artifacts that
+          never compound into a system-level description — is now
+          acknowledged inside the toolkit itself:
+          <code>converge</code> exists to reconcile a codebase with its
+          specs after the fact. The default center of gravity is still
+          the feature bundle, and post-merge persistence remains
+          convention rather than structure.
+        </p>
+
+        <h3 id="m-openspec"><span class="tool-tag">OpenSpec</span>Delta-spec / change-lifecycle SDD.</h3>
+
+        <p>
+          OpenSpec, from Fission-AI, is the newest of the four and
+          already at BMAD-scale adoption (52.6k GitHub stars as of
+          September 2026).<sup class="cite"><a href="#ref-6">6</a></sup>
+          It keeps a persistent requirements set in
+          <code>openspec/specs/</code> and evolves it through change
+          folders — <code>proposal.md</code>, spec deltas marked
+          <code>ADDED</code> / <code>MODIFIED</code> /
+          <code>REMOVED</code>, <code>design.md</code>,
+          <code>tasks.md</code> — driven by a propose → apply → archive
+          loop, with a longer fluid command set (explore, new,
+          continue, verify). Archiving a change merges its deltas into
+          the persistent specs. The stated philosophy: "fluid not
+          rigid, iterative not waterfall, easy not complex." 30+ AI
+          tools are supported.<sup class="cite"><a href="#ref-6">6</a></sup>
+        </p>
+
+        <p>
+          The methodology bet underneath: governance survives only when
+          it is nearly free — a small persistent spec set plus
+          per-change deltas is the most process teams will actually
+          keep using, brownfield included. The structural gap is
+          verification depth: the archive merge is mechanical, drift
+          between spec and code is checked by a verify pass rather
+          than detected as a graph property, and there are no approval
+          gates, derivation links, or semantic drift categories.
+          System-level persistence without lifecycle governance.
         </p>
 
         <h3 id="m-bmad"><span class="tool-tag">BMAD Method</span>Agent-role / workflow SDD.</h3>
 
         <p>
           BMAD describes itself as an AI-driven development framework
-          spanning ideation and planning through agentic implementation.<sup class="cite"><a href="#ref-5">5</a></sup>
-          <sup class="cite"><a href="#ref-6">6</a></sup>
-          It provides specialized AI agents — Analyst, Product Manager,
-          Architect, Developer, UX Designer, and others — and guided
-          workflows that adapt to project complexity. BMad Builder
-          allows creating custom agents, workflows, and modules. The
-          framework is closer to <span class="codae">cod<span class="ae">æ</span></span> in spirit than the other SDD
+          spanning ideation and planning through agentic implementation.<sup class="cite"><a href="#ref-7">7</a></sup>
+          <sup class="cite"><a href="#ref-8">8</a></sup>
+          v6 installs five named agents — Analyst, Product Manager,
+          Architect, Developer, UX Designer — and roughly two dozen
+          skills across planning and shipping, with one official
+          implementation loop (<code>bmad-sprint-planning</code> →
+          <code>bmad-build</code> → <code>bmad-code-review</code>) plus
+          an unattended worker for orchestrators. BMad Builder allows
+          creating custom agents, workflows, and modules. The
+          framework remains closer to <span class="codae">cod<span class="ae">æ</span></span> in spirit than the other SDD
           tools because it governs a broader development lifecycle
           rather than only single-feature workflow or per-file specs.
         </p>
@@ -755,10 +821,19 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         <p>
           The methodology bet underneath: structured agent roles and
           adaptive workflows can make AI-assisted development behave
-          more like a disciplined team process. The structural gap is
-          graph and audit formalism — BMAD organizes humans and agents
-          into roles and phases but does not (yet) materialize a
-          first-class Contract Graph or trace substrate.
+          more like a disciplined team process. The structural gap this
+          paper named in May 2026 — no first-class Contract Graph or
+          trace substrate — needs revising in one half. BMAD's
+          v6.9–6.11 releases grew real run evidence: content-addressed
+          snapshots of exactly what ran, machine-readable spec
+          statuses, and retrospectives required to cite the epic's own
+          artifacts.<sup class="cite"><a href="#ref-8">8</a></sup> The
+          graph half stands: no item-level derivation, no drift
+          statuses, no reconcile operation. And BMAD's brownfield
+          doctrine now argues the opposite of a durable contract —
+          archive the planning documents, let agents read the code,
+          keep one small verified context block in
+          AGENTS.md.<sup class="cite"><a href="#ref-7">7</a></sup>
         </p>
       </section>
 
@@ -782,7 +857,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
           systems need a durable contract graph, not just better
           feature specs or workflow prompts. The contract is what a
           human comprehends; code is downstream. Agent Behavioral
-          Contracts research<sup class="cite"><a href="#ref-7">7</a></sup>
+          Contracts research<sup class="cite"><a href="#ref-9">9</a></sup>
           backs this — contract-style enforcement on agents produces
           measurable governance improvements (5.2–6.8 soft violations
           per session detected vs uncontracted baselines; 88–100%
@@ -793,7 +868,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
 
         <p>
           <span class="codae">cod<span class="ae">æ</span></span> is an hommage to Bertrand Meyer's Design by
-          Contract.<sup class="cite"><a href="#ref-8">8</a></sup> The
+          Contract.<sup class="cite"><a href="#ref-10">10</a></sup> The
           inheritance is the discipline of explicit obligations between
           software elements. The boundary moves upward — from
           routine/class contracts to system-generation contracts. The
@@ -814,12 +889,13 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         </p>
 
         <div class="cmp-wrap">
-          <table class="cmp-table" aria-label="Methodology comparison of Kiro, Spec Kit, BMAD, and codæ">
+          <table class="cmp-table" aria-label="Methodology comparison of Kiro, Spec Kit, OpenSpec, BMAD, and codæ">
             <thead>
               <tr>
                 <th scope="col">Dimension</th>
                 <th scope="col">AWS Kiro</th>
                 <th scope="col">GitHub Spec Kit</th>
+                <th scope="col">OpenSpec</th>
                 <th scope="col">BMAD Method</th>
                 <th scope="col" class="col-self"><span class="codae">cod<span class="ae">æ</span></span> / VibeLoom</th>
               </tr>
@@ -827,8 +903,9 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
             <tbody>
               <tr>
                 <th scope="row">Family</th>
-                <td>IDE-anchored SDD</td>
+                <td>IDE-anchored SDD, now IDE + CLI + cloud platform</td>
                 <td>feature/artifact-bundle SDD</td>
+                <td>delta-spec / change-lifecycle SDD</td>
                 <td>agent-role/workflow SDD</td>
                 <td class="cell-self">contract-driven agentic engineering</td>
               </tr>
@@ -836,20 +913,23 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
                 <th scope="row">Primary unit</th>
                 <td>feature/bugfix spec triplet (req/design/tasks)</td>
                 <td>feature spec bundle + constitution</td>
+                <td>change folder: proposal, spec deltas, design, tasks</td>
                 <td>workflow phase, agent role, project artifact</td>
                 <td class="cell-self">contract tier and affected graph cut</td>
               </tr>
               <tr>
                 <th scope="row">Persistent knowledge</th>
-                <td>steering files, AGENTS.md, file references</td>
-                <td>constitution, memory, extensions/presets</td>
-                <td>progressively built project context and agent artifacts</td>
+                <td>steering files (4 inclusion modes), AGENTS.md standard</td>
+                <td>constitution, memory, extensions/presets/bundles</td>
+                <td><code>openspec/specs/</code> — persistent system requirements, updated on archive</td>
+                <td>verified AGENTS.md context block; planning artifacts (archived in brownfield)</td>
                 <td class="cell-self">approved contract graph + active decision context</td>
               </tr>
               <tr>
                 <th scope="row">Human review surface</th>
-                <td>requirements/design/tasks inside IDE</td>
+                <td>requirements/design/tasks in IDE + CLI spec-review screens</td>
                 <td>spec/plan/tasks/checklists</td>
+                <td>proposal + delta specs + tasks per change</td>
                 <td>PRD, UX, architecture, stories, reviews</td>
                 <td class="cell-self">review/reconciliation packets over IDed items</td>
               </tr>
@@ -857,35 +937,48 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
                 <th scope="row">Spec lifetime</th>
                 <td>feature/bugfix specs + persistent steering</td>
                 <td>feature artifacts + persistent constitution</td>
+                <td>deltas merge into permanent specs; change folders archived</td>
                 <td>project lifecycle artifacts across phases</td>
                 <td class="cell-self">permanent evolving contract graph</td>
               </tr>
               <tr>
                 <th scope="row">Drift handling</th>
-                <td>hooks, steering, reviews, property-based spec correctness</td>
-                <td>analyze/checklist; default remains feature-centric</td>
-                <td>correct-course, readiness checks, review workflows</td>
+                <td>hooks, steering, spec review, property-based spec correctness</td>
+                <td>analyze/checklist pre-generation; <code>converge</code> assesses codebase vs specs</td>
+                <td>ADDED/MODIFIED/REMOVED deltas + verify pass; no semantic categories</td>
+                <td>correct-course, readiness gates, evidence-based retrospective</td>
                 <td class="cell-self">stale/uncovered/dangling/drifted/obsolete categories + traces</td>
               </tr>
               <tr>
                 <th scope="row">Reconciliation</th>
                 <td>workflow convention through specs/tasks/hooks</td>
-                <td>phase-gate correction and extensions</td>
+                <td>phase-gate correction; post-hoc <code>converge</code></td>
+                <td>mechanical archive merge; conflicts by convention</td>
                 <td>workflow correction and re-planning</td>
                 <td class="cell-self">first-class <code>reconcile</code> operation</td>
               </tr>
               <tr>
                 <th scope="row">Code relation</th>
-                <td>agent implements spec tasks</td>
+                <td>agent implements spec tasks in dependency waves</td>
                 <td>agent implements plan/tasks</td>
+                <td>agent implements tasks; verify checks the change</td>
                 <td>developer agent implements stories/tasks</td>
                 <td class="cell-self">code-sync traces map generated code to contract IDs + validation</td>
               </tr>
               <tr>
+                <th scope="row">Run evidence</th>
+                <td>checkpointing; session and task-execution logs</td>
+                <td>artifacts committed per feature branch</td>
+                <td>archived change folders as history</td>
+                <td>content-addressed run snapshots; machine-readable spec status; retro over epic artifacts</td>
+                <td class="cell-self">six JSONL trace schemas: approval, code-sync, generation, eval, decision, import</td>
+              </tr>
+              <tr>
                 <th scope="row">Dark-factory readiness</th>
-                <td>partial: strong local workflow; code remains close review surface</td>
+                <td>partial: strong local workflow + cloud sessions; code remains the review surface</td>
                 <td>partial: executable specs but default feature scope</td>
-                <td>partial: process scaffolding, less graph/audit formalism</td>
+                <td>partial: persistent specs, but no approval graph or trace substrate</td>
+                <td>partial: process scaffolding + growing run evidence; no graph formalism</td>
                 <td class="cell-self">explicit trajectory: contract as control surface, code as generated output</td>
               </tr>
             </tbody>
@@ -900,7 +993,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         <p>
           The <span class="codae">cod<span class="ae">æ</span></span> manifesto's central claim is that the human-mendable
           surface should be measured in <em>items</em>, not lines of
-          code. Each of the three SDD comparators answers what surface
+          code. Each of the four SDD comparators answers what surface
           a human is supposed to hold differently:
         </p>
 
@@ -913,6 +1006,12 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
           plus a series of medium-sized per-feature artifact bundles.
           Mixed-scale; the global surface is what survives between
           features.</li>
+          <li><strong>OpenSpec</strong> — a persistent spec set that
+          compounds with the system, plus small per-change deltas. The
+          delta is the review surface; the accumulated
+          <code>specs/</code> directory is what a human must still
+          hold as the system grows — persistent, but flat: no tiers,
+          no derivation.</li>
           <li><strong>BMAD</strong> — phase-by-phase artifacts (PRD,
           architecture, UX, stories) accumulating across the project
           lifecycle. Larger total surface than the other two, organized
@@ -947,28 +1046,44 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
 
         <ul>
           <li><strong>Kiro.</strong> Hooks fire on file events to
-          cascade spec changes; property-based testing of specs is now
-          part of GA. Steering files carry standing knowledge that
+          cascade spec changes; property-based testing of specs landed
+          at GA, and the CLI added dedicated spec-review screens in
+          2026. Steering files carry standing knowledge that
           outlasts a single feature. Post-completion spec lifetime is
           mostly convention.<sup class="cite"><a href="#ref-1">1</a></sup>
-          <sup class="cite"><a href="#ref-2">2</a></sup></li>
+          <sup class="cite"><a href="#ref-2">2</a></sup>
+          <sup class="cite"><a href="#ref-3">3</a></sup></li>
 
           <li><strong>Spec Kit.</strong> Artifact-layer drift detection
           via <code>/speckit.analyze</code> and
           <code>/speckit.checklist</code> catches inconsistencies
-          before code generation.<sup class="cite"><a href="#ref-3">3</a></sup>
-          <sup class="cite"><a href="#ref-4">4</a></sup>
-          The structural gap is post-merge: branch-scoped specs do not
-          compound into system-level documentation, so drift between
-          features is invisible at the spec layer.</li>
+          before code generation, and <code>/speckit.converge</code>
+          now assesses an existing codebase against its specs after
+          the fact.<sup class="cite"><a href="#ref-4">4</a></sup>
+          <sup class="cite"><a href="#ref-5">5</a></sup>
+          The post-merge gap is narrowing but structural: branch-scoped
+          specs still do not compound into system-level documentation,
+          so drift between features stays invisible at the spec layer
+          until a converge pass is run by hand.</li>
+
+          <li><strong>OpenSpec.</strong> The persistent spec set makes
+          post-merge drift <em>representable</em>: deltas marked
+          ADDED / MODIFIED / REMOVED merge into
+          <code>openspec/specs/</code> on archive, and a verify pass
+          checks the change.<sup class="cite"><a href="#ref-6">6</a></sup>
+          But drift is not <em>detected</em>: the merge is mechanical,
+          spec↔code coherence rests on the verify convention, and
+          there are no item-level statuses or semantic checks.</li>
 
           <li><strong>BMAD.</strong> Workflow correction, "correct
-          course," and readiness checks are built into the agent
+          course," and readiness gates are built into the agent
           orchestration; phases re-plan when an upstream artifact
-          changes.<sup class="cite"><a href="#ref-5">5</a></sup>
-          <sup class="cite"><a href="#ref-6">6</a></sup>
-          The framework does not yet materialize drift as a graph
-          property or expose status categories at item granularity.</li>
+          changes. v6.9–6.11 added an evidence layer — retrospectives
+          that must cite the epic's own artifacts, content-addressed
+          snapshots of what actually ran.<sup class="cite"><a href="#ref-7">7</a></sup>
+          <sup class="cite"><a href="#ref-8">8</a></sup>
+          Drift is still not a graph property, and no status categories
+          exist at item granularity.</li>
 
           <li><strong><span class="codae">cod<span class="ae">æ</span></span>.</strong> Drift forms detected
           explicitly: <em>stale</em> (downstream depended on changed
@@ -982,10 +1097,12 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         </ul>
 
         <p>
-          The honest 2026 caveat: no peer-reviewed benchmark compares
-          drift outcomes across these four tools. Each mechanism is
-          well-described in current docs and practitioner reports; the
-          empirical comparison the field needs hasn't shipped yet.
+          The honest caveat stands in September 2026: no peer-reviewed
+          benchmark compares drift outcomes across these tools. A June
+          2026 process taxonomy compares framework <em>shapes</em><sup class="cite"><a href="#ref-13">13</a></sup>;
+          each drift mechanism is well-described in current docs and
+          practitioner reports; the outcome comparison the field needs
+          still hasn't shipped.
         </p>
       </section>
 
@@ -1013,11 +1130,19 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
             a system-level spec.
           </li>
           <li>
+            <strong>OpenSpec bets</strong> that governance survives
+            only if it is nearly free — a persistent spec set plus
+            delta-marked changes, "fluid not rigid." Vindicated if
+            adoption-through-lightness outlasts formalism as codebases
+            and teams grow.
+          </li>
+          <li>
             <strong>BMAD bets</strong> that structured agent roles
             plus adaptive workflows make AI-assisted development
             behave like a disciplined team process. Vindicated if the
             agent-role abstraction scales across project complexity
-            without needing a graph or audit formalism.
+            without needing a graph formalism. Its 2026 evidence turn
+            quietly hedges the audit half of that bet.
           </li>
           <li>
             <strong><span class="codae">cod<span class="ae">æ</span></span> bets</strong> that a tiered, mutually-derived
@@ -1036,7 +1161,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         <h2><span class="num">§8 — SDD maturity ladder</span>Where vibeloom fits.</h2>
 
         <p>
-          The 2026 SDD taxonomy<sup class="cite"><a href="#ref-9">9</a></sup>
+          The 2026 SDD taxonomy<sup class="cite"><a href="#ref-11">11</a></sup>
           places existing approaches across three rigor levels:
         </p>
 
@@ -1045,6 +1170,14 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
           <li><strong>Spec-anchored</strong> — specs and code co-evolve with explicit enforcement; the spec doesn't decay because something keeps checking it.</li>
           <li><strong>Spec-as-source</strong> — specs alone are edited; code is regenerated; humans never touch generated code.</li>
         </ul>
+
+        <p>
+          The pressure toward the top of the ladder is now visible in
+          the literature too: a July 2026 enterprise framing argues
+          that specification governance — deterministic validation
+          over contract-shaped specs — is the foundation AI-native
+          engineering needs.<sup class="cite"><a href="#ref-12">12</a></sup>
+        </p>
 
         <p>
           <span class="codae">cod<span class="ae">æ</span></span> argues for a fourth level: <strong>contract-driven</strong>.
@@ -1070,7 +1203,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
               <text x="20" y="36" font-family="Inter, sans-serif" font-size="11" fill="#5a5a5a">specs and code co-evolve with enforcement</text>
               <text x="350" y="28" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#5a5a5a" text-anchor="end">level 2</text>
             </g>
-            <text x="465" y="221" font-family="JetBrains Mono, monospace" font-size="11" fill="#5a5a5a">— Kiro, Spec Kit, BMAD</text>
+            <text x="465" y="221" font-family="JetBrains Mono, monospace" font-size="11" fill="#5a5a5a">— Kiro, Spec Kit, OpenSpec, BMAD</text>
 
             <g transform="translate(110, 130)">
               <rect width="360" height="44" rx="6" fill="#efeeec" stroke="#d6d3cd"/>
@@ -1089,9 +1222,9 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
             <text x="515" y="94" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#c43a50">— codæ / VibeLoom</text>
 
             <line x1="40" y1="318" x2="700" y2="318" stroke="#d6d3cd" stroke-width="1"/>
-            <text x="40" y="334" font-family="JetBrains Mono, monospace" font-size="10" fill="#707070">levels 1–3 from Piskala 2026 [9]; level 4 added.</text>
+            <text x="40" y="334" font-family="JetBrains Mono, monospace" font-size="10" fill="#707070">levels 1–3 from Piskala 2026 [11]; level 4 added.</text>
           </svg>
-          <p class="fig-caption"><strong>SDD maturity ladder, extended.</strong> Levels 1–3 are the rigor tiers in Piskala's 2026 taxonomy. Kiro, Spec Kit, and BMAD all sit at level 2 (different mechanisms — IDE hooks vs phase gates vs role workflows — same family). Tessl was at level 3 pre-pivot; the January 2026 shift to skills-as-package-manager makes its current placement uncertain (see §9). <span class="codae">cod<span class="ae">æ</span></span> argues for a fourth level — contract-driven — distinguished by lifecycle governance and graph-based drift detection.</p>
+          <p class="fig-caption"><strong>SDD maturity ladder, extended.</strong> Levels 1–3 are the rigor tiers in Piskala's 2026 taxonomy. Kiro, Spec Kit, OpenSpec, and BMAD all sit at level 2 (different mechanisms — IDE hooks vs phase gates vs delta merges vs role workflows — same family). Within the level, OpenSpec holds the strongest system-level spec persistence and BMAD pushes hardest on the run-evidence axis — the level is compressing upward, but the level-4 slot remains unoccupied by any shipped comparator. Tessl was at level 3 pre-pivot; the January 2026 shift to skills-as-package-manager took it off this ladder (see §9). <span class="codae">cod<span class="ae">æ</span></span> argues for the fourth level — contract-driven — distinguished by lifecycle governance and graph-based drift detection.</p>
         </div>
       </section>
 
@@ -1099,45 +1232,53 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
         <h2><span class="num">§9 — Sidebars</span>Tessl and Pythagora.</h2>
 
         <p>
-          Two tools are sometimes grouped with SDD but are not, in May
-          2026, the right comparators for a <span class="codae">cod<span class="ae">æ</span></span> methodology
-          discussion:
+          Two tools are sometimes grouped with SDD but are not, in
+          September 2026, the right comparators for a <span class="codae">cod<span class="ae">æ</span></span> methodology
+          discussion — and both moved since the May edition:
         </p>
 
         <div class="sidebar-block">
-          <h3><span class="tool-tag">Tessl</span>Now context/skills package management.</h3>
+          <h3><span class="tool-tag">Tessl</span>Agent-skills registry and enablement, compounding.</h3>
           <p>
             Tessl pivoted in January 2026 away from per-file
             spec-as-source toward "the package manager for agent
-            skills."<sup class="cite"><a href="#ref-10">10</a></sup>
-            <sup class="cite"><a href="#ref-11">11</a></sup> Current
-            Tessl positions itself as a versioned registry of
-            workflow-procedure skills, docs, rules, and other
-            agent-context bundles ("tiles"), with evaluation,
-            distribution, and lifecycle management for that context.
-            That is better understood as <em>skills/context
-            infrastructure</em> than as a feature-spec or contract-stack
-            methodology. Tessl remains relevant because it proves the
-            market is moving from one-off prompts toward evaluated,
-            versioned agent context. <span class="codae">cod<span class="ae">æ</span></span> agrees with that direction
-            but applies it to system-specific truth, not skill
-            distribution.
+            skills."<sup class="cite"><a href="#ref-14">14</a></sup>
+            By September 2026 that direction has compounded: the
+            registry versions thousands of skills installed via
+            <code>npx tessl install</code>, every public skill carries
+            a Snyk security score under a March 2026
+            partnership<sup class="cite"><a href="#ref-15">15</a></sup>,
+            and the company sells an "agent enablement platform" —
+            generate, evaluate, distribute, and optimize agent skills
+            and context — to enterprises such as Cisco and
+            HashiCorp.<sup class="cite"><a href="#ref-16">16</a></sup>
+            That is <em>skills/context infrastructure</em>, not a
+            feature-spec or contract-stack methodology. Tessl matters
+            here for what it proves: agent context is becoming
+            versioned, evaluated, and secured like software.
+            <span class="codae">cod<span class="ae">æ</span></span> agrees with that direction — and applies the same
+            lifecycle discipline to system-specific truth rather than
+            distributable skills.
           </p>
         </div>
 
         <div class="sidebar-block">
-          <h3><span class="tool-tag">Pythagora</span>App-generator / AI-developer lineage.</h3>
+          <h3><span class="tool-tag">Pythagora → Pazi</span>Out of the developer-tool race.</h3>
           <p>
-            Pythagora describes itself as an AI teammate inside VS
-            Code or Cursor powered by specialized agents that plan,
-            code, review, test, debug, and deploy full-stack apps.<sup class="cite"><a href="#ref-12">12</a></sup>
-            GPT Pilot, its open-source lineage, is no longer maintained
-            as the primary product and redirects to Pythagora.ai.
-            Pythagora is relevant as app-generator / AI-developer
-            companion lineage but is not the best methodology
-            comparator for SDD vs <span class="codae">cod<span class="ae">æ</span></span> — the framing is closer to "AI
-            does the coding work for you" than to "structured
-            artifacts govern the system."
+            The May edition treated Pythagora as app-generator /
+            AI-developer lineage. That lineage has now left the field:
+            <code>pythagora.ai</code> redirects to
+            <code>pazi.ai</code>, where the same founding team — the
+            creators of GPT Pilot — builds "a platform where
+            autonomous companies are built": role-based business
+            agents with plans and progress reporting, aimed at
+            entrepreneurs rather than engineering
+            teams.<sup class="cite"><a href="#ref-17">17</a></sup>
+            GPT Pilot remains public but historical. The exit is
+            itself a data point about where the pure app-generation
+            bet led — squeezed between the platform players above and
+            the methodology layer this paper compares, the founders
+            moved up-stack to business operations.
           </p>
         </div>
       </section>
@@ -1149,15 +1290,16 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
           References are primary sources where possible — official
           docs, official repositories, official blogs — supplemented
           with verified secondary coverage. Tool descriptions reflect
-          May 2026 official positioning. arXiv items are preprints
-          unless they name a peer-reviewed venue.
+          September 2026 official positioning (originally verified May
+          2026, re-verified 2026-09-01 for this revision). arXiv items
+          are preprints unless they name a peer-reviewed venue.
         </p>
 
         <ol>
           <li id="ref-1">
             <span class="title">Kiro homepage and docs.</span>
             AWS Kiro.
-            <span class="meta">Verified May 2026 · <a href="https://kiro.dev/" target="_blank" rel="noopener">kiro.dev</a> · <a href="https://kiro.dev/docs/specs/" target="_blank" rel="noopener">specs</a> · <a href="https://kiro.dev/docs/steering/" target="_blank" rel="noopener">steering</a> · <a href="https://kiro.dev/docs/hooks/" target="_blank" rel="noopener">hooks</a></span>
+            <span class="meta">Verified September 2026 · <a href="https://kiro.dev/" target="_blank" rel="noopener">kiro.dev</a> · <a href="https://kiro.dev/docs/specs/" target="_blank" rel="noopener">specs</a> · <a href="https://kiro.dev/docs/steering/" target="_blank" rel="noopener">steering</a> · <a href="https://kiro.dev/docs/hooks/" target="_blank" rel="noopener">hooks</a></span>
           </li>
           <li id="ref-2">
             <span class="title">Kiro general availability announcement.</span>
@@ -1165,54 +1307,78 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
             <span class="meta"><a href="https://kiro.dev/blog/general-availability/" target="_blank" rel="noopener">kiro.dev/blog/general-availability/</a></span>
           </li>
           <li id="ref-3">
-            <span class="title">GitHub Spec Kit official documentation.</span>
-            GitHub.
-            <span class="meta">Verified May 2026 · <a href="https://github.github.com/spec-kit/index.html" target="_blank" rel="noopener">github.github.com/spec-kit</a></span>
+            <span class="title">Kiro changelog — IDE, CLI, Crew, web, cloud sessions.</span>
+            Kiro.
+            <span class="meta">Accessed 2026-09-01 · <a href="https://kiro.dev/changelog/" target="_blank" rel="noopener">kiro.dev/changelog/</a></span>
           </li>
           <li id="ref-4">
-            <span class="title">github/spec-kit repository.</span>
+            <span class="title">GitHub Spec Kit official documentation.</span>
             GitHub.
-            <span class="meta"><a href="https://github.com/github/spec-kit" target="_blank" rel="noopener">github.com/github/spec-kit</a></span>
+            <span class="meta">Docs updated 2026-07-16, verified September 2026 · <a href="https://github.github.com/spec-kit/index.html" target="_blank" rel="noopener">github.github.com/spec-kit</a></span>
           </li>
           <li id="ref-5">
-            <span class="title">BMAD Method documentation.</span>
-            BMAD.
-            <span class="meta">Verified May 2026 · <a href="https://docs.bmad-method.org/" target="_blank" rel="noopener">docs.bmad-method.org</a> · <a href="https://docs.bmad-method.org/reference/agents/" target="_blank" rel="noopener">agents</a> · <a href="https://docs.bmad-method.org/reference/modules/" target="_blank" rel="noopener">modules</a></span>
+            <span class="title">github/spec-kit repository.</span>
+            GitHub.
+            <span class="meta">128.6k stars as of 2026-09-01 · <a href="https://github.com/github/spec-kit" target="_blank" rel="noopener">github.com/github/spec-kit</a></span>
           </li>
           <li id="ref-6">
-            <span class="title">BMAD-METHOD repository.</span>
-            BMAD code organization.
-            <span class="meta"><a href="https://github.com/bmad-code-org/BMAD-METHOD" target="_blank" rel="noopener">github.com/bmad-code-org/BMAD-METHOD</a></span>
+            <span class="title">Fission-AI/OpenSpec repository.</span>
+            Fission AI.
+            <span class="meta">52.6k stars as of 2026-09-01 · v1.4.1 (2026-06-03) · <a href="https://github.com/Fission-AI/OpenSpec" target="_blank" rel="noopener">github.com/Fission-AI/OpenSpec</a></span>
           </li>
           <li id="ref-7">
+            <span class="title">BMAD Method documentation.</span>
+            BMAD.
+            <span class="meta">Verified September 2026 · <a href="https://docs.bmad-method.org/" target="_blank" rel="noopener">docs.bmad-method.org</a> · <a href="https://docs.bmad-method.org/reference/skills-and-agents/" target="_blank" rel="noopener">skills &amp; agents</a> · <a href="https://docs.bmad-method.org/existing-codebases/theory-of-project-context/" target="_blank" rel="noopener">project-context theory</a></span>
+          </li>
+          <li id="ref-8">
+            <span class="title">BMAD-METHOD repository and changelog.</span>
+            BMad Code organization.
+            <span class="meta">v6.11.0 (2026-08-09) · <a href="https://github.com/bmad-code-org/BMAD-METHOD" target="_blank" rel="noopener">github.com/bmad-code-org/BMAD-METHOD</a> · <a href="https://github.com/bmad-code-org/BMAD-METHOD/blob/main/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a></span>
+          </li>
+          <li id="ref-9">
             <span class="title">Agent Behavioral Contracts: Formal Specification and Runtime Enforcement for Reliable Autonomous AI Agents.</span>
             Bhardwaj, V.P.
             <span class="meta">arXiv:2602.22302 · 2026-02-25 · <a href="https://arxiv.org/abs/2602.22302" target="_blank" rel="noopener">arxiv.org/abs/2602.22302</a></span>
           </li>
-          <li id="ref-8">
+          <li id="ref-10">
             <span class="title">Design by Contract.</span>
             Eiffel Software (Bertrand Meyer's foundational discipline).
             <span class="meta"><a href="https://www.eiffel.com/values/design-by-contract/" target="_blank" rel="noopener">eiffel.com/values/design-by-contract</a></span>
           </li>
-          <li id="ref-9">
+          <li id="ref-11">
             <span class="title">Spec-Driven Development: From Code to Contract in the Age of AI Coding Assistants.</span>
             Piskala, D.B.
-            <span class="meta">arXiv:2602.00180 · 2026-01-30 · <a href="https://arxiv.org/abs/2602.00180" target="_blank" rel="noopener">arxiv.org/abs/2602.00180</a></span>
+            <span class="meta">arXiv:2602.00180 · 2026-01-30 · submitted to AIWare 2026 · <a href="https://arxiv.org/abs/2602.00180" target="_blank" rel="noopener">arxiv.org/abs/2602.00180</a></span>
           </li>
-          <li id="ref-10">
+          <li id="ref-12">
+            <span class="title">Specification-Driven Development as the Foundation of AI-Native Enterprise Software Engineering.</span>
+            Alenezi, M.
+            <span class="meta">arXiv:2607.16680 · 2026-07-18 · <a href="https://arxiv.org/abs/2607.16680" target="_blank" rel="noopener">arxiv.org/abs/2607.16680</a></span>
+          </li>
+          <li id="ref-13">
+            <span class="title">From Prompt to Process: a Process Taxonomy and Comparative Assessment of Frameworks Supporting AI Software Development Agents.</span>
+            <span class="meta">arXiv:2606.04967 · June 2026 · <a href="https://arxiv.org/abs/2606.04967" target="_blank" rel="noopener">arxiv.org/abs/2606.04967</a></span>
+          </li>
+          <li id="ref-14">
             <span class="title">Announcing skills on Tessl: the package manager for agent skills.</span>
             Podjarny, G. (Tessl).
             <span class="meta">2026-01-29 · <a href="https://tessl.io/blog/skills-are-software-and-they-need-a-lifecycle-introducing-skills-on-tessl" target="_blank" rel="noopener">tessl.io/blog/skills-are-software-and-they-need-a-lifecycle…</a></span>
           </li>
-          <li id="ref-11">
-            <span class="title">Tessl docs — How Tessl works.</span>
-            Tessl Docs.
-            <span class="meta">Verified May 2026 · <a href="https://docs.tessl.io/introduction-to-tessl/how-tessl-works" target="_blank" rel="noopener">docs.tessl.io/introduction-to-tessl/how-tessl-works</a></span>
+          <li id="ref-15">
+            <span class="title">Securing the Agent Skills Registry: How Snyk and Tessl Are Setting the Standard.</span>
+            Snyk.
+            <span class="meta">2026-03-17 · <a href="https://snyk.io/blog/snyk-tessl-partnership/" target="_blank" rel="noopener">snyk.io/blog/snyk-tessl-partnership/</a></span>
           </li>
-          <li id="ref-12">
-            <span class="title">Pythagora.ai homepage.</span>
-            Pythagora.
-            <span class="meta"><a href="https://www.pythagora.ai/" target="_blank" rel="noopener">pythagora.ai</a> · <a href="https://github.com/Pythagora-io/gpt-pilot" target="_blank" rel="noopener">github.com/Pythagora-io/gpt-pilot</a></span>
+          <li id="ref-16">
+            <span class="title">Tessl — Agent Enablement Platform.</span>
+            Tessl.
+            <span class="meta">Accessed 2026-09-01 · <a href="https://tessl.io/enterprise/" target="_blank" rel="noopener">tessl.io/enterprise/</a></span>
+          </li>
+          <li id="ref-17">
+            <span class="title">Pazi (formerly Pythagora).</span>
+            Pazi / Y Combinator profile / GPT Pilot lineage.
+            <span class="meta">pythagora.ai 302-redirect to pazi.ai observed 2026-09-01 · <a href="https://pazi.ai/" target="_blank" rel="noopener">pazi.ai</a> · <a href="https://www.ycombinator.com/companies/pazi" target="_blank" rel="noopener">ycombinator.com/companies/pazi</a> · <a href="https://github.com/Pythagora-io/gpt-pilot" target="_blank" rel="noopener">github.com/Pythagora-io/gpt-pilot</a></span>
           </li>
         </ol>
       </section>
@@ -1226,7 +1392,7 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
 <footer>
   <div class="wrap">
     <div class="row">
-      <span>© 2026 cod<span class="accent">æ</span> — methodology comparison · whitepaper v0.3</span>
+      <span>© 2026 cod<span class="accent">æ</span> — methodology comparison · whitepaper v0.3 · rev. September 2026</span>
       <span>By <a href="mailto:info@vibeloom.ai">Ilya Baimetov</a> · <a href="codæ-manifesto.html">Manifesto</a> · <a href="https://github.com/ilya-baimetov/vibeloom" target="_blank" rel="noopener">GitHub</a></span>
     </div>
   </div>

@@ -72,7 +72,7 @@
         {"@type":"Question","name":"What is the contract stack?","acceptedAnswer":{"@type":"Answer","text":"A tiered, version-controlled set of artifacts — intent-specs, product-specs, system-specs, plus derived context and code — where each tier derives from the approved tier above. The contract stack doubles as the eval stack: upstream items are both the basis for downstream work and the criterion against which it's checked."}},
         {"@type":"Question","name":"What modes does VibeLoom support?","acceptedAnswer":{"@type":"Answer","text":"vibe, pm, dev, ux, and expert. The mode controls which tiers the user explicitly co-authors and approves and which the agent handles autonomously. Vibe → full upgrade is one-way."}},
         {"@type":"Question","name":"What forms of drift does VibeLoom detect?","acceptedAnswer":{"@type":"Answer","text":"Structural (upstream changed, detected against the approval trace), lifecycle (approved file edited outside the flow, auto-reopens to draft), and semantic (downstream meaning shifted, detected by agent eval). VibeLoom also tracks item lifecycle states: current, stale, uncovered, dangling, drifted, obsolete."}},
-        {"@type":"Question","name":"How does VibeLoom compare to GitHub Spec Kit, Kiro, BMAD, and Tessl?","acceptedAnswer":{"@type":"Answer","text":"Spec Kit, Kiro, and BMAD keep humans on the factory floor — per-feature specs that drive one generation cycle, then ship and go static. Tessl pivoted from per-file spec-as-source to per-skill context management. VibeLoom is the only one with a whole-system, graph-connected contract that survives every regeneration and is governed across the lifecycle."}}
+        {"@type":"Question","name":"How does VibeLoom compare to GitHub Spec Kit, Kiro, BMAD, and Tessl?","acceptedAnswer":{"@type":"Answer","text":"Spec Kit and Kiro center on per-feature specs that drive one generation cycle, then ship and go static; BMAD runs agent-role workflows across the lifecycle but keeps its artifacts as documents rather than a governed contract. Tessl pivoted from per-file spec-as-source to per-skill context management. VibeLoom is the only one with a whole-system, graph-connected contract that survives every regeneration and is governed across the lifecycle."}}
       ]
     }
   ]
@@ -352,7 +352,7 @@
 
       <h2 id="compare">VibeLoom vs spec-driven tools</h2>
       <p>Spec-driven development was the right step. Contract-driven is the next.</p>
-      <p>Spec Kit, Kiro, and BMAD all elevated the load-bearing artifact above code — but kept it per-feature: each spec drives one cycle, then ships and goes static. Their durable layers (constitutions, steering files, persona checklists) stay thin. VibeLoom keeps the contract <em>load-bearing across the whole lifecycle</em>: derivation, eval, drift detection, reconciliation, traceability across components.</p>
+      <p>Spec Kit, Kiro, and BMAD all elevated the load-bearing artifact above code. Spec Kit and Kiro keep it per-feature: each spec drives one cycle, then ships and goes static. BMAD spans the lifecycle — PRD, architecture, stories, and since v6.9 machine-readable run evidence — but the artifacts remain documents to archive, not a governed graph. The durable layers (constitutions, steering files, verified context blocks) stay thin. VibeLoom keeps the contract <em>load-bearing across the whole lifecycle</em>: derivation, eval, drift detection, reconciliation, traceability across components.</p>
       <table>
         <thead>
           <tr>
@@ -369,42 +369,42 @@
             <td>Contract Graph + reconciliation</td>
             <td>Per-feature workflow + constitution</td>
             <td>IDE + per-feature spec pipeline</td>
-            <td>Per-feature workflow + role personas (PM, Architect, Dev, QA)</td>
+            <td>Lifecycle workflows + agent roles (Analyst, PM, Architect, Dev, UX)</td>
           </tr>
           <tr>
             <td><strong>Scope of governance</strong></td>
             <td>Whole-system (graph)</td>
             <td>Per-feature + global constitution</td>
             <td>Per-feature + global steering files</td>
-            <td>Per-feature + persona checklists</td>
+            <td>Lifecycle documents + verified AGENTS.md context block</td>
           </tr>
           <tr>
             <td><strong>What persists across generations</strong></td>
             <td>Specs evolve, graph-tracked</td>
             <td>Specs decay, branch-scoped</td>
             <td>Specs go static post-creation</td>
-            <td>Specs go static; checklists persist</td>
+            <td>Specs carry machine-readable status; run evidence snapshotted; planning docs archived</td>
           </tr>
           <tr>
             <td><strong>Coupling to current model capability</strong></td>
             <td>Low — value grows with model quality</td>
             <td>Medium-high — ceremony scaffolds the model</td>
             <td>High — workflow keeps the model on rails</td>
-            <td>Medium — heavyweight ceremony per feature</td>
+            <td>Medium — adaptive workflow depth scaffolds the model</td>
           </tr>
           <tr>
             <td><strong>Cross-cutting coherence</strong></td>
             <td>Native (graph + DDD invariants)</td>
             <td>Constitution only — features don't talk</td>
             <td>Steering files only — specs siloed</td>
-            <td>Personas don't carry cross-feature state</td>
+            <td>Epic spec + sprint status carry cross-story state; no graph across epics</td>
           </tr>
         </tbody>
       </table>
       <div class="callout">
         <strong>Sidebar: Tessl.</strong> Tessl pivoted in early 2026 away from per-file <em>spec-as-source</em> toward per-skill context management. Different bet — managing what the agent <em>knows</em>, not what it <em>writes</em>. Same direction as VibeLoom, smaller scope (per-skill, not whole-system).
       </div>
-      <p><strong>Where each tool wins.</strong> Spec Kit — strongest open-source starting point and community. Kiro — cleanest auditable per-feature trail for regulated environments inside an IDE. BMAD — strongest workflow-with-personas for teams that want explicit role separation. VibeLoom — the only whole-system, graph-connected contract.</p>
+      <p><strong>Where each tool wins.</strong> Spec Kit — strongest open-source starting point and community. Kiro — cleanest auditable per-feature trail for regulated environments inside an IDE. BMAD — strongest lifecycle workflow and agentic review architecture for teams that want explicit role structure. VibeLoom — the only whole-system, graph-connected contract.</p>
 
       <hr>
 
