@@ -1071,9 +1071,13 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
           ADDED / MODIFIED / REMOVED merge into
           <code>openspec/specs/</code> on archive, and a verify pass
           checks the change.<sup class="cite"><a href="#ref-6">6</a></sup>
-          But drift is not <em>detected</em>: the merge is mechanical,
-          spec↔code coherence rests on the verify convention, and
-          there are no item-level statuses or semantic checks.</li>
+          But drift is not <em>tracked</em>: <code>openspec validate</code>
+          checks a change's MODIFIED requirements against the main
+          specs they replace, and <code>/opsx:verify</code> is an agent
+          pass — completeness, correctness, coherence — scoped to the
+          active change and non-blocking. There are no item-level
+          statuses, and nothing checks specs against code once a change
+          is archived.</li>
 
           <li><strong>BMAD.</strong> Workflow correction, "correct
           course," and readiness gates are built into the agent
