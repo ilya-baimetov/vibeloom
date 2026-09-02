@@ -72,7 +72,7 @@
         {"@type":"Question","name":"What is the contract stack?","acceptedAnswer":{"@type":"Answer","text":"A tiered, version-controlled set of artifacts — intent-specs, product-specs, system-specs, plus derived context and code — where each tier derives from the approved tier above. The contract stack doubles as the eval stack: upstream items are both the basis for downstream work and the criterion against which it's checked."}},
         {"@type":"Question","name":"What modes does VibeLoom support?","acceptedAnswer":{"@type":"Answer","text":"vibe, pm, dev, ux, and expert. The mode controls which tiers the user explicitly co-authors and approves and which the agent handles autonomously. Vibe → full upgrade is one-way."}},
         {"@type":"Question","name":"What forms of drift does VibeLoom detect?","acceptedAnswer":{"@type":"Answer","text":"Structural (upstream changed, detected against the approval trace), lifecycle (approved file edited outside the flow, auto-reopens to draft), and semantic (downstream meaning shifted, detected by agent eval). VibeLoom also tracks item lifecycle states: current, stale, uncovered, dangling, drifted, obsolete."}},
-        {"@type":"Question","name":"How does VibeLoom compare to GitHub Spec Kit, Kiro, BMAD, and Tessl?","acceptedAnswer":{"@type":"Answer","text":"Spec Kit and Kiro center on per-feature specs that drive one generation cycle, then ship and go static; BMAD runs agent-role workflows across the lifecycle but keeps its artifacts as documents rather than a governed contract. Tessl pivoted from per-file spec-as-source to per-skill context management. VibeLoom is the only one with a whole-system, graph-connected contract that survives every regeneration and is governed across the lifecycle."}}
+        {"@type":"Question","name":"How does VibeLoom compare to GitHub Spec Kit, Kiro, OpenSpec, BMAD, and Tessl?","acceptedAnswer":{"@type":"Answer","text":"Spec Kit and Kiro center on per-feature specs that drive one generation cycle, then ship and go static; BMAD runs agent-role workflows across the lifecycle but keeps its artifacts as documents rather than a governed contract; OpenSpec keeps a persistent, system-level spec set evolved by deltas — the closest shipped cousin, without IDs, derivation, gates, or drift detection. Tessl pivoted from per-file spec-as-source to per-skill context management. VibeLoom is the only one with a whole-system, graph-connected contract that survives every regeneration and is governed across the lifecycle."}}
       ]
     }
   ]
@@ -352,7 +352,7 @@
 
       <h2 id="compare">VibeLoom vs spec-driven tools</h2>
       <p>Spec-driven development was the right step. Contract-driven is the next.</p>
-      <p>Spec Kit, Kiro, and BMAD all elevated the load-bearing artifact above code. Spec Kit and Kiro keep it per-feature: each spec drives one cycle, then ships and goes static. BMAD spans the lifecycle — PRD, architecture, stories, and since v6.9 machine-readable run evidence — but the artifacts remain documents to archive, not a governed graph. The durable layers (constitutions, steering files, verified context blocks) stay thin. VibeLoom keeps the contract <em>load-bearing across the whole lifecycle</em>: derivation, eval, drift detection, reconciliation, traceability across components.</p>
+      <p>Spec Kit, Kiro, and BMAD all elevated the load-bearing artifact above code. Spec Kit and Kiro keep it per-feature: each spec drives one cycle, then ships and goes static. BMAD spans the lifecycle — PRD, architecture, stories, and since v6.9 machine-readable run evidence — but the artifacts remain documents to archive, not a governed graph. OpenSpec goes furthest: a persistent, system-level spec set that compounds through delta-marked changes — but flat and ungoverned, with no IDs, derivation links, or drift detection. The durable layers (constitutions, steering files, verified context blocks) stay thin. VibeLoom keeps the contract <em>load-bearing across the whole lifecycle</em>: derivation, eval, drift detection, reconciliation, traceability across components.</p>
       <table>
         <thead>
           <tr>
@@ -360,6 +360,7 @@
             <th>VibeLoom</th>
             <th>GitHub Spec Kit</th>
             <th>Kiro</th>
+            <th>OpenSpec</th>
             <th>BMAD</th>
           </tr>
         </thead>
@@ -369,6 +370,7 @@
             <td>Contract Graph + reconciliation</td>
             <td>Per-feature workflow + constitution</td>
             <td>IDE + per-feature spec pipeline</td>
+            <td>Persistent spec set + delta-marked change folders</td>
             <td>Lifecycle workflows + agent roles (Analyst, PM, Architect, Dev, UX)</td>
           </tr>
           <tr>
@@ -376,6 +378,7 @@
             <td>Whole-system (graph)</td>
             <td>Per-feature + global constitution</td>
             <td>Per-feature + global steering files</td>
+            <td>System-level specs — flat: no tiers, no derivation</td>
             <td>Lifecycle documents + verified AGENTS.md context block</td>
           </tr>
           <tr>
@@ -383,6 +386,7 @@
             <td>Specs evolve, graph-tracked</td>
             <td>Specs decay, branch-scoped</td>
             <td>Specs go static post-creation</td>
+            <td>Specs compound via archive merge; change folders archived</td>
             <td>Specs carry machine-readable status; run evidence snapshotted; planning docs archived</td>
           </tr>
           <tr>
@@ -390,6 +394,7 @@
             <td>Low — value grows with model quality</td>
             <td>Medium-high — ceremony scaffolds the model</td>
             <td>High — workflow keeps the model on rails</td>
+            <td>Medium — light process; verification rests on agent judgment</td>
             <td>Medium — adaptive workflow depth scaffolds the model</td>
           </tr>
           <tr>
@@ -397,6 +402,7 @@
             <td>Native (graph + DDD invariants)</td>
             <td>Constitution only — features don't talk</td>
             <td>Steering files only — specs siloed</td>
+            <td>Shared specs directory; coherence checked by a verify pass, not detected</td>
             <td>Epic spec + sprint status carry cross-story state; no graph across epics</td>
           </tr>
         </tbody>
@@ -404,7 +410,7 @@
       <div class="callout">
         <strong>Sidebar: Tessl.</strong> Tessl pivoted in early 2026 away from per-file <em>spec-as-source</em> toward per-skill context management. Different bet — managing what the agent <em>knows</em>, not what it <em>writes</em>. Same direction as VibeLoom, smaller scope (per-skill, not whole-system).
       </div>
-      <p><strong>Where each tool wins.</strong> Spec Kit — strongest open-source starting point and community. Kiro — cleanest auditable per-feature trail for regulated environments inside an IDE. BMAD — strongest lifecycle workflow and agentic review architecture for teams that want explicit role structure. VibeLoom — the only whole-system, graph-connected contract.</p>
+      <p><strong>Where each tool wins.</strong> Spec Kit — strongest open-source starting point and community. Kiro — cleanest auditable per-feature trail for regulated environments inside an IDE. OpenSpec — the lightest path to a persistent, system-level spec set, and the strongest brownfield ergonomics. BMAD — strongest lifecycle workflow and agentic review architecture for teams that want explicit role structure. VibeLoom — the only whole-system, graph-connected contract.</p>
 
       <hr>
 

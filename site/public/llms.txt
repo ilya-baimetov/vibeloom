@@ -2,7 +2,7 @@
 
 > Contract-driven agentic engineering — an open-source Skill plus a deterministic Python engine that gives AI coding agents a multi-tier contract that humans author and agents are compiled against, with drift detection, approval gates, and reconciliation across the lifecycle.
 
-VibeLoom is the v0.3 reference implementation of **codæ** — contract-driven agentic engineering. codæ is the next step beyond spec-driven development (GitHub Spec Kit, AWS Kiro, BMAD): instead of treating specifications as one-off planning documents that decay after the first generation pass, codæ maintains a multi-tier, mutually-derived, graph-tied contract that doubles as the eval surface for every subsequent change. The contract is more formal than prose, less formal than first-order logic — structured markdown with stable IDs and explicit derivation links, plus a deterministic engine that detects drift the moment it appears.
+VibeLoom is the v0.3 reference implementation of **codæ** — contract-driven agentic engineering. codæ is the next step beyond spec-driven development (GitHub Spec Kit, AWS Kiro, OpenSpec, BMAD): instead of treating specifications as one-off planning documents that decay after the first generation pass, codæ maintains a multi-tier, mutually-derived, graph-tied contract that doubles as the eval surface for every subsequent change. The contract is more formal than prose, less formal than first-order logic — structured markdown with stable IDs and explicit derivation links, plus a deterministic engine that detects drift the moment it appears.
 
 The methodology and engine are open source under MIT license. v0.3 ships as a Skill for Claude Code and Codex plus a deterministic Python 3.10+ engine with zero runtime dependencies.
 
@@ -56,6 +56,7 @@ Ilya Baimetov. Independent advisory available — see https://vibeloom.ai/contac
 
 - **GitHub Spec Kit** — open-source spec-driven workflow with constitution + per-feature specify/plan/tasks. Strong durable layer at the constitution; per-feature artifacts decay post-merge. Source: https://github.com/github/spec-kit
 - **AWS Kiro** — IDE-bound feature spec workflow (requirements → design → tasks) plus steering files and hooks. Strong feature documentation; per-feature specs go static post-creation. Source: https://kiro.dev/docs/specs/feature-specs/
+- **OpenSpec** — persistent `openspec/specs/` evolved through delta-marked change folders (propose → apply → archive). The closest shipped cousin to a contract stack; no IDs, derivation links, approval gates, or drift detection. Source: https://github.com/Fission-AI/OpenSpec
 - **BMAD** — agent-role workflows (Analyst, PM, Architect, Dev, UX) spanning planning through an evidence-producing build loop. Lifecycle scope and strong agentic review; artifacts stay documents — no whole-system contract graph.
 - **Tessl** — pivoted from per-file `spec-as-source` toward per-skill context management. Same direction as VibeLoom, smaller scope.
 - **VibeLoom** — whole-system contract for one codebase, graph-connected from intent down to component, with explicit drift detection and reconciliation across every change.
