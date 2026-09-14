@@ -23,17 +23,29 @@ needed.
 
 Usage
 -----
-    python3 extract-templates.py            # extract: writes templates/ from templates.md
+    python3 extract-templates.py            # extract: writes the skill surface from templates.md
     python3 extract-templates.py --check    # drift check: non-zero exit if extracted
-                                            # content differs from templates/
-    python3 extract-templates.py --dest X   # override destination (default: templates/)
+                                            # content differs from what's on disk
+    python3 extract-templates.py --dest X   # override destination (default: v03/ root)
 
 Both modes are idempotent. --check reads the source, builds the would-be tree
 in memory, and diffs against the on-disk tree without writing anything.
 
-The default destination is `templates/` — a build artifact, not source. The
-`templates/` directory is gitignored. Templates are regenerated on demand;
-they are never committed to the repo.
+The default destination is the version root (`v03/`), so the extracted skill
+surface lands as `SKILL.md`, `subagent-prompt.md`, `references/`, `tasks/`, and
+`artifacts/` alongside the methodology and implementation specs. That layout is
+identical to the release bundle's layout, which is what lets every relative link
+in SKILL.md resolve both in a git clone and in an unpacked tarball.
+
+Unlike earlier versions, the extracted output IS committed — it is the
+installable surface, and a clone must contain it. `vibeloom-templates.md`
+remains canonical: edit the source, re-extract, and use --check in CI to prove
+the two never drift.
+
+Because the destination root is now the version root (which also holds the
+specs, engine/, site/, examples/ and maintainer reports), orphan detection is
+scoped to the subtrees this source actually owns -- see MANAGED scoping in
+check_tree(). Files outside that scope are none of this script's business.
 """
 
 from __future__ import annotations
@@ -131,15 +143,29 @@ def check_tree(blocks: dict[str, str], dest_root: Path) -> list[str]:
             disk_hash = hashlib.sha256(on_disk.encode()).hexdigest()[:12]
             drift.append(f"differs: {rel_path}  source={src_hash}  disk={disk_hash}")
 
-    # Disk-vs-source: every disk file under the dest tree should be sourced.
+    # Disk-vs-source: every disk file under a *managed* subtree should be sourced.
+    #
+    # dest_root is the version root, which also contains files this source does
+    # not own (vibeloom-methodology.md, engine/, site/, examples/, reports...).
+    # So we only police the top-level directories the source populates. Root
+    # files are checked source-to-disk above but are not swept for orphans,
+    # because we cannot distinguish "ours" from the rest of the version root.
     expected = set(blocks.keys())
-    if dest_root.exists():
-        for path in dest_root.rglob("*"):
+    managed_dirs = sorted({p.split("/", 1)[0] for p in expected if "/" in p})
+    ignored_names = {".DS_Store"}
+
+    for managed in managed_dirs:
+        base = dest_root / managed
+        if not base.exists():
+            continue
+        for path in base.rglob("*"):
             if not path.is_file():
                 continue
-            rel = str(path.relative_to(dest_root))
-            if rel in {".DS_Store"}:
+            if path.name in ignored_names or path.suffix == ".pyc":
                 continue
+            if "__pycache__" in path.parts:
+                continue
+            rel = path.relative_to(dest_root).as_posix()
             if rel not in expected:
                 drift.append(f"orphan on disk (not in source): {rel}")
 
@@ -162,8 +188,8 @@ def main() -> int:
     parser.add_argument(
         "--dest",
         type=Path,
-        default=Path(__file__).parent / "templates",
-        help="destination root for extracted templates (default: templates/ next to source; gitignored)",
+        default=Path(__file__).parent,
+        help="destination root for the extracted skill surface (default: the version root next to source)",
     )
     parser.add_argument(
         "--check",

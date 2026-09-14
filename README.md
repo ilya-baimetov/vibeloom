@@ -10,8 +10,8 @@ VibeLoom is the reference instantiation of **codæ** — contract-driven agentic
 
 | Path | Status | Purpose |
 | --- | --- | --- |
-| [`v03/`](v03/) | **Current spec** (May 2026) | codæ manifesto + VibeLoom v0.3 methodology, implementation, comparison, examples, getting-started, roadmap. Spec-only — engine catches up in a v0.3.x release. |
-| [`v02/`](v02/) | **Runnable** | v0.2 methodology, skill, artifact templates, and the deterministic `vibeloom-engine` Python substrate. Use this if you want to actually run the tool today. |
+| [`v03/`](v03/) | **Current + runnable** | codæ manifesto + VibeLoom v0.3 methodology, implementation, comparison, examples, getting-started, roadmap — plus the loadable skill ([`v03/SKILL.md`](v03/SKILL.md)) and the deterministic `vibeloom-engine` 0.3.0. Use this. |
+| [`v02/`](v02/) | Superseded, still runnable | v0.2 methodology, skill, artifact templates, and the `vibeloom-engine` 0.2.0 substrate. Kept working for anyone mid-project on v0.2. |
 | [`v01/`](v01/) | Archived | Earliest skill-only package; kept runnable but no longer the active methodology. |
 | [`site/`](site/) | Active | Public website source for `vibeloom.ai` (Cloudflare Workers static assets). |
 | [`vibeloom-dev/`](vibeloom-dev/) | Maintainer skill | Orthogonal Claude/Codex skill for *developing* VibeLoom itself — adversarial canon/skill/site reviews, cross-agent feedback, generation from upstream specs. Operates against any `vNN/` version. **Not** the user-facing VibeLoom skill (that's `vNN/SKILL.md`); shares no command surface or schema. |
@@ -19,10 +19,11 @@ VibeLoom is the reference instantiation of **codæ** — contract-driven agentic
 
 > **Two skills in this repo.** The user-facing **VibeLoom** skill (defined per-version in each `vNN/SKILL.md` with its own methodology + implementation + templates) governs user projects through the operations `init / import / generate / eval / review / reconcile / approve / status`. The **`vibeloom-dev`** maintainer skill develops VibeLoom itself — its commands (`init / eval / review / generate <target> / reconcile / feedback <peer> <target>`) operate against any `vNN/` version. The two are orthogonal: separate command surfaces, separate schemas, separate skill manifests.
 
-### v03 — the codæ paradigm + VibeLoom v0.3 spec
+### v03 — the codæ paradigm + VibeLoom v0.3
 
 Read in this order:
 
+- **[v03/SKILL.md](v03/SKILL.md)** — the skill manifest Claude Code and Codex load. Operation routing, authoritative sources, template inventory. Its `references/`, `tasks/`, and `artifacts/` sit alongside it in `v03/`.
 - **[v03/codæ-manifesto.html](v03/codæ-manifesto.html)** — the paradigm. The case, the cognitive-surface argument, the bet, the SDD positioning, the DbC hommage with aspires-toward-decidability framing.
 - **[v03/getting-started.md](v03/getting-started.md)** — 30-minute on-ramp. Install, bootstrap a vibe project, generate, ship, upgrade.
 - **[v03/vibeloom-methodology.md](v03/vibeloom-methodology.md)** — what VibeLoom is. Five modes, contract stack, 6 status categories, operations, verification ladder, review and reconciliation packets.
@@ -31,7 +32,7 @@ Read in this order:
 - **[v03/examples/](v03/examples/)** — five worked examples: greenfield vibe-mode, brownfield import, ux-led design, multi-component reconciliation, parallel dispatch.
 - **[v03/roadmap.md](v03/roadmap.md)** — features considered for v04+ (dry-run, contract REPL, contract debugger, contract pattern library, ContractDelta, DDD context maps, compliance mode, trace-derived learning).
 
-### v02 — the runnable substrate
+### v02 — the previous substrate
 
 - **[v02/SKILL.md](v02/SKILL.md)** — the skill file Claude Code and Codex load (operation routing, guardrails, response shape)
 - **[v02/vibeloom-methodology.md](v02/vibeloom-methodology.md)** — v0.2 methodology
@@ -48,17 +49,19 @@ git clone https://github.com/ilya-baimetov/vibeloom
 cd vibeloom
 
 # Verify the engine runs (Python 3.10+ is the only requirement)
-PYTHONPATH=v02/engine python3 -m vibeloom_engine --version
-# vibeloom-engine 0.2.0
+PYTHONPATH=v03/engine python3 -m vibeloom_engine --version
+# vibeloom-engine 0.3.0
 
-# Open a project directory in Claude Code or Codex
-# The v02/ skill is loaded automatically; run:
-/vibeloom init --mode pm     # or vibe | dev | expert
+# Point Claude Code or Codex at v03/ as a skill source — v03/SKILL.md
+# registers the command surface — then run:
+/vibeloom init --mode vibe   # or pm | dev | ux | expert
 ```
 
-The engine is pure Python — no `pip install` needed. The skill invokes it via `python -m` using the path to `v02/engine`.
+The engine is pure Python — no `pip install` needed. The skill invokes it via `python -m` using the path to `v03/engine`.
 
-For the v0.3 first-30-minutes journey (spec-level, engine support pending), see **[v03/getting-started.md](v03/getting-started.md)**.
+Prefer a pinned, hash-verified artifact? The [v0.3.0 release](https://github.com/ilya-baimetov/vibeloom/releases/tag/v0.3.0) ships `vibeloom-v0.3.0.tar.gz` with a `manifest.yaml` of per-file sha256s. Its internal layout is identical to `v03/`, so the skill behaves the same whether loaded from a clone or an unpacked tarball.
+
+For the v0.3 first-30-minutes journey, see **[v03/getting-started.md](v03/getting-started.md)**.
 
 ## What's new in v0.3
 
@@ -74,7 +77,7 @@ For the v0.3 first-30-minutes journey (spec-level, engine support pending), see 
 - **Item-count cognitive surface metric** — explicit per-tier item budgets; LOC is supporting evidence only.
 - **DbC framed honestly** — hommage to Bertrand Meyer, not equivalence; aspires toward decidability via the verification ladder.
 - **Dark factory** — framed as a 2-3 year trajectory, not a v0.3 promise.
-- **Vibe mode is genuinely minimal** — no graph, no code-sync. Upgrade is a feature.
+- **Vibe mode is surface-minimal, not internally absent** — the user-facing ceremony stays minimal; the agent and engine may still derive private graph-like structure, cache entries, and code-sync-like evidence for generation quality, repair, replay, and upgrade. That scaffolding is never an approval gate. Upgrade is a feature.
 
 ## Deployment
 

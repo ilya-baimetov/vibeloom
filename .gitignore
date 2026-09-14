@@ -8,9 +8,11 @@ outputs/
 __pycache__/
 *.pyc
 
-# VibeLoom build artifacts — extracted templates
-# (canonical source is vibeloom-templates.md; templates/ is regenerable via extract-templates.py)
-v03/templates/
+# NOTE: v03's extracted skill surface (SKILL.md, subagent-prompt.md, references/,
+# tasks/, artifacts/) is deliberately NOT ignored. It is the installable surface —
+# a clone has to contain it or the skill cannot be loaded from the repo at all.
+# vibeloom-templates.md stays canonical; `extract-templates.py --check` is the
+# CI guard that proves source and committed output never drift.
 
 # Release-asset staging (tarballs go to GitHub releases, not into git)
 dist/

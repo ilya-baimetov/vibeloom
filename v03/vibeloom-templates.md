@@ -74,41 +74,28 @@ Run `python3 extract-templates.py` to materialize. Run `python3 extract-template
 
 ### `README.md`
 
-````template:README.md
-# v03/templates/
+````template:SKILL-README.md
+# v03/ — VibeLoom v0.3 skill surface
 
-Generation-ready templates for v0.3 VibeLoom. The methodology + implementation docs (in `v03/`) define WHAT VibeLoom is and HOW it's built; this directory provides the concrete templates an agent uses to *generate* a working VibeLoom project from those specs.
+The installable skill for VibeLoom v0.3. The methodology and implementation docs in this same directory define WHAT VibeLoom is and HOW it's built; the files inventoried below are the concrete surface an agent loads to *generate* a working VibeLoom project from those specs.
 
-## Directory layout
+Everything in the inventory is generated from `vibeloom-templates.md` by `extract-templates.py`. That file is canonical — edit it, never the extracted output. `python3 extract-templates.py --check` verifies the tree still matches its source.
+
+## Layout
 
 ```
-v03/templates/
-├── README.md                          (this file)
-├── artifacts/                         per-artifact templates (the contract stack itself)
-│   ├── intent-specs/
-│   │   ├── intent.md                  full-mode intent
-│   │   ├── vibe-intent.md             vibe-mode compact intent
-│   │   └── defaults.md                repo-wide defaults + Tech Stack section per DDD layer
-│   ├── product-specs/
-│   │   ├── prd.md                     OBJ / KR / MET / FR / NFR
-│   │   ├── usm.md                     EPIC / FLOW / STORY / ACC / MS
-│   │   └── dm.md                      TERM / BC / AGG / ENT / VO / INV
-│   ├── ux-specs/
-│   │   └── ux.md                      VIEW / INT / UXC / MOCK
-│   ├── system-specs/
-│   │   ├── system.md                  EXT / TB / SNFR
-│   │   ├── vibe-system.md             vibe compact system
-│   │   ├── containers.md              CONT inventory
-│   │   ├── container.md               per-container; layer field + deployment target
-│   │   └── component.md               per-component; layer-aware bounded_context
-│   ├── context/
-│   │   ├── bdd.md                     SCN per Gherkin scenario
-│   │   ├── root-config.md             AGENTS.md / CLAUDE.md at root
-│   │   ├── container-config.md        per-container config
-│   │   └── component-config.md        per-component config
-│   ├── decision-trace.md              single template for IDR / PDR / UDR / ADR / general (renders trace entries; not a context artifact)
-│   └── validation-registry.md         project-level meta artifact
-├── tasks/                             per-operation task templates (Inputs / Steps / Output / Constraints / Validation)
+v03/
+├── SKILL.md                            the manifest Claude Code / Codex loads
+├── subagent-prompt.md                  body shape wrapping the subagent task header
+├── SKILL-README.md                     (this file)
+├── references/                         load-on-demand skill guides
+│   ├── artifacts.md                    artifact layout, frontmatter, ID schema, derivation rules
+│   ├── eval.md                         verification ladder + heuristic dimensions
+│   ├── modes.md                        per-mode behavior (vibe / pm / dev / ux / expert)
+│   ├── operations.md                   per-operation quick reference
+│   ├── runtime.md                      dispatch plan / wave assembly / parallel semantics
+│   └── troubleshooting.md              failure modes + recovery
+├── tasks/                              per-operation task templates
 │   ├── init.md
 │   ├── import.md
 │   ├── generate-intent-specs.md
@@ -117,39 +104,59 @@ v03/templates/
 │   ├── generate-ux-specs.md
 │   ├── generate-system-specs.md
 │   ├── generate-context.md
-│   ├── generate-code-component.md     leaf subagent task
+│   ├── generate-code-component.md      leaf subagent task
 │   ├── eval.md
 │   ├── review.md
 │   ├── reconcile.md
 │   ├── approve.md
 │   └── status.md
-└── skill/
-    ├── SKILL.md                       the loaded-by-Claude-Code/Codex skill manifest
-    ├── subagent-prompt.md             body shape wrapping the subagent task header
-    └── references/
-        ├── artifacts.md               artifact layout, frontmatter, ID schema, derivation rules
-        ├── eval.md                    verification ladder + heuristic dimensions
-        ├── modes.md                   per-mode behavior (vibe / pm / dev / ux / expert)
-        ├── operations.md              per-operation quick reference
-        ├── runtime.md                 dispatch plan / wave assembly / parallel semantics / subagent task header
-        └── troubleshooting.md         failure modes + recovery
+├── artifacts/                          per-artifact templates (the contract stack itself)
+│   ├── intent-specs/
+│   │   ├── intent.md                   full-mode intent
+│   │   ├── vibe-intent.md              vibe-mode compact intent
+│   │   └── defaults.md                 repo-wide defaults + Tech Stack per DDD layer
+│   ├── product-specs/
+│   │   ├── prd.md                      OBJ / KR / MET / FR / NFR
+│   │   ├── usm.md                      EPIC / FLOW / STORY / ACC / MS
+│   │   └── dm.md                       TERM / BC / AGG / ENT / VO / INV
+│   ├── ux-specs/
+│   │   └── ux.md                       VIEW / INT / UXC / MOCK
+│   ├── system-specs/
+│   │   ├── system.md                   EXT / TB / SNFR
+│   │   ├── vibe-system.md              vibe compact system
+│   │   ├── containers.md               CONT inventory
+│   │   ├── container.md                per-container; layer field + deployment target
+│   │   └── component.md                per-component; layer-aware bounded_context
+│   ├── context/
+│   │   ├── bdd.md                      SCN per Gherkin scenario
+│   │   ├── root-config.md              AGENTS.md / CLAUDE.md at root
+│   │   ├── container-config.md         per-container config
+│   │   └── component-config.md         per-component config
+│   ├── decision-trace.md               single template for IDR / PDR / UDR / ADR / general
+│   └── validation-registry.md          project-level meta artifact
+├── vibeloom-methodology.md             authoritative: WHAT
+├── vibeloom-implementation.md          authoritative: HOW
+├── codæ-manifesto.html                 paradigm: WHY
+└── engine/                             deterministic Python engine (vibeloom-engine 0.3.0)
 ```
 
-## How an agent uses these templates
+This layout is deliberately identical to the release bundle's layout, so every relative link in `SKILL.md` resolves the same way whether the skill is loaded from a git clone or from an unpacked `vibeloom-v0.3.0.tar.gz`. One path scheme, both distribution paths.
 
-1. **Skill loads `skill/SKILL.md`** automatically when Claude Code or Codex sees `/vibeloom` or `$vibeloom`. The skill orchestrates everything else.
-2. **Skill loads relevant `skill/references/*.md`** on demand per operation (e.g. `runtime.md` for `generate`, `eval.md` for `eval`/`review`).
-3. **Skill loads the relevant `tasks/*.md`** for the invoked operation (one task template per operation).
-4. **Skill materializes `artifacts/*.md`** when generating new artifacts (one artifact template per file generated).
-5. **Subagents receive `skill/subagent-prompt.md`** wrapped around their task header from the dispatch plan.
+## How an agent uses this surface
 
-Authoritative sources (the methodology + implementation specs) live one level up at `../vibeloom-methodology.md` and `../vibeloom-implementation.md`. If a template here disagrees with those specs, the specs win.
+1. **`SKILL.md` loads** automatically when Claude Code or Codex sees `/vibeloom` or `$vibeloom`. It orchestrates everything else.
+2. **`references/*.md` load on demand** per operation (e.g. `runtime.md` for `generate`, `eval.md` for `eval` / `review`).
+3. **The matching `tasks/*.md` loads** for the invoked operation (one task template per operation).
+4. **`artifacts/*.md` are materialized** when generating new artifacts (one artifact template per generated file).
+5. **Subagents receive `subagent-prompt.md`** wrapped around their task header from the dispatch plan.
+
+Authoritative sources sit alongside this file at `vibeloom-methodology.md` and `vibeloom-implementation.md`. If a template here disagrees with those specs, the specs win.
 
 ## Worked example with real content
 
-For an end-to-end demonstration that the templates produce real, usable artifacts, see [`../examples/greenfield-note-search.md`](../examples/greenfield-note-search.md). It walks through a full vibe-mode session and an upgrade to pm mode, with embedded `intent.md`, `defaults.md`, `system.md`, `container.md` content showing what the templates materialize into.
+For an end-to-end demonstration that the templates produce real, usable artifacts, see [`examples/greenfield-note-search.md`](examples/greenfield-note-search.md). It walks through a full vibe-mode session and an upgrade to pm mode, with embedded `intent.md`, `defaults.md`, `system.md`, `container.md` content showing what the templates materialize into.
 
-## Quality conventions enforced across templates
+## Quality conventions enforced across the surface
 
 - No count words in headings or sentence-leading positions ("Three forms", "Five modes", etc.). Counts change; copy shouldn't bake them in.
 - Layer-aware constraints in container.md (`layer` field) and component.md (`bounded_context` empty for non-domain components).
@@ -167,7 +174,7 @@ Templates follow the v0.3 spec exactly. When the methodology or implementation c
 
 ### `skill/SKILL.md`
 
-````template:skill/SKILL.md
+````template:SKILL.md
 ---
 name: vibeloom
 description: Contract-driven agentic engineering for long-lived AI-coded projects. Use when the user wants to bootstrap, import, generate, eval, review, reconcile, or approve artifacts in a project governed by VibeLoom (modes: vibe, pm, dev, ux, expert).
@@ -186,9 +193,9 @@ Invoke on any `$vibeloom` or `/vibeloom` command, or when the user mentions Vibe
 
 Always consult these before making decisions:
 
-- **[vibeloom-methodology.md](../../vibeloom-methodology.md)** — WHAT (entities, tiers, modes, operations, approval model, Contract Graph, status taxonomy, verification ladder, decision-trace classification). If this skill file conflicts with the methodology, the methodology wins.
-- **[vibeloom-implementation.md](../../vibeloom-implementation.md)** — HOW (cache vs traces split, artifact layout, frontmatter shape, ID schema, runtime loop, dispatch plan + wave assembly + subagent task header schema, trace schemas, layer-aware constraints).
-- **[codæ-manifesto.html](../../codæ-manifesto.html)** — WHY (the case for contract-driven agentic engineering). Paradigm context; not loaded for runtime decisions, but referenced when explaining the system or onboarding new contributors.
+- **[vibeloom-methodology.md](vibeloom-methodology.md)** — WHAT (entities, tiers, modes, operations, approval model, Contract Graph, status taxonomy, verification ladder, decision-trace classification). If this skill file conflicts with the methodology, the methodology wins.
+- **[vibeloom-implementation.md](vibeloom-implementation.md)** — HOW (cache vs traces split, artifact layout, frontmatter shape, ID schema, runtime loop, dispatch plan + wave assembly + subagent task header schema, trace schemas, layer-aware constraints).
+- **[codæ-manifesto.html](codæ-manifesto.html)** — WHY (the case for contract-driven agentic engineering). Paradigm context; not loaded for runtime decisions, but referenced when explaining the system or onboarding new contributors.
 
 ## Runtime references (load on demand)
 
@@ -201,7 +208,7 @@ Always consult these before making decisions:
 
 ## Templates
 
-### Artifact templates (under [`../artifacts/`](../artifacts/))
+### Artifact templates (under [`artifacts/`](artifacts/))
 
 - `intent-specs/`: `intent.md`, `vibe-intent.md`, `defaults.md` (with Tech Stack section per layer)
 - `product-specs/`: `prd.md`, `usm.md`, `dm.md`
@@ -213,7 +220,7 @@ Always consult these before making decisions:
 
 Load one artifact template at a time for the artifact being generated.
 
-### Task templates (under [`../tasks/`](../tasks/))
+### Task templates (under [`tasks/`](tasks/))
 
 One task template per operation, following the canonical Design-by-Contract structure: Purpose / Inputs / Preconditions / Steps / Output / Postconditions / Constraints / Invariants / Validation / Failure modes.
 
@@ -327,7 +334,7 @@ Keep responses tight. For operations that pause for user input, use this structu
 
 ### `skill/subagent-prompt.md`
 
-````template:skill/subagent-prompt.md
+````template:subagent-prompt.md
 <!--
 VibeLoom template: subagent-prompt
 Used by: orchestrator (the Skill) when dispatching a subagent task within a wave.
@@ -435,10 +442,10 @@ You will not see the orchestrator's response to these failures; you only see you
 
 ### `skill/references/artifacts.md`
 
-````template:skill/references/artifacts.md
+````template:references/artifacts.md
 # Artifacts Reference
 
-Artifact layout, frontmatter shapes, ID schema, and derivation rules. Authoritative semantics live in [`vibeloom-implementation.md`](../../../vibeloom-implementation.md). This file is a load-on-demand condensation.
+Artifact layout, frontmatter shapes, ID schema, and derivation rules. Authoritative semantics live in [`vibeloom-implementation.md`](../vibeloom-implementation.md). This file is a load-on-demand condensation.
 
 ---
 
@@ -626,7 +633,7 @@ Visible item IDs use short typed references: `PREFIX-####` (fixed-width 4-digit)
 
 ### Prefix registry
 
-Canonical source: [implementation §5.1](../../../vibeloom-implementation.md#51-id-prefix-registry). Reproduced here for runtime load-on-demand; if any row disagrees, the implementation doc wins.
+Canonical source: [implementation §5.1](../vibeloom-implementation.md#51-id-prefix-registry). Reproduced here for runtime load-on-demand; if any row disagrees, the implementation doc wins.
 
 | Prefix | Name | Tier | Source artifact | Scope | Notes (constraints, derivation) |
 |---|---|---|---|---|---|
@@ -714,7 +721,7 @@ Containers carry a required `layer` field. The layer drives:
 - `capability` and `constraint` are the only root entity types.
 - `default` (DEF) becomes universally binding once derived; it may be referenced by any downstream entity without requiring an additional typed edge.
 
-See [`vibeloom-methodology.md`](../../../vibeloom-methodology.md) §8 for the full edge table.
+See [`vibeloom-methodology.md`](../vibeloom-methodology.md) §8 for the full edge table.
 
 ---
 
@@ -746,14 +753,14 @@ Domain-specific columns (e.g., `kind`, `runtime`, `rule`, `mockup_refs`) are tem
 
 ### `skill/references/eval.md`
 
-````template:skill/references/eval.md
+````template:references/eval.md
 # Verification Ladder + Semantic Eval Reference
 
 Load on demand during `eval`, `review`, `reconcile`, and `approve` when the target needs validation across the verification ladder.
 
 ## The verification ladder
 
-The three tiers (Decidable / Mechanical / Heuristic) and the per-tier check inventory are canonically defined in [methodology §14.3](../../../vibeloom-methodology.md#143-verification-ladder). This reference covers the **heuristic tier** only — agent-judged semantic dimensions, where guidance is needed. The decidable and mechanical tiers are engine-driven and don't require this file.
+The three tiers (Decidable / Mechanical / Heuristic) and the per-tier check inventory are canonically defined in [methodology §14.3](../vibeloom-methodology.md#143-verification-ladder). This reference covers the **heuristic tier** only — agent-judged semantic dimensions, where guidance is needed. The decidable and mechanical tiers are engine-driven and don't require this file.
 
 The codæ trajectory is to promote checks upward as the engine matures — heuristic dimensions become mechanical runners; mechanical runners become structural rules. The decidable share grows over time.
 
@@ -892,10 +899,10 @@ The named dimensions above are not exhaustive. When you observe a semantic issue
 
 ### `skill/references/modes.md`
 
-````template:skill/references/modes.md
+````template:references/modes.md
 # Modes Reference
 
-Modes control user ownership, delegation, and contract-stack depth. Authoritative semantics live in [`vibeloom-methodology.md ## Modes`](../../../vibeloom-methodology.md). This file is a load-on-demand condensation.
+Modes control user ownership, delegation, and contract-stack depth. Authoritative semantics live in [`vibeloom-methodology.md ## Modes`](../vibeloom-methodology.md). This file is a load-on-demand condensation.
 
 A mode controls three things:
 
@@ -1022,15 +1029,15 @@ After every stop, the skill suggests the next forward command:
 
 ## Upgrade
 
-`init --upgrade --mode <pm|dev|ux|expert>` promotes a `vibe` repo to a full mode. One-way — no downgrade back to `vibe`. See [`../../../vibeloom-methodology.md ## Vibe-to-Full Upgrade`](../../../vibeloom-methodology.md). The compact stack expands into the full graph; existing code is import-analyzed against the freshly generated full contract.
+`init --upgrade --mode <pm|dev|ux|expert>` promotes a `vibe` repo to a full mode. One-way — no downgrade back to `vibe`. See [`../../../vibeloom-methodology.md ## Vibe-to-Full Upgrade`](../vibeloom-methodology.md). The compact stack expands into the full graph; existing code is import-analyzed against the freshly generated full contract.
 ````
 
 ### `skill/references/operations.md`
 
-````template:skill/references/operations.md
+````template:references/operations.md
 # Operations Reference
 
-Quick runtime reference for VibeLoom operations. Authoritative semantics live in [`vibeloom-methodology.md ## Operations`](../../../vibeloom-methodology.md); this file is a load-on-demand condensation for the skill.
+Quick runtime reference for VibeLoom operations. Authoritative semantics live in [`vibeloom-methodology.md ## Operations`](../vibeloom-methodology.md); this file is a load-on-demand condensation for the skill.
 
 `eval` and `generate` are the primitives. `review` is an interactive shell on `eval`; `reconcile` is an interactive shell on `generate`. An approval unit is one contract tier.
 
@@ -1086,7 +1093,7 @@ Quick runtime reference for VibeLoom operations. Authoritative semantics live in
 
 ## `reconcile`
 
-- **Purpose:** Remediation loop for drift in all forms (structural, lifecycle, semantic — see [`../../../vibeloom-methodology.md`](../../../vibeloom-methodology.md) §15 (drift classification) and §16 (workflow shapes for reconciliation)). Inspects existing downstream artifacts, surfaces conflicts, selectively regenerates after user direction. Interactive shell on `generate`.
+- **Purpose:** Remediation loop for drift in all forms (structural, lifecycle, semantic — see [`../../../vibeloom-methodology.md`](../vibeloom-methodology.md) §15 (drift classification) and §16 (workflow shapes for reconciliation)). Inspects existing downstream artifacts, surfaces conflicts, selectively regenerates after user direction. Interactive shell on `generate`.
 - **Parameter:** Optional target scope (`product-specs` | `ux-specs` | `system-specs` | `context` | `code`). When omitted, reconciles from the highest changed tier downward through `code`.
 - **Precondition:** At least one drift form is present — approved upstream has changed (structural), an approved artifact was edited outside the flow (lifecycle), or semantic eval surfaced content divergence.
 - **Postcondition:** Drift resolved; affected artifacts regenerated via `generate`.
@@ -1128,10 +1135,10 @@ See [`runtime.md`](runtime.md) for dispatch mechanics and [`modes.md`](modes.md)
 
 ### `skill/references/runtime.md`
 
-````template:skill/references/runtime.md
+````template:references/runtime.md
 # Runtime Reference
 
-Dispatch mechanics for the skill. Authoritative semantics live in [`vibeloom-implementation.md`](../../../vibeloom-implementation.md). This file is a load-on-demand condensation focused on what the orchestrator needs at runtime.
+Dispatch mechanics for the skill. Authoritative semantics live in [`vibeloom-implementation.md`](../vibeloom-implementation.md). This file is a load-on-demand condensation focused on what the orchestrator needs at runtime.
 
 ---
 
@@ -1357,7 +1364,7 @@ Component-owned outputs are changed only through subagent rerun/reconcile flow, 
 
 ### `skill/references/troubleshooting.md`
 
-````template:skill/references/troubleshooting.md
+````template:references/troubleshooting.md
 # Troubleshooting Reference
 
 Common failure modes and recovery paths. Load on demand when the normal flow hits an error or ambiguity.
@@ -1382,7 +1389,7 @@ Common failure modes and recovery paths. Load on demand when the normal flow hit
 
 ## Breaking semantic change during delegated auto-advance
 
-**Symptom:** In `pm` or `dev`, a delegated tier's eval detects a breaking change (see [`vibeloom-methodology.md ## Generation ### Breaking-Change Detection`](../../../vibeloom-methodology.md) for the classification table).
+**Symptom:** In `pm` or `dev`, a delegated tier's eval detects a breaking change (see [`vibeloom-methodology.md ## Generation ### Breaking-Change Detection`](../vibeloom-methodology.md) for the classification table).
 
 **Action:** Escalate. Explicit user review and approval of that tier become required before the run can complete. Surface the breaking signal with item IDs, both approved and draft statements, and the conflict description.
 
@@ -1612,9 +1619,9 @@ Read-only validation of a target against approved upstream truth across the veri
 1. Build/refresh the structural basis:
    - Full modes: Contract Graph via engine `parse + graph`.
    - Vibe: compact artifact inventory from `intent.md`, `defaults.md`, `system.md`, and any private scaffolding the engine chooses to derive.
-2. **Decidable tier (engine, structural)**: run the engine's structural checks for the target. Full modes use the canonical check inventory in [methodology §14.3](../../vibeloom-methodology.md#143-verification-ladder), including `derives_from` validation per implementation §5.1 and methodology §8.2. Vibe runs compact checks only: required visible files, parseable frontmatter/sections, approval hash consistency, validation registry presence, and upgrade recommendation heuristics.
+2. **Decidable tier (engine, structural)**: run the engine's structural checks for the target. Full modes use the canonical check inventory in [methodology §14.3](../vibeloom-methodology.md#143-verification-ladder), including `derives_from` validation per implementation §5.1 and methodology §8.2. Vibe runs compact checks only: required visible files, parseable frontmatter/sections, approval hash consistency, validation registry presence, and upgrade recommendation heuristics.
 3. **Mechanical tier (engine + runners)**: invoke validation runners declared in `validation-registry.md` that are in scope for the target. Aggregate pass/fail per runner.
-4. **Heuristic tier (agent, semantic)**: agent runs the heuristic dimensions defined in [`references/eval.md`](../skill/references/eval.md) (canonical dimension list in methodology §14.2) against items in scope.
+4. **Heuristic tier (agent, semantic)**: agent runs the heuristic dimensions defined in [`references/eval.md`](../references/eval.md) (canonical dimension list in methodology §14.2) against items in scope.
 5. Categorize findings: `blocking` (must address before approval) or `advisory` (worth noting, not gating).
 6. Emit an `eval` trace per invocation: target, checks_run, findings (each with finding_id, severity, item_id, message), cost.
 7. Return aggregated findings to caller (or surface to user if invoked directly).
@@ -3748,7 +3755,7 @@ Tier: system-specs (vibe only)
 Purpose: all-inclusive summary "technical" spec. Flat covering system context, containers, components, and structured local content.
 Entities: CONT-#### and CMP-#### only (per methodology ## Modes ### Vibe Mode).
 
-Note on scope: vibe keeps the Contract Graph unmaterialized. EXT/TB/SNFR/interfaces/dependencies/behaviors appear as structured content in this one file rather than as distinct artifacts. Upgrade to pm/dev/ux/expert expands this into system + containers + per-container + per-component.
+Note on scope: vibe keeps the public Contract Graph unmaterialized. EXT/TB/SNFR/interfaces/dependencies/behaviors appear as structured content in this one file rather than as distinct user-reviewed artifacts. The engine may derive private scaffolding from them. Upgrade to pm/dev/ux/expert expands this into system + containers + per-container + per-component.
 
 Generator guidance:
 - Keep this tight. Vibe is a compromise between ceremony and structure.
@@ -3775,7 +3782,7 @@ derives_from: []
 
 ## External actors and systems
 
-<!-- Structured content in vibe — not graph entities. Kept here for orientation. -->
+<!-- Structured content in vibe — not public graph entities. Kept here for orientation. -->
 
 | name | kind | relationship |
 |---|---|---|
