@@ -2,7 +2,7 @@
 .contact-disclosure > summary::-webkit-details-marker { display: none; }
 .contact-disclosure[open] > summary svg { transform: rotate(90deg); }
 .contact-disclosure > summary:focus-visible,
-.contact-form button:focus-visible { outline: 3px solid var(--c-red-deep); outline-offset: 4px; }
+.contact-form button:focus-visible { outline: 3px solid var(--c-ink); outline-offset: 4px; }
 .contact-form { margin-top: 28px; max-width: 640px; }
 .contact-form fieldset { border: 0; min-width: 0; }
 .contact-fields-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
@@ -16,7 +16,7 @@
 }
 .contact-field textarea { resize: vertical; min-height: 130px; }
 .contact-field input:focus, .contact-field textarea:focus {
-  outline: 2px solid var(--c-red-deep); outline-offset: 2px;
+  outline: 2px solid var(--c-ink); outline-offset: 2px;
 }
 .contact-form .contact-privacy { color: var(--c-ink-4); font-size: 0.85rem; margin-bottom: 20px; }
 .contact-form button { font-family: inherit; min-width: 164px; min-height: 44px; }
