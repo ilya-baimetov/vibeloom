@@ -88,7 +88,7 @@ export async function syncContact(env, id, fetcher = fetch) {
       Name: { title: richText(row.name) },
       Email: { email: row.email },
       Comment: { rich_text: richText(row.comment) },
-      Date: { date: { start: row.updated_at } },
+      Date: { date: { start: row.submitted_at } },
     };
     let page = pageId ? await updatePageIfPresent(env, fetcher, pageId, properties) : null;
     if (!page) {

@@ -62,15 +62,15 @@ test('contact identity, name, email, and submission time are indexed, but commen
   }));
   assert.ok(indexes.some((index) => index.origin === 'pk' && index.columns[0] === 'id'));
   assert.ok(indexes.some((index) => index.unique === 1 && index.columns[0] === 'email'));
-  for (const column of ['name', 'email', 'updated_at']) {
+  for (const column of ['name', 'email', 'submitted_at', 'updated_at']) {
     assert.ok(indexes.some((index) => index.columns[0] === column), `${column} needs a leading index`);
   }
   assert.ok(indexes.every((index) => !index.columns.includes('comment')));
   const byName = s.sqlite.prepare('EXPLAIN QUERY PLAN SELECT id FROM contact_requests WHERE name = ?').all('Ada');
-  const byTime = s.sqlite.prepare('EXPLAIN QUERY PLAN SELECT id FROM contact_requests WHERE updated_at >= ? ORDER BY updated_at')
+  const byTime = s.sqlite.prepare('EXPLAIN QUERY PLAN SELECT id FROM contact_requests WHERE submitted_at >= ? ORDER BY submitted_at')
     .all('2026-01-01T00:00:00.000Z');
   assert.ok(byName.some((step) => step.detail.includes('contacts_name')));
-  assert.ok(byTime.some((step) => step.detail.includes('contacts_updated_at')));
+  assert.ok(byTime.some((step) => step.detail.includes('contacts_submitted_at')));
 });
 
 test('email alone identifies contact: replaces name/comment, clears blank comment, preserves identity', async (t) => {
@@ -171,7 +171,7 @@ test('creates Notion entry with matching schema, then updates same page for the 
   const chunks = calls[1].body.properties.Comment.rich_text;
   assert.ok(chunks.every((x) => x.text.content.length <= 2000));
   assert.equal(chunks.map((x) => x.text.content).join(''), s.all()[0].comment);
-  assert.deepEqual(calls[1].body.properties.Date, { date: { start: s.all()[0].updated_at } });
+  assert.deepEqual(calls[1].body.properties.Date, { date: { start: s.all()[0].submitted_at } });
   assert.equal(s.all()[0].notion_synced_version, 1);
   await s.submit({ ...s.contact, name: 'New Name', comment: '' });
   await syncPendingContacts(s.notionEnv, fetcher);
@@ -179,7 +179,7 @@ test('creates Notion entry with matching schema, then updates same page for the 
   assert.equal(calls[2].method, 'PATCH');
   assert.match(calls[2].url, /pages\/page-1$/);
   assert.deepEqual(calls[2].body.properties.Comment.rich_text, []);
-  assert.deepEqual(calls[2].body.properties.Date, { date: { start: s.all()[0].updated_at } });
+  assert.deepEqual(calls[2].body.properties.Date, { date: { start: s.all()[0].submitted_at } });
   assert.equal(s.all()[0].notion_synced_version, 2);
 });
 
@@ -264,7 +264,7 @@ test('missing stored Notion page is replaced directly and subsequent submissions
       Name: { title: [{ type: 'text', text: { content: 'Latest Name' } }] },
       Email: { email: s.contact.email },
       Comment: { rich_text: [] },
-      Date: { date: { start: s.all()[0].updated_at } },
+      Date: { date: { start: s.all()[0].submitted_at } },
     },
   });
   assert.equal(s.all()[0].notion_page_id, 'replacement');
@@ -449,6 +449,7 @@ test('replacement and retries reuse the exact saved timestamp, not the delivery 
   await s.submit();
   const created = '2026-01-01T12:00:00.123Z';
   const updated = '2026-02-01T12:34:56.789Z';
+  const sharedTimestamp = '2026-02-01T12:34:00.000Z';
   s.sqlite.prepare("UPDATE contact_requests SET created_at = ?, updated_at = ?, notion_page_id = 'missing'")
     .run(created, updated);
   let failCreation = true;
@@ -462,7 +463,8 @@ test('replacement and retries reuse the exact saved timestamp, not the delivery 
   failCreation = false;
   s.sqlite.exec('UPDATE contact_requests SET notion_next_attempt = 0');
   await syncPendingContacts(s.notionEnv, fetcher);
-  assert.deepEqual(sentTimestamps, [updated, updated, updated, updated]);
+  assert.deepEqual(sentTimestamps, [sharedTimestamp, sharedTimestamp, sharedTimestamp, sharedTimestamp]);
+  assert.equal(s.all()[0].submitted_at, sharedTimestamp);
   assert.equal(s.all()[0].created_at, created);
   assert.equal(s.all()[0].updated_at, updated);
   assert.equal(s.all()[0].notion_synced_version, 1);
@@ -477,7 +479,7 @@ test('timestamp backfill resyncs an existing row without altering its submission
   await syncPendingContacts(s.notionEnv, async (url, options) => {
     assert.ok(url.endsWith('/pages/existing'));
     assert.equal(options.method, 'PATCH');
-    assert.equal(JSON.parse(options.body).properties.Date.date.start, original.updated_at);
+    assert.equal(JSON.parse(options.body).properties.Date.date.start, original.submitted_at);
     return Response.json({ id: 'existing' });
   });
   assert.equal(s.all()[0].created_at, original.created_at);
