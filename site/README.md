@@ -62,7 +62,9 @@ Contact form -> POST /api/contact -> D1 upsert by email -> success + cleared for
 
 - Name and email are required; comment is optional. Names are capped at 120 characters, email at 254, and comment at 5,000.
 - Email is trimmed and lowercased. It is the only uniqueness key. Names never determine identity; plus-addresses and dotted addresses are not merged.
+- The primary key is a generated UUID `id`. Email's unique constraint supplies its index; separate indexes cover `name` and `updated_at` (the mirrored timestamp). `comment` is not indexed.
 - A later accepted submission replaces name and comment, including clearing a previous comment when the new one is blank. The original creation timestamp is preserved; the update timestamp and version advance. There is no submission history.
+- D1 stores `created_at` and `updated_at` as UTC ISO 8601 timestamps. Notion's `Date` is copied directly from `updated_at`: the latest accepted submission time, not the later sync time. Retries and replacement rows reuse the same saved value. Notion may display that instant in your local time zone.
 - Public responses never reveal whether an address already exists. An entered email is **not verified**: another person knowing an address could overwrite its submitted details. Do not use these records for authentication, identity verification, or marketing consent.
 - Success is shown only after D1 confirms the save. Failure preserves the form; the submit button is disabled during a request. Opening/closing the disclosure does not discard a draft.
 - The API enforces JSON, same-origin browser requests, a 32 KiB body limit, a honeypot, and five submissions per IP per 10-minute window. Only temporary windowed IP hashes are stored and expired buckets are cleaned by the scheduled job. These are basic abuse controls, not strong bot prevention; add Cloudflare Turnstile if needed.
@@ -72,7 +74,8 @@ Contact form -> POST /api/contact -> D1 upsert by email -> success + cleared for
 
 Destination: [VibeLoom / Contacts](https://www.notion.so/3e5b73b9298a8011b1a5e651d3905b67).
 The configured **data source ID** is `3e5b73b9-298a-80c1-92cc-000b10119aa1`.
-Its existing properties are `Name` (title), `Email` (email), and `Comment` (rich text).
+Its properties are `Name` (title), `Email` (email), `Comment` (rich text), and
+`Date` (date with time, mirrored from D1 `updated_at`).
 
 1. Create an internal Notion integration with **read, insert, and update content** capabilities and grant it access to this database. The chat's Notion connector is not a deployable runtime credential.
 2. Add its token directly to Cloudflare, not to chat or source control:
