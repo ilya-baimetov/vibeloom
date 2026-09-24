@@ -23,8 +23,8 @@
 .contact-form button:disabled { opacity: 0.65; cursor: wait; transform: none; }
 .contact-feedback { overflow-wrap: anywhere; font-size: 0.95rem; }
 .contact-feedback:not(:empty) { padding: 14px 16px; margin-top: 16px; border-left: 3px solid; border-radius: 4px; }
-.contact-success { color: #17583c; background: #edf8f1; }
-.contact-error { color: #9b2033; background: #fff0f2; }
+.contact-success { color: var(--c-ink); background: var(--c-bg); }
+.contact-error { color: var(--c-red-deep); background: var(--c-red-soft); }
 .visually-hidden, .contact-trap {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
