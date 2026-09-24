@@ -31,3 +31,8 @@ dist/
 
 # Per-version release artifacts (rebuildable from source)
 /v*/dist/
+
+# Local-only business docs (not for github)
+/investor-inbound-filter.md
+/program-proposal-ai-code-governance-practice.md
+/validation-ai-first-transformation-consulting.md
