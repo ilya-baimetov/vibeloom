@@ -159,6 +159,49 @@ The compiler analogy creates an obligation: real compilers come with debuggers, 
 
 ---
 
+### C4. Vertical slices as atomic units of contract change
+
+**What it does.** A `SLICE-####` is a small, end-to-end, coherent change to the contract stack — sized to deliver one piece of user-perceivable value (in most teams, one PR's worth of work, though the canon takes no position on the PR mapping). Slices are declared in a new sibling artifact under `intent-specs/`: `slices.md`, alongside `intent.md` and `defaults.md`. Each slice carries `id`, `name`, `summary`, `entry_tier` (the highest tier the slice's change actually touches — slices don't always start at intent), `requires: [SLICE-####]` for sequencing, and optional `aggregates: [SLICE-####]` for release-level grouping via composition. Items at every other tier (PRD, USM, UX, DM, system, context) carry a `slice: SLICE-####` annotation declaring which slice they belong to.
+
+Operations gain a `--slice` scope: `vibeloom approve --slice SLICE-0042` approves every item annotated to that slice atomically; `vibeloom generate --slice SLICE-0042` regenerates only items in that slice; `vibeloom eval --slice SLICE-0042` runs eval scoped to the slice; `vibeloom dry-run --slice SLICE-0042` previews the dispatch.
+
+**Aspirational direction (v06+).** Slice-as-versioning: the contract graph evolves through composed, named, reversible slices. HEAD = composition of approved slices. Atomic rollback reverts a slice. Parallel-slice merge with structural conflict resolution (contract graphs aren't text — plain diff doesn't work; structural merge required). This is "git for contracts" applied to the contract graph; Tessl has been exploring similar territory. Engine cost is significant: slice-application model, conflict resolution UI, ordering semantics, history-aware queries.
+
+**Justification.** Three pains today:
+
+1. *Approval is too coarse.* "Approve product-specs" approves everything at once. Real teams ship in increments; canon should reflect that.
+2. *Incremental authoring has no canonical home.* Solo authors work in slices implicitly; the graph doesn't see slices, so dispatch and dry-run can't scope to them.
+3. *No atomic rollback unit.* When a generation goes wrong, there's no "revert this thing" — you reconcile manually or revert traces piecemeal.
+
+Slices solve all three with one entity. The aspirational version makes contract evolution itself versioned and reversible — the long-term trajectory for codæ.
+
+**With vs without.**
+
+- *Without.* PM wants to ship just the "user can tag notes" feature. They edit the single PRD, add an FR, run `vibeloom generate`. The dispatch planner regenerates everything affected — including unrelated items they hadn't intended to touch. Approval covers the whole PRD. Rollback requires reverting individual decision traces.
+- *With.* PM declares `SLICE-0003 "User can tag notes"` in `slices.md` with `entry_tier: product-specs`. They add FR-0042 to the PRD with `slice: SLICE-0003`. They run `vibeloom generate --slice SLICE-0003`. Dispatch generates only that slice's items. `vibeloom approve --slice SLICE-0003` approves the whole slice atomically. If something's wrong: `vibeloom dry-run --slice SLICE-0003` before committing, or roll the slice back later.
+
+**Key design decisions (provisional, locked enough to file).**
+
+- *Single entity, variable size.* One `SLICE-####` entity that varies in scope from PR-sized to release-sized; use `aggregates: [SLICE-####]` for nesting. Resist `SUB-SLICE` or `SUPER-SLICE` types — the existing composition pattern handles arbitrary nesting.
+- *Don't tie SLICE to PR.* PR is a delivery-mechanism concept (trunk-based dev, Gerrit, direct push are all valid). Canon should care about *what changes*, not *how the change is reviewed*. Map slice ↔ PR in a reference doc, not in the entity definition.
+- *Name: "slice", not "increment".* "Increment" anchors to Scrum vocabulary; "slice" is framework-neutral and captures the vertical-cut-through-layers semantic precisely. A reference doc maps slice ↔ Scrum increment ↔ Kanban delivery batch ↔ ShapeUp bet ↔ SAFe PI for adopters from each tradition.
+- *Slice doesn't always start at intent.* The `entry_tier` field captures the highest tier a slice actually touches. Product-feature slices start at intent or PRD; UX-refinement slices start at ux-specs; technical/refactor slices start at system-specs. Mandating "every slice starts at intent" forces low-leverage slices through unnecessary tiers as ceremony.
+- *USM (and other artifacts) render slices, do not own them.* USM displays slices as Patton priority bands across the user-journey axis. `slices.md` is the source of truth; USM, PRD-by-slice views, release-plan views are all derived renderings of the same data.
+
+**Open design questions (need v05/v06 spec work).**
+
+- *Approval routing.* A technical slice approved by an architect; a product-feature slice approved by PM + architect. v04 doesn't have role-based approval routing — needs design. May couple with compliance-mode work (C3).
+- *Unsliced items.* When are item-level `slice:` annotations required vs optional? Proposal: optional at authoring, required at approval. Items without `slice:` show as `unsliced` in `status`.
+- *Slice lifecycle states.* `planned` / `in_progress` / `current` / `shipped` / `postponed` / `abandoned` — what state machine governs transitions? How do these interact with the six existing status categories (`current` / `stale` / `uncovered` / `dangling` / `drifted` / `obsolete`)?
+- *Vibe-mode behavior.* Vibe mode is single-MVP by design — slicing doesn't apply. `slices.md` is omitted or auto-collapsed to a single implicit slice.
+- *Migration from un-sliced v04 projects.* Backfill strategy: every existing item gets assigned to a synthetic `SLICE-0000 "Initial"`. New work goes into named slices going forward.
+
+**Why deferred from v04.** v04 already carries evals + observability + transactional ops + reconcile changes + DDD context maps + typed `derives_from`. Slice-as-atomic-unit adds non-trivial engine work (slice-scoped dispatch, slice-scoped approval, sandbox forks per slice, annotation handling across every tier). The methodology decisions are coherent on paper but unproven by users; deserves soak time before locking into canon. Tentative sequencing: v05 ships slices as atomic approval/dispatch units; v06+ aspires to full slice-based versioning (git-for-contracts).
+
+**Related but separable.** Multi-DM per BC, multi-PRD per feature area, and multi-USM per user journey are independent multiplication decisions that came up in the same conversation. Of those, multi-DM per BC is canonical DDD and worth tracking as its own entry (relates to C2 DDD context maps). Multi-PRD/multi-USM are real but lower-leverage; defer until team-collaboration users actually exist. Multi-intent is mostly the wrong target — what teams want is slice-level contributions to a single intent.md, not multiple intent files.
+
+---
+
 ## D. Trace-derived learning
 
 The original methodology had a "Learning from traces" section as a wish list. v03 moved it here so it can be specified properly when the time comes.

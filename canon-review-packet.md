@@ -61,15 +61,15 @@
 
 ## 2. Findings
 
-### CANON-001: `vibe` mode still leaks full-mode graph, component, and code-sync machinery
+### CANON-001: `vibe` mode confuses surface ceremony with internal machinery
 
 **Severity:** High
 
 **Location:**
 
-- `v03/vibeloom-methodology.md:106` says `vibe` has "minimal -- no graph, no code-sync, no per-item status".
-- `v03/vibeloom-methodology.md:116-118` says `vibe` has no IDed graph and no code-sync trace.
-- `v03/vibeloom-implementation.md:90` says `vibe` has no graph cache, no code-sync trace, and no status cache.
+- `v03/vibeloom-methodology.md:106` said `vibe` has "minimal -- no graph, no code-sync, no per-item status".
+- `v03/vibeloom-methodology.md:116-118` said `vibe` has no IDed graph and no code-sync trace.
+- `v03/vibeloom-implementation.md:90` said `vibe` has no graph cache, no code-sync trace, and no status cache.
 - `v03/vibeloom-templates.md:243-249` lists engine commands as graph/cache/status-persisting, without mode qualification.
 - `v03/vibeloom-templates.md:282` routes `generate code` to `tasks/generate-code-component.md`, "one subagent per affected component".
 - `v03/vibeloom-templates.md:1651-1680` defines code generation as a per-component task with full lineage and approved component-level `system-specs`.
@@ -79,26 +79,26 @@
 - `v03/vibeloom-templates.md:1591-1603` says `eval` requires/builds `.vibeloom/cache/contract-graph.json`.
 - `v03/vibeloom-templates.md:2361` says `import` initializes `.vibeloom/cache/contract-graph.json`, with no `vibe` exception.
 
-**Issue:** `status` is mode-aware now, but adjacent operation templates still route `vibe` through full-mode graph/component/cache/code-sync behavior.
+**Issue:** The original finding overcorrected in the wrong direction. `vibe` should minimize the user's ceremonial surface, not forbid the engine from using internal structure. The problem is not private graph/cache/component/code-sync-like scaffolding; the problem is exposing that scaffolding as something the user must curate, approve, or understand.
 
-**Why it matters:** `vibe` is supposed to be the low-ceremony path from intent to a small generated system. If the forward path depends on component specs, graph cache, structural eval, or code-sync traces, the documented mode cannot execute without silently growing into full mode.
+**Why it matters:** `vibe` is supposed to stay close to vibe coding for small projects: prompt, iterate, approve outcomes. If the canon bans useful internal scaffolding, quality and recoverability suffer. If it exposes that scaffolding as user ceremony, vibe collapses into full mode.
 
 **Fix options:**
 
-1. Add explicit `vibe` branches to `approve`, `eval`, `import`, `generate-context`, and `generate-code`.
-   - Keeps one command surface. The cost is conditional complexity in several templates.
-2. Add dedicated compact tasks: `generate-vibe-system.md`, `generate-vibe-context.md`, `generate-vibe-code.md`, plus a `vibe` branch in `import`/`approve`/`eval`.
-   - Cleanest mental model. More files and routing changes.
-3. Restrict `vibe` to `init`, `review intent-specs`, `approve intent-specs`, `status`, and `upgrade`; require upgrade before code generation/import-generated graph behavior.
-   - Simplest runtime. Weakens the product promise of `vibe`.
+1. Ban graph/cache/component/code-sync machinery from vibe entirely.
+   - Purest surface model. Costs quality, replayability, and upgrade evidence.
+2. Allow internal machinery, forbid ceremonial exposure.
+   - Keeps vibe close to vibe coding while preserving VibeLoom's repair/replay advantage. Requires explicit surface/internal language across methodology, implementation, and templates.
+3. Reframe vibe as generic agent mode with optional no-structure behavior.
+   - Simplest to explain. Weakens VibeLoom's differentiation from ordinary vibe coding.
 
-**Recommended fix:** Option 2. `vibe` is not a stripped full mode; separate compact tasks prevent full-mode assumptions from leaking back in.
+**Recommended fix:** Option 2. The durable invariant should be: vibe users approve outcomes, not intermediate specs; agents may maintain private scaffolding when it improves generation quality, repair, replay, or future upgrade.
 
 **Verification:**
 
-- `SKILL.md` command routing has explicit `vibe` routes or explicit `vibe` refusal rules.
-- No `vibe` path writes `.vibeloom/cache/contract-graph.json`, `.vibeloom/cache/status.json`, or `.vibeloom/traces/code-sync.jsonl`.
-- `tasks/approve.md`, `tasks/eval.md`, `tasks/import.md`, `tasks/generate-context.md`, and code-generation routing state full-mode vs `vibe` behavior explicitly.
+- Methodology §5.1 states "surface simplicity, not internal absence."
+- Implementation §2.2 and §15.6 distinguish user-facing compact layout from private runtime scaffolding.
+- `SKILL.md` routing, `references/modes.md`, `references/runtime.md`, and affected task templates say vibe may use private scaffolding but must not require graph/status/component/code-sync ceremony from the user.
 - `python3 v03/extract-templates.py --check`.
 
 **Downstream impact:** skill routing, engine behavior, extracted templates, getting-started docs, site if `vibe` is marketed as intent-to-code.

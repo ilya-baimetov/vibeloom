@@ -18,6 +18,7 @@ This report covers three consecutive walks against the v0.3 canon:
 | ID | Severity | User choice | Disposition | One-line |
 |---|---|---|---|---|
 | CANON-008 | Medium | Option 2 | fixed | Added an explicit one-time frozen-v03 exception to `v03/review-canon.md`; this walk may apply approved fixes directly to v03, but the repo-level frozen-version policy remains unchanged. |
+| CANON-001 | High | Revised Option 2 | fixed | Reframed vibe around surface/internal separation: user ceremony stays minimal while agents/engine may use private scaffolding for quality, repair, replay, and upgrade. |
 
 ### CANON-008 · Medium · v03 review/fix workflow conflicts with frozen-version model
 
@@ -38,6 +39,29 @@ This report covers three consecutive walks against the v0.3 canon:
 **Downstream impact.**
 - No site or skill propagation from this issue.
 - Future maintainer workflow still needs v04+ for normal mutable-version work.
+
+### CANON-001 · High · vibe mode confused surface ceremony with internal machinery
+
+**Disposition:** fixed (Revised Option 2 — allow internal machinery, forbid ceremonial exposure).
+
+**Rationale:** User clarified that vibe mode is about minimizing the ceremonial surface and staying close to vibe coding. Internal behavior is less important as long as small-project users can trust the agent to make reasonable choices without curating intermediate specs. The fix preserves VibeLoom's advantage by allowing private scaffolding for repair/replay/upgrade while keeping it out of the user approval surface.
+
+**Applied changes / confirmed alignment:**
+
+- **`v03/vibeloom-methodology.md`** — confirmed current text already uses "user-facing ceremony" and §5.1 already states "surface simplicity, not internal absence."
+- **`v03/vibeloom-implementation.md`** — confirmed current compact vibe layout already distinguishes required user-facing layout from optional private runtime scaffolding, including status semantics and acceptance criteria.
+- **`v03/vibeloom-templates.md`** — updated skill routing, substrate description, mode reference, runtime reference, and affected task templates (`approve`, `eval`, `generate-code-component`, `generate-context`, `import`, `init`, `status`) so vibe may use private scaffolding but does not expose it as user-managed ceremony.
+- **`canon-review-packet.md`** — revised CANON-001 itself so the packet no longer recommends banning internal machinery.
+
+**Verification:**
+
+- `rg -n "vibe minimizes ceremony|surface simplicity, not internal absence|private scaffolding|user-facing ceremony" v03/vibeloom-methodology.md v03/vibeloom-implementation.md v03/vibeloom-templates.md`
+- `python3 v03/extract-templates.py --check`
+- `python3 v03/site/scripts/check_consistency.py`
+
+**Downstream impact.**
+- Engine: vibe implementations may use private cache/scaffolding, but must not expose it as user-owned graph/status/component ceremony.
+- Skill/site: any public vibe-mode copy should say "minimal ceremony" rather than "no internal structure."
 
 ---
 

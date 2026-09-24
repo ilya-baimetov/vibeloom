@@ -1291,251 +1291,483 @@ footer a:hover { color: var(--c-ink); border-color: var(--c-ink); }
       </section>
 
       <!-- REFERENCES -->
+            <!-- REFERENCES -->
       <section id="references" class="refs">
-        <h2><span class="num">References</span>Primary, verified, mostly 2026.</h2>
+        <h2><span class="num">References</span>Primary, verified, mostly 2025-2026.</h2>
 
         <p class="refs-note">
-          Most citations are 2026; Chroma's <em>Context Rot</em> (July 2025) is included because nothing comparable has appeared since. arXiv items are preprints unless a peer-reviewed venue is named. Older draft figures (e.g. earlier AI-debt counts) were updated to current numbers. List reflects June 2026.
+          88 contemporary citations (2025-2026) plus 4 foundational references. Sourced from the codæ References database; rows with Status = Approved or Tier = Foundations, excluding Retired/Replaced. arXiv items are preprints unless a peer-reviewed venue is named. List reflects 2026-09-19.
         </p>
 
         <p class="refs-note" style="margin-top: 8px;">
-          <strong>Dated-evidence policy.</strong> Contemporary citations are dated and may age out. When a figure is superseded by newer data, the citation is updated in place rather than versioned. The thesis itself is intentionally separable from any single citation — no claim in §§1–7 depends on a single source. If you are reading this after late 2027 and the Contemporary set has not been refreshed, treat it as historical rather than current.
+          <strong>Dated-evidence policy.</strong> Contemporary citations are dated and may age out. When a figure is superseded by newer data, the citation is updated in place rather than versioned. The thesis itself is intentionally separable from any single citation — no claim in the manifesto depends on a single source. If you are reading this after late 2027 and the Contemporary set has not been refreshed, treat it as historical rather than current.
         </p>
 
-                <h3 style="margin: 14px 0 18px 0; font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-5); font-weight: 700;">Contemporary · 2025–2026</h3>
+        <h3 style="margin: 14px 0 18px 0; font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-5); font-weight: 700;">Contemporary &middot; 2025&ndash;2026</h3>
         <ol>
           <li id="ref-1">
-            <span class="title">Agentic Coding is a Trap.</span>
-            Faye, L. The viral May 2026 critique of spec-driven development (~391 HN points). The strongest contemporary articulation of why ungoverned agentic workflows fail at scaffolding: <em>"What you say is often not what you mean, and LLMs fill in ambiguity with assumptions (or hallucinations) — more review, more agent revisions, more tokens burned, and more disconnection from what is being created."</em> <span class="codae">cod<span class="ae">æ</span></span> shares the diagnosis and rejects the prescription.
-            <span class="meta">2026-04-30 · <a href="https://larsfaye.com/articles/agentic-coding-is-a-trap" target="_blank" rel="noopener">larsfaye.com/articles/agentic-coding-is-a-trap</a></span>
+            <span class="title">Governed AI-Assisted Engineering: Graduated Human Oversight for Agentic Code Generation in Regulated Domains.</span>
+            Richard Kang. A three-tier graduated-oversight model preserves 84–97% of agentic coding velocity while maintaining compliance-evidence coverage for regulated functions.
+            <span class="meta">arXiv · arXiv:2606.22484 · 2026-06-26 · <a href="https://arxiv.org/abs/2606.22484" target="_blank" rel="noopener">arxiv.org/abs/2606.22484</a></span>
           </li>
           <li id="ref-2">
-            <span class="title">Bridging the Gap between User Intent and LLM: A Requirement Alignment Approach for Code Generation (REA-Coder).</span>
-            Li, J., Bai, R., Luo, Y., Zhang, Y., Yang, W., Sun, Z., Zhao, T., Jin, D., Li, L., Jin, Z.
-            <span class="meta">arXiv:2604.16198 · 2026-04-17 · <a href="https://arxiv.org/abs/2604.16198" target="_blank" rel="noopener">arxiv.org/abs/2604.16198</a></span>
+            <span class="title">Codex-maxxing for Long-Running Work.</span>
+            OpenAI. A product playbook for durable agent threads distinguishes what Codex prepares from what a human must decide: consent, approval, any irreversible action.
+            <span class="meta">OpenAI · openai.com · 2026-06-24 · <a href="https://openai.com/index/codex-maxxing-long-running-work/" target="_blank" rel="noopener">openai.com/index/codex-maxxing-long-running-work/</a></span>
           </li>
           <li id="ref-3">
-            <span class="title">Cognitive-Load-Aware Refactoring (CDDRefactorER).</span>
-            Saha, S., Hasan, A.A., Shifat, F.T., Imran, M.M.
-            <span class="meta">EASE 2026 · arXiv:2603.16791 v2 · 2026-04-16 · <a href="https://arxiv.org/abs/2603.16791" target="_blank" rel="noopener">arxiv.org/abs/2603.16791</a></span>
+            <span class="title">Ideas: Slow Down to Speed Up When Working With AI Agents.</span>
+            Gergely Orosz. Argues unchecked code-generation volume erodes quality, citing a Meta security outage, and that deliberate pacing preserves comprehension.
+            <span class="meta">Pragmatic Engineer · newsletter.pragmaticengineer.com · 2026-06-24 · <a href="https://newsletter.pragmaticengineer.com/p/ideas-slow-down-to-speed-up-when" target="_blank" rel="noopener">newsletter.pragmaticengineer.com/p/ideas-slow-down-to-speed-up-when</a></span>
           </li>
           <li id="ref-4">
-            <span class="title">Comprehension Debt in GenAI-Assisted Software Engineering Projects.</span>
-            Ahmad, M.O. (Karlstad University).
-            <span class="meta">arXiv:2604.13277 · 2026-04-14 · <a href="https://arxiv.org/abs/2604.13277" target="_blank" rel="noopener">arxiv.org/abs/2604.13277</a></span>
+            <span class="title">REPOT: Recoverable Program-of-Thought via Checkpoint Repair.</span>
+            Verified-replay planning walks to the first invalid transition, then repairs from a verified prefix — a structural analogy to boundary-repair contracts.
+            <span class="meta">HuggingFace Papers · arXiv:2605.30052 · 2026-06-24 · <a href="https://huggingface.co/papers/2605.30052" target="_blank" rel="noopener">huggingface.co/papers/2605.30052</a></span>
           </li>
           <li id="ref-5">
-            <span class="title">Comprehension Debt — the hidden cost of AI generated code.</span>
-            Osmani, A. (O'Reilly Radar).
-            <span class="meta">2026-04-13 · <a href="https://www.oreilly.com/radar/comprehension-debt-the-hidden-cost-of-ai-generated-code/" target="_blank" rel="noopener">oreilly.com/radar/comprehension-debt-the-hidden-cost-of-ai-generated-code/</a></span>
+            <span class="title">5 Key Trends Shaping Agentic Development in 2026.</span>
+            Names spec-driven workflows, governance/audit, and engineers-as-orchestrators among five trends validating codæ's contract-as-control-surface thesis.
+            <span class="meta">The New Stack · thenewstack.io · 2026-06-24 · <a href="https://thenewstack.io/5-key-trends-shaping-agentic-development-in-2026/" target="_blank" rel="noopener">thenewstack.io/5-key-trends-shaping-agentic-development-in-2026/</a></span>
           </li>
           <li id="ref-6">
-            <span class="title">"An Endless Stream of AI Slop": The Growing Burden of AI-Assisted Software Development.</span>
-            Baltes, S., Cheong, M., Treude, C.
-            <span class="meta">arXiv:2603.27249 · 2026-03-28 · <a href="https://arxiv.org/abs/2603.27249" target="_blank" rel="noopener">arxiv.org/abs/2603.27249</a></span>
+            <span class="title">George Hotz: Coding Agents Will Be One of the Most Costly Mistakes.</span>
+            George Hotz. Frames coding agents as producing unreviewed, undocumented code faster than any human can comprehend or own — naming the problem without the solution.
+            <span class="meta">The Decoder · the-decoder.com · 2026-06-24 · <a href="https://the-decoder.com/george-hotz-says-coding-agents-will-be-one-of-the-most-costly-mistakes-in-software-development/" target="_blank" rel="noopener">the-decoder.com/george-hotz-says-coding-agents-will-be-one-of-the-most-costly-mistakes-in-software-development/</a></span>
           </li>
           <li id="ref-7">
-            <span class="title">SlopCodeBench: Benchmarking How Coding Agents Degrade Over Long-Horizon Iterative Tasks.</span>
-            Orlanski, G., Roy, D., Yun, A., Shin, C., Gu, A., Ge, A., Adila, D., Sala, F., Albarghouthi, A.
-            <span class="meta">arXiv:2603.24755 · 2026-03-25 · <a href="https://arxiv.org/abs/2603.24755" target="_blank" rel="noopener">arxiv.org/abs/2603.24755</a></span>
+            <span class="title">AI is inflating student grades — points to outsourced work, not better learning.</span>
+            UC Berkeley. An analysis of ~500,000 grades finds grade inflation tracking ChatGPT adoption concentrated in homework — outsourced work, not better learning.
+            <span class="meta">The Decoder (UC Berkeley study) · the-decoder.com · 2026-06-23 · <a href="https://the-decoder.com/ai-is-inflating-student-grades-and-the-effect-points-to-outsourced-work-not-better-learning/" target="_blank" rel="noopener">the-decoder.com/ai-is-inflating-student-grades-and-the-effect-points-to-outsourced-work-not-better-learning/</a></span>
           </li>
           <li id="ref-8">
-            <span class="title">2025 State of AI-Assisted Software Development.</span>
-            Google Cloud DORA team. Coverage by InfoQ, March 2026.
-            <span class="meta">2026-03-17 · <a href="https://www.infoq.com/news/2026/03/ai-dora-report/" target="_blank" rel="noopener">infoq.com/news/2026/03/ai-dora-report/</a></span>
+            <span class="title">AWS: AI agents lack business context and security — launches Context + Continuum.</span>
+            AWS ships Context and Continuum to patch agents' missing business context and unremediated vulnerabilities — a hyperscaler validating the exact gap codæ's contracts address.
+            <span class="meta">The Decoder (AWS) · the-decoder.com · 2026-06-23 · <a href="https://the-decoder.com/aws-says-ai-agents-lack-business-context-and-security-launches-two-services-to-patch-the-gaps/" target="_blank" rel="noopener">the-decoder.com/aws-says-ai-agents-lack-business-context-and-security-launches-two-services-to-patch-the-gaps/</a></span>
           </li>
           <li id="ref-9">
-            <span class="title">From Technical Debt to Cognitive and Intent Debt: Rethinking Software Health in the Age of AI.</span>
-            Storey, MA. (Canada Research Chair Tier 1, Human and Social Aspects of Software Engineering, University of Victoria). Proposes the Triple Debt Model — technical debt in code, cognitive debt in developers' minds, and <em>intent debt</em>: the absence of externalized rationale developers and AI agents need to work safely with code.
-            <span class="meta">arXiv:2603.22106 · 2026-03 · <a href="https://arxiv.org/abs/2603.22106" target="_blank" rel="noopener">arxiv.org/abs/2603.22106</a></span>
+            <span class="title">GateMem: Benchmarking Memory Governance in Multi-Principal Shared-Memory Agents.</span>
+            The first benchmark for memory governance in multi-principal shared-memory agents tests whether agents correctly isolate and gate cross-principal reads and writes.
+            <span class="meta">HuggingFace Papers · arXiv:2606.18829 · 2026-06-23 · <a href="https://huggingface.co/papers/2606.18829" target="_blank" rel="noopener">huggingface.co/papers/2606.18829</a></span>
           </li>
           <li id="ref-10">
-            <span class="title">Debt Behind the AI Boom: A Large-Scale Empirical Study of AI-Generated Code in the Wild.</span>
-            Liu et al.
-            <span class="meta">arXiv:2603.28592 (v2) · 2026 · <a href="https://arxiv.org/abs/2603.28592" target="_blank" rel="noopener">arxiv.org/abs/2603.28592</a></span>
+            <span class="title">Inside the Scaffold: A Source-Code Taxonomy of Coding Agent Architectures.</span>
+            Maps how 13 real open-source coding-agent scaffolds structure control loops, tool interfaces, and resource management, grounded in file paths and line numbers.
+            <span class="meta">arXiv · arXiv:2604.03515 · 2026-06-22 · <a href="https://arxiv.org/abs/2604.03515" target="_blank" rel="noopener">arxiv.org/abs/2604.03515</a></span>
           </li>
           <li id="ref-11">
-            <span class="title">The Dark Software Factory: A New Era of Autonomous Software Delivery.</span>
-            BCG Platinion (Schatlowski, Griewel, Lipska et al.). <em>"As few as three engineers can run a software factory where humans no longer write code."</em> On where advantage moves: <em>"the moat moves upstream: to proprietary data, deep domain knowledge, strength of ecosystem and go-to-market, and the quality of intent your organization can produce. The companies that win are not those that build the best software, but those that know best what to build and can refine it fastest."</em>
-            <span class="meta">2026-03 · <a href="https://www.bcgplatinion.com/insights/the-dark-software-factory" target="_blank" rel="noopener">bcgplatinion.com/insights/the-dark-software-factory</a></span>
+            <span class="title">Dive into Claude Code: Design Space of AI Agent Systems.</span>
+            A source-code-grounded taxonomy of Claude Code's 7-mode permission system, MCP/plugins/skills/hooks, and subagent delegation with worktree isolation.
+            <span class="meta">arXiv (VILA-Lab) · arXiv:2604.14228 · 2026-06-22 · <a href="https://arxiv.org/abs/2604.14228" target="_blank" rel="noopener">arxiv.org/abs/2604.14228</a></span>
           </li>
           <li id="ref-12">
-            <span class="title">2026 Agentic Coding Trends Report.</span>
-            Anthropic.
-            <span class="meta">Q1 2026 · <a href="https://resources.anthropic.com/hubfs/2026%20Agentic%20Coding%20Trends%20Report.pdf" target="_blank" rel="noopener">resources.anthropic.com/…2026 Agentic Coding Trends Report.pdf</a></span>
+            <span class="title">Google DeepMind AI Control Roadmap — Agents as Insider Threats.</span>
+            Analyzing ~1M coding tasks, DeepMind finds the dominant agent failure mode is scope-creeping overzealousness, not malice — treating its own agents as insider threats with graduated permissions.
+            <span class="meta">The Decoder (Google DeepMind) · the-decoder.com · 2026-06-20 · <a href="https://the-decoder.com/google-deepmind-treats-its-own-ai-agents-like-rogue-employees-with-office-keys/" target="_blank" rel="noopener">the-decoder.com/google-deepmind-treats-its-own-ai-agents-like-rogue-employees-with-office-keys/</a></span>
           </li>
           <li id="ref-13">
-            <span class="title">SWE Context Bench: A Benchmark for Context Learning in Coding.</span>
-            Zhu, J., Hu, M., Wu, J.
-            <span class="meta">arXiv:2602.08316 · 2026-02-09 (rev. 2026-03-27) · <a href="https://arxiv.org/abs/2602.08316" target="_blank" rel="noopener">arxiv.org/abs/2602.08316</a></span>
+            <span class="title">Agents-K1: Towards Agent-native Knowledge Orchestration.</span>
+            Lei Bai, Bo Zhang, et al. A five-module schema and rule-based-reward IE pipeline builds agent-native scientific knowledge orchestration over 2.46 million papers.
+            <span class="meta">arXiv (Shanghai AI Lab) · arXiv:2606.13669 · 2026-06-20 · <a href="https://arxiv.org/abs/2606.13669" target="_blank" rel="noopener">arxiv.org/abs/2606.13669</a></span>
           </li>
           <li id="ref-14">
-            <span class="title">Codified Context: Infrastructure for AI Agents in a Complex Codebase.</span>
-            Vasilopoulos, A.
-            <span class="meta">arXiv:2602.20478 · 2026-02-24 · <a href="https://arxiv.org/abs/2602.20478" target="_blank" rel="noopener">arxiv.org/abs/2602.20478</a></span>
+            <span class="title">Verified Detection and Prevention of Concurrency Anomalies in Multi-Agent LLMs.</span>
+            Sajjad Khan. Formally verifies (Verus/TLA+) serialization and isolation across shared multi-agent state — machine-checkable concurrency contracts for agent systems.
+            <span class="meta">HuggingFace Papers · arXiv:2606.17182 · 2026-06-20 · <a href="https://huggingface.co/papers/2606.17182" target="_blank" rel="noopener">huggingface.co/papers/2606.17182</a></span>
           </li>
           <li id="ref-15">
-            <span class="title">How Generative and Agentic AI Shift Concern from Technical Debt to Cognitive Debt.</span>
-            Willison, S. (creator of Datasette; ~30 years software experience). Frames cognitive debt at the practitioner scale: <em>"losing a firm mental model of what [the applications] can do and how they work, which means each additional feature becomes harder to reason about."</em>
-            <span class="meta">2026-02-15 · <a href="https://simonwillison.net/2026/Feb/15/cognitive-debt/" target="_blank" rel="noopener">simonwillison.net/2026/Feb/15/cognitive-debt/</a></span>
+            <span class="title">Microsoft's SkillOpt Boosts GPT-5.5 Using Nothing but a Trained Markdown File.</span>
+            Microsoft + university collaborators. SkillOpt trains a Markdown skill file like model weights, gaining ~23 points on GPT-5.5 — direct evidence a human-readable, machine-checkable contract is a tunable control surface.
+            <span class="meta">The Decoder (Microsoft) · the-decoder.com · 2026-06-17 · <a href="https://the-decoder.com/microsofts-skillopt-boosts-gpt-5-5-by-using-nothing-but-a-trained-markdown-file/" target="_blank" rel="noopener">the-decoder.com/microsofts-skillopt-boosts-gpt-5-5-by-using-nothing-but-a-trained-markdown-file/</a></span>
           </li>
           <li id="ref-16">
-            <span class="title">Fragments: February 13.</span>
-            Fowler, M. (Thoughtworks Chief Scientist; <em>Refactoring</em> · <em>Patterns of Enterprise Application Architecture</em>). Notes from the Thoughtworks Future of Software Development Retreat. Ratifies Storey's cognitive-debt framing at the most senior practitioner table in the industry and adds his own anchor: <em>"the equivalent of cruft is ignorance — both of the code and the domain the code is supporting."</em> That ignorance is precisely what the codæ contract externalizes.
-            <span class="meta">2026-02-13 · <a href="https://martinfowler.com/fragments/2026-02-13.html" target="_blank" rel="noopener">martinfowler.com/fragments/2026-02-13.html</a></span>
+            <span class="title">Loopcraft: The Art of Stacking Loops.</span>
+            Frames "stacking loops" as a compositional primitive, coining a "Salty Lesson for agents": focus on goals and orchestration, not fixing things yourself.
+            <span class="meta">Latent Space AINews · latent.space · 2026-06-17 · <a href="https://www.latent.space/p/ainews-loopcraft-the-art-of-stacking" target="_blank" rel="noopener">www.latent.space/p/ainews-loopcraft-the-art-of-stacking</a></span>
           </li>
           <li id="ref-17">
-            <span class="title">Spotify says its best developers haven't written a line of code since December, thanks to AI.</span>
-            TechCrunch coverage of Spotify Q4 2025 earnings call (co-CEO Gustav Söderström). Spotify's internal coding-agent platform <em>Honk</em> had ~650 PRs/month merged by early 2026; engineers operate as agent reviewers.
-            <span class="meta">2026-02-12 · <a href="https://techcrunch.com/2026/02/12/spotify-says-its-best-developers-havent-written-a-line-of-code-since-december-thanks-to-ai/" target="_blank" rel="noopener">techcrunch.com/2026/02/12/spotify-says-…</a></span>
+            <span class="title">AI Coding Agents Find the Right File but Miss the Exact Lines That Matter.</span>
+            SWE-Explore finds agents reliably locate the right file but cover only 14–19% of the line-level areas that actually matter.
+            <span class="meta">The Decoder · the-decoder.com · 2026-06-17 · <a href="https://the-decoder.com/ai-coding-agents-find-the-right-file-but-miss-the-exact-lines-that-matter-study/" target="_blank" rel="noopener">the-decoder.com/ai-coding-agents-find-the-right-file-but-miss-the-exact-lines-that-matter-study/</a></span>
           </li>
           <li id="ref-18">
-            <span class="title">How AI assistance impacts the formation of coding skills.</span>
-            Anthropic. Randomized controlled trial (n=52) on engineers learning the Trio async library. AI-assisted group scored 17% lower on mastery (50% vs 67%); the gap was <em>largest in debugging</em>. Decisive sub-finding: those who used AI for <strong>conceptual inquiry</strong> scored 65%+; those <strong>delegating code generation</strong> scored below 40%. The layer of delegation determines whether skill is preserved.
-            <span class="meta">2026-02 · <a href="https://www.anthropic.com/research/AI-assistance-coding-skills" target="_blank" rel="noopener">anthropic.com/research/AI-assistance-coding-skills</a></span>
+            <span class="title">Do Coding Agents Deceive Us? Detecting and Preventing Cheating via Capped Evaluation.</span>
+            Measures a wide "open–hidden" pass-rate gap — deceptively high test performance — and proposes capped evaluation to make gaming harder.
+            <span class="meta">arXiv (U-Tokyo/RIKEN) · arXiv:2606.07379 · 2026-06-17 · <a href="https://arxiv.org/abs/2606.07379" target="_blank" rel="noopener">arxiv.org/abs/2606.07379</a></span>
           </li>
           <li id="ref-19">
-            <span class="title">How AI Is Transforming Work at Anthropic.</span>
-            Anthropic. Sociotechnical study of 132 engineers + 53 interviews. Names the <em>paradox of supervision</em>: "effectively using Claude requires supervision, and supervising Claude requires the very coding skills that may atrophy from AI overuse." The structural argument for keeping humans above implementation.
-            <span class="meta">Q1 2026 · <a href="https://www.anthropic.com/research/how-ai-is-transforming-work-at-anthropic" target="_blank" rel="noopener">anthropic.com/research/how-ai-is-transforming-work-at-anthropic</a></span>
+            <span class="title">AI Agent Runs Amok in Fedora and Elsewhere.</span>
+            A compromised account's AI agent submitted a plausible-but-wrong kernel patch that "overwhelmed the maintainer into merging the fix" — slop and intent-mismatch inside a real OSS project.
+            <span class="meta">LWN · lwn.net · 2026-06-17 · <a href="https://lwn.net/SubscriberLink/1077035/c7e7c14fbd60fae9/" target="_blank" rel="noopener">lwn.net/SubscriberLink/1077035/c7e7c14fbd60fae9/</a></span>
           </li>
           <li id="ref-20">
-            <span class="title">Spec-Driven Development: From Code to Contract in the Age of AI Coding Assistants.</span>
-            Piskala, D.B.
-            <span class="meta">arXiv:2602.00180 · 2026-01-30 · <a href="https://arxiv.org/abs/2602.00180" target="_blank" rel="noopener">arxiv.org/abs/2602.00180</a></span>
+            <span class="title">Slightly Reducing the Sloppiness of AI-Generated Front End.</span>
+            Observes that "slop is not a distinct style, it can be overlaid on top of many others" — a personal, subjective experiment in style prompting.
+            <span class="meta">envs.net · 2026-06-17 · <a href="https://envs.net/~volpe/blog/posts/reduce-slop.html" target="_blank" rel="noopener">envs.net/~volpe/blog/posts/reduce-slop.html</a></span>
           </li>
           <li id="ref-21">
-            <span class="title">Speed at the Cost of Quality: How Cursor AI Increases Short-Term Velocity and Long-Term Complexity in Open-Source Projects.</span>
-            He, H., Miller, C., Agarwal, S., Kästner, C., Vasilescu, B. (CMU).
-            <span class="meta">MSR 2026 · arXiv:2511.04427 v3 · 2026-01-26 · <a href="https://arxiv.org/abs/2511.04427" target="_blank" rel="noopener">arxiv.org/abs/2511.04427</a></span>
+            <span class="title">What Codex unlocks for Notion.</span>
+            A Notion engineer describes spending more time writing specs for Codex to verify, running multiple tasks in parallel.
+            <span class="meta">OpenAI case study · openai.com · 2026-06-15 · <a href="https://openai.com/index/notion" target="_blank" rel="noopener">openai.com/index/notion</a></span>
           </li>
           <li id="ref-22">
-            <span class="title">Leading high-performing engineering teams in the age of AI.</span>
-            Forsgren, N. (DORA-research lead; co-author of <em>Accelerate</em>; ex-VP of Research, GitHub). Talk at the Pragmatic Engineer Summit, 2026.
-            <span class="meta"><a href="https://youtu.be/DfrAaDgFgjc" target="_blank" rel="noopener">youtu.be/DfrAaDgFgjc</a></span>
-          </li>          <li id="ref-23">
-            <span class="title">Agents, AGI &amp; the Next Big Scientific Breakthrough.</span>
-            Hassabis, D. (CEO, Google DeepMind; Nobel laureate, 2024). Talk at Y Combinator, 2026.
-            <span class="meta"><a href="https://youtu.be/JNyuX1zoOgU" target="_blank" rel="noopener">youtu.be/JNyuX1zoOgU</a></span>
+            <span class="title">FrontierCode: Benchmarking for Code Quality over Slop.</span>
+            Cognition's mergeability/regression-safety benchmark found Opus 4.8 scores ~13% on the hardest tier versus 50%+ on SWE-Bench — "models write sloppy code that works but isn't maintainable."
+            <span class="meta">Latent Space AINews · latent.space · 2026-06-15 · <a href="https://www.latent.space/p/ainews-frontiercode-benchmarking" target="_blank" rel="noopener">www.latent.space/p/ainews-frontiercode-benchmarking</a></span>
+          </li>
+          <li id="ref-23">
+            <span class="title">The Age of Async Agents — Cognition &amp; OpenInspect.</span>
+            Cognition (Devin) describes why pure auto-merge vibe coding breaks down after two weeks — a button "implemented in 10 different places" — and why they reinstated code review.
+            <span class="meta">Latent Space · latent.space · 2026-06-15 · <a href="https://www.latent.space/p/cognition" target="_blank" rel="noopener">www.latent.space/p/cognition</a></span>
           </li>
           <li id="ref-24">
-            <span class="title">Claude Code best practices.</span>
-            Anthropic, "Code w/ Claude" presentation. Operational guidance: agents have no native memory; CLAUDE.md is the entry-level shared state; the structured generalization is a contract.
-            <span class="meta"><a href="https://youtu.be/gv0WHhKelSE" target="_blank" rel="noopener">youtu.be/gv0WHhKelSE</a></span>
+            <span class="title">Reality: The Final Eval — Andon Labs.</span>
+            Andon Labs argues production behavior IS the ground-truth eval: "you don't know what a model is capable of doing in the real world unless you actually give it inventory, a wallet, tools, customers, competitors, humans, & some time."
+            <span class="meta">Latent Space · latent.space · 2026-06-14 · <a href="https://www.latent.space/p/andon" target="_blank" rel="noopener">www.latent.space/p/andon</a></span>
           </li>
           <li id="ref-25">
-            <span class="title">From Vibe Coding to Agentic Engineering.</span>
-            Karpathy, A. Talk at Sequoia AI Ascent 2025. The talk that named "agentic engineering" as the next operating mode for professional software.
-            <span class="meta"><a href="https://youtu.be/96jN2OCOfLs" target="_blank" rel="noopener">youtu.be/96jN2OCOfLs</a> · transcript and Sequoia summary at <a href="https://karpathy.bearblog.dev/sequoia-ascent-2026/" target="_blank" rel="noopener">karpathy.bearblog.dev/sequoia-ascent-2026/</a></span>
+            <span class="title">Scaling Past Informal AI — Carina Hong, Axiom Math.</span>
+            Carina Hong. Hong argues Lean-verified proofs give a far stronger control signal than statistical RL: "anything that can be specified can be proven."
+            <span class="meta">Latent Space · latent.space · 2026-06-14 · <a href="https://www.latent.space/p/axiom" target="_blank" rel="noopener">www.latent.space/p/axiom</a></span>
           </li>
           <li id="ref-26">
-            <span class="title">Context Rot: how increasing input tokens impacts LLM performance.</span>
-            Chroma Research (technical report).
-            <span class="meta">2025-07-14 · <a href="https://www.trychroma.com/research/context-rot" target="_blank" rel="noopener">trychroma.com/research/context-rot</a></span>
+            <span class="title">How to Stop Shipping Low-Quality RL Environments.</span>
+            "A flaky harness systematically generates garbage data... you'd rather lose an episode than poison one" — fail-fast as a contract-violation stance.
+            <span class="meta">Latent Space · latent.space · 2026-06-14 · <a href="https://www.latent.space/p/bad-envs" target="_blank" rel="noopener">www.latent.space/p/bad-envs</a></span>
           </li>
           <li id="ref-27">
-            <span class="title">Your Brain on ChatGPT: Accumulation of Cognitive Debt when Using an AI Assistant for Essay Writing Task.</span>
-            Kos'myna, N. et al. MIT Media Lab. EEG study, n=54 across four sessions; over four months LLM users consistently underperformed at neural, linguistic, and behavioral levels. Formally introduces the term <em>cognitive debt</em>.
-            <span class="meta">arXiv preprint · 2025 · <a href="https://www.media.mit.edu/publications/your-brain-on-chatgpt/" target="_blank" rel="noopener">media.mit.edu/publications/your-brain-on-chatgpt</a></span>
+            <span class="title">Various LLM Smells — a taxonomy of LLM-generated code failure patterns.</span>
+            A personal taxonomy of recognizable AI writing and design tics — "ai-smell" as an artifact emerging across AI-assisted tasks.
+            <span class="meta">shvbsle.in · 2026-06-12 · <a href="https://shvbsle.in/various-llm-smells/" target="_blank" rel="noopener">shvbsle.in/various-llm-smells/</a></span>
           </li>
           <li id="ref-28">
-            <span class="title">The Impact of Generative AI on Critical Thinking: Self-Reported Reductions in Cognitive Effort and Confidence Effects from a Survey of Knowledge Workers.</span>
-            Lee, H.-P. et al. (Microsoft Research + Carnegie Mellon). Survey of 319 knowledge workers. Higher AI reliance correlates with reduced critical thinking and less diverse outcomes.
-            <span class="meta">CHI 2025 · 2025-02 · coverage: <a href="https://www.404media.co/microsoft-study-finds-ai-makes-human-cognition-atrophied-and-unprepared-3/" target="_blank" rel="noopener">404media.co/microsoft-study-finds-ai-makes-human-cognition-atrophied-and-unprepared-3/</a></span>
+            <span class="title">SQLite adopts AGENTS.md.</span>
+            Simon Willison. "SQLite does not accept agentic code. However the project will accept agentic bug reports that include a reproducible test case" — a real contract boundary in critical OSS infrastructure.
+            <span class="meta">Simon Willison · simonwillison.net · 2026-06-12 · <a href="https://simonwillison.net/2026/May/27/sqlite-agents/" target="_blank" rel="noopener">simonwillison.net/2026/May/27/sqlite-agents/</a></span>
           </li>
           <li id="ref-29">
-            <span class="title">Shift-Up: A Framework for Software Engineering Guardrails in AI-native Software Development — Initial Findings.</span>
-            Lipsanen, P., Rannikko, L., Christophe, F., Kalliokoski, K., Stirbu, V., Mikkonen, T. Accepted at VibeX 2026 (International Workshop on Vibe Coding and Vibe Researching). Reframes BDD-style executable requirements, C4 architectural models, and ADRs as machine-readable structural guardrails for GenAI-native development; reports that embedding these artifacts stabilizes agent behavior, reduces implementation drift, and shifts human effort toward design and validation versus unstructured vibe coding and prompt engineering.
-            <span class="meta">VibeX 2026 · arXiv:2604.20436 · 2026-04-22 · <a href="https://arxiv.org/abs/2604.20436" target="_blank" rel="noopener">arxiv.org/abs/2604.20436</a></span>
+            <span class="title">Harness-1: Reinforcement Learning for Search Agents with State-Externalizing Harnesses.</span>
+            Pengcheng Jiang, et al. Pulling durable state out of the policy into an environment-side harness lifted retrieval recall 11.4 points — a structural analogy to the codæ contract.
+            <span class="meta">arXiv (Jiawei Han group) · arXiv:2606.02373 · 2026-06-12 · <a href="https://arxiv.org/abs/2606.02373" target="_blank" rel="noopener">arxiv.org/abs/2606.02373</a></span>
           </li>
           <li id="ref-30">
-            <span class="title">Constitutional Spec-Driven Development: Enforcing Security by Construction in AI-Assisted Code Generation.</span>
-            Marri, S.R. Introduces a versioned, machine-readable <em>Constitution</em> that encodes non-negotiable security constraints — derived from the CWE/MITRE Top 25 and regulatory frameworks — into the specification layer rather than the review layer. A banking-microservices case study reports a 73% reduction in security defects versus unconstrained AI generation while preserving developer velocity.
-            <span class="meta">arXiv:2602.02584 · 2026-01-31 · <a href="https://arxiv.org/abs/2602.02584" target="_blank" rel="noopener">arxiv.org/abs/2602.02584</a></span>
+            <span class="title">"Vibe Slop": AI-Generated Code as a Technical-Debt Time Bomb.</span>
+            Mario Zechner &amp; Armin Ronacher. Coins "vibe slop": code fast to produce, expensive to maintain, and potentially dangerous to run, at Shopify (&gt;50%) and Google (~75%) AI-written-code scale.
+            <span class="meta">The Wall Street Journal · wsj.com · 2026-06-12 · <a href="https://www.wsj.com/articles/ai-vibe-slop-coding-technical-debt-2026" target="_blank" rel="noopener">www.wsj.com/articles/ai-vibe-slop-coding-technical-debt-2026</a></span>
           </li>
           <li id="ref-31">
-            <span class="title">AIDev: Studying AI Coding Agents on GitHub.</span>
-            A large-scale dataset of 932,791 agent-authored pull requests across 116,211 repositories and 72,189 developers (Codex, Devin, Copilot, Cursor, Claude Code), quantifying the scale at which ungoverned agentic code is already entering production.
-            <span class="meta">arXiv:2602.09185 · 2026-02 · <a href="https://arxiv.org/abs/2602.09185" target="_blank" rel="noopener">arxiv.org/abs/2602.09185</a></span>
+            <span class="title">The Meta-Agent Challenge: Are Current Agents Capable of Autonomous Agent Development?</span>
+            A benchmark across 5 domains finds meta-agents rarely match human-engineered baselines and reward-hack under pressure — evidence that autonomy without contracts fails.
+            <span class="meta">arXiv · arXiv:2606.04455 · 2026-06-11 · <a href="https://arxiv.org/abs/2606.04455" target="_blank" rel="noopener">arxiv.org/abs/2606.04455</a></span>
           </li>
           <li id="ref-32">
-            <span class="title">Configuring Agentic AI Coding Tools: An Exploratory Study.</span>
-            Galster et al. A study of 2,853 GitHub repositories cataloguing eight configuration mechanisms; context files (CLAUDE.md, AGENTS.md) dominate, with <em>AGENTS.md</em> emerging bottom-up as a tool-agnostic standard. Code-level governance is normalizing — while executable verification stays shallowly adopted.
-            <span class="meta">arXiv:2602.14690 · 2026-02 · <a href="https://arxiv.org/abs/2602.14690" target="_blank" rel="noopener">arxiv.org/abs/2602.14690</a></span>
+            <span class="title">Agentic AI in the Software Development Lifecycle.</span>
+            A survey traces the shift from producer to orchestrator under "delegated execution under human supervision" across the software development lifecycle.
+            <span class="meta">arXiv · arXiv:2604.26275 · 2026-06-11 · <a href="https://arxiv.org/abs/2604.26275" target="_blank" rel="noopener">arxiv.org/abs/2604.26275</a></span>
           </li>
           <li id="ref-33">
-            <span class="title">VibeGuard: A Security Gate Framework for AI-Generated Code.</span>
-            Xie, Y. (Kennesaw State). Motivated by the March 2026 Claude Code source-map leak (~512,000 lines of proprietary TypeScript exposed by a packaging misconfiguration in a vibe-coded tool). A pre-publish gate of "negative checks" — what must be <em>absent</em> — reaches 100% recall / 89.47% precision on its test suite: the <span class="codae">cod<span class="ae">æ</span></span> enforcement pattern as a hard gate rather than human review.
-            <span class="meta">arXiv:2604.01052 · 2026-04-01 · <a href="https://arxiv.org/abs/2604.01052" target="_blank" rel="noopener">arxiv.org/abs/2604.01052</a></span>
+            <span class="title">AI Slop and the Software Commons.</span>
+            Baltes, Cheong, Treude. Frames AI slop as a depleted commons — cheap to generate, expensive to review — prescribing Ostrom-style institutional governance.
+            <span class="meta">arXiv · arXiv:2604.16754 · 2026-06-11 · <a href="https://arxiv.org/abs/2604.16754" target="_blank" rel="noopener">arxiv.org/abs/2604.16754</a></span>
           </li>
           <li id="ref-34">
-            <span class="title">Coding Agents Don't Know When to Act (FixedBench).</span>
-            Gloaguen, Mündler, Müller, Raychev, Vechev (ETH Zürich). On 200 already-resolved issues where the correct output is an empty patch, state-of-the-art agents instead edit working code in <em>35–65% of cases</em> — an "action bias" that a per-task contract defining "done" is meant to govern.
-            <span class="meta">arXiv:2605.07769 · 2026-05-08 · <a href="https://arxiv.org/abs/2605.07769" target="_blank" rel="noopener">arxiv.org/abs/2605.07769</a></span>
+            <span class="title">The VibeSec Reckoning.</span>
+            Fowler-hosted Thoughtworks practitioners. "Prompting for test-driven development is not the same as enforcing code coverage thresholds in your build tool. One is a suggestion. The other is a gate."
+            <span class="meta">Martin Fowler · martinfowler.com · 2026-06-10 · <a href="https://martinfowler.com/articles/vibesec-reckoning.html" target="_blank" rel="noopener">martinfowler.com/articles/vibesec-reckoning.html</a></span>
           </li>
           <li id="ref-35">
-            <span class="title">Spec Kit Agents: Context-Grounded Agentic Workflows.</span>
-            Taghavi &amp; Bhavani. Wrapping the Specify→Plan→Tasks→Implement pipeline in read-only discovery and validation hooks that ground each stage in real repository evidence lifts SWE-bench Lite Pass@1 to 58.2% at ~100% repo-test compatibility — grounding in specs + repo context beats ungrounded generation.
-            <span class="meta">arXiv:2604.05278 · 2026-04 · <a href="https://arxiv.org/abs/2604.05278" target="_blank" rel="noopener">arxiv.org/abs/2604.05278</a></span>
+            <span class="title">How AI Agents Reshape Knowledge Work: Autonomy, Efficiency, and Scope.</span>
+            A natural experiment at Perplexity found autonomous "Computer" agents cut task time 269→36 minutes and shifted follow-up queries toward verification and extension.
+            <span class="meta">arXiv (Perplexity) · arXiv:2606.07489 · 2026-06-10 · <a href="https://arxiv.org/abs/2606.07489" target="_blank" rel="noopener">arxiv.org/abs/2606.07489</a></span>
           </li>
           <li id="ref-36">
-            <span class="title">TDAD: Test-Driven Agentic Development — Reducing Code Regressions via Graph-Based Impact Analysis.</span>
-            An AST-derived code–test dependency graph, shipped to the agent as a lightweight skill, tells it which tests a change endangers before commit — cutting regressions <em>70%</em> (6.08%→1.82%) and lifting issue resolution 24%→32%. Procedural TDD prompting alone made regressions worse; the structural contract is what works.
-            <span class="meta">arXiv:2603.17973 · 2026-03 · <a href="https://arxiv.org/abs/2603.17973" target="_blank" rel="noopener">arxiv.org/abs/2603.17973</a></span>
+            <span class="title">Adaptive Auto-Harness: Sustained Self-Improvement for Agentic Deployment.</span>
+            Dakuo Wang, et al. A densely-updated harness goes brittle over time — accuracy peaks early then declines — until structured human-steering hooks repair the drift.
+            <span class="meta">arXiv · arXiv:2606.01770 · 2026-06-10 · <a href="https://arxiv.org/abs/2606.01770" target="_blank" rel="noopener">arxiv.org/abs/2606.01770</a></span>
           </li>
           <li id="ref-37">
-            <span class="title">The Specification as Quality Gate: Three Hypotheses on AI-Assisted Code Review.</span>
-            Zietsman, C. Argues AI reviewing AI is "structurally circular" without an executable spec — generator and reviewer share a training distribution, so their errors <em>"echo rather than cancel."</em> Implied architecture: specifications first, deterministic verification second, AI review only for the structural residual.
-            <span class="meta">arXiv:2603.25773 · 2026-03-26 · <a href="https://arxiv.org/abs/2603.25773" target="_blank" rel="noopener">arxiv.org/abs/2603.25773</a></span>
+            <span class="title">AI's Impact on Software Engineers in 2026, Part 2.</span>
+            Gergely Orosz. A 900+ response survey documents the "death of code review" and comprehension debt: "AI is an amplifier, not a fixer. Good software engineering practices get multiplied. So do the bad ones."
+            <span class="meta">Pragmatic Engineer · newsletter.pragmaticengineer.com · 2026-06-10 · <a href="https://newsletter.pragmaticengineer.com/p/ai-impact-on-software-engineers-part-2" target="_blank" rel="noopener">newsletter.pragmaticengineer.com/p/ai-impact-on-software-engineers-part-2</a></span>
           </li>
           <li id="ref-38">
-            <span class="title">Shepherd: A Runtime Substrate Empowering Meta-Agents with a Formalized Execution Trace.</span>
-            Yu, Chong, Nandi, Soylu, Sun, Manning, Shi (Stanford). A Lean-mechanized, Git-like typed execution trace makes agent runs forkable and replayable; live supervision raises pair-coding pass rate from <em>28.8% to 54.7%</em> on CooperBench — "contract-as-trace," where governance measurably beats opaque autonomy.
-            <span class="meta">arXiv:2605.10913 · 2026-05-11 · <a href="https://arxiv.org/abs/2605.10913" target="_blank" rel="noopener">arxiv.org/abs/2605.10913</a></span>
+            <span class="title">AI Vibe Coding Threatens Open Source as Maintainers Face Crisis.</span>
+            "AI slop is DDOSing OSS maintainers" — Stack Overflow activity down 25%, cURL's valid-report rate down to 5%.
+            <span class="meta">InfoQ · infoq.com · 2026-06-10 · <a href="https://www.infoq.com/news/2026/02/ai-floods-close-projects/" target="_blank" rel="noopener">www.infoq.com/news/2026/02/ai-floods-close-projects/</a></span>
           </li>
           <li id="ref-39">
-            <span class="title">Meta-Engineering Harnesses for AI-Native Software Production: A Contract-Driven Adversarial Verification Architecture.</span>
-            Sengupta, Briggs, Myshakivskyi. An independent team converges on the <span class="codae">cod<span class="ae">æ</span></span> design — requirements compiled into explicit contracts, role-specialized agents, independent and adversarial verification, an outer calibration loop — reported running in production across 17 features. External validation of the paradigm; its in-app payments case study independently surfaces the incomplete-contract risk.
-            <span class="meta">arXiv:2605.25665 · 2026-05-25 · <a href="https://arxiv.org/abs/2605.25665" target="_blank" rel="noopener">arxiv.org/abs/2605.25665</a></span>
+            <span class="title">Loop Engineering.</span>
+            Addy Osmani. Names intent debt and cognitive surrender in a maker/checker split where skills become "intent written down on the outside."
+            <span class="meta">Addy Osmani · addyosmani.com · 2026-06-10 · <a href="https://addyosmani.com/blog/loop-engineering/" target="_blank" rel="noopener">addyosmani.com/blog/loop-engineering/</a></span>
           </li>
           <li id="ref-40">
-            <span class="title">cURL ends its bug-bounty program over AI slop.</span>
-            Stenberg, D. (coverage: The New Stack, BleepingComputer, The Register). A named piece of load-bearing internet infrastructure shut its HackerOne bounty in January 2026 because AI-generated "slop" reports — "seven Hackerone issues within a sixteen hour period," none valid — overwhelmed a small security team. Human triage does not scale against machine-speed slop.
-            <span class="meta">2026-01-21 · <a href="https://thenewstack.io/drowning-in-ai-slop-reports-curl-ends-bug-bounties/" target="_blank" rel="noopener">thenewstack.io/…drowning-in-ai-slop-reports-curl-ends-bug-bounties</a></span>
+            <span class="title">Empirical Study on AI Usage in GitHub Repositories.</span>
+            Coding 35,361 AI-referencing comments and 12,996 commits, this maps AI as a "collaborative support mechanism" requiring sustained human oversight to refine and correct.
+            <span class="meta">arXiv · arXiv:2606.06843 · 2026-06-10 · <a href="https://arxiv.org/abs/2606.06843" target="_blank" rel="noopener">arxiv.org/abs/2606.06843</a></span>
           </li>
           <li id="ref-41">
-            <span class="title">How Endava is redesigning software delivery around AI agents.</span>
-            OpenAI case study. An ~11,000-person software-services firm rebuilt delivery as "DavaFlow": specs produced first, agents implement, humans "oversee the work" at each phase — cutting requirements analysis from weeks to hours. The governed agentic workflow at enterprise scale (vendor case study; figures self-reported).
-            <span class="meta">2026-06-04 · <a href="https://openai.com/index/endava-frontiers/" target="_blank" rel="noopener">openai.com/index/endava-frontiers</a></span>
+            <span class="title">The End of Software Engineering?</span>
+            Argues code is "ephemeral tooling for an LLM-driven reasoning loop" — the named alternative codæ answers by treating the contract, not the code, as durable.
+            <span class="meta">arXiv · arXiv:2606.05608 · 2026-06-10 · <a href="https://arxiv.org/abs/2606.05608" target="_blank" rel="noopener">arxiv.org/abs/2606.05608</a></span>
           </li>
           <li id="ref-42">
-            <span class="title">Learning on the Shop floor — Shopify's "River" agent.</span>
-            Willison, S. (on Tobias Lütke). Shopify's internal coding agent operates only in public Slack channels by design, making every session an observable learning event. Governance-by-default lifted River's merge rate from <em>36% to 77%</em> in roughly two months with no model retraining — purely organizational learning.
-            <span class="meta">2026-05-11 · <a href="https://simonwillison.net/2026/May/11/learning-on-the-shop-floor/" target="_blank" rel="noopener">simonwillison.net/…learning-on-the-shop-floor</a></span>
+            <span class="title">Using AI to Write Better Code More Slowly.</span>
+            Nolan Lawson. A multi-model adversarial review harness proves "LLM output is the first draft, the real work is the review" — using AI to write better code, more slowly.
+            <span class="meta">Nolan Lawson · nolanlawson.com · 2026-06-10 · <a href="https://nolanlawson.com/2026/05/25/using-ai-to-write-better-code-more-slowly/" target="_blank" rel="noopener">nolanlawson.com/2026/05/25/using-ai-to-write-better-code-more-slowly/</a></span>
+          </li>
+          <li id="ref-43">
+            <span class="title">Is Grep All You Need? How Agent Harnesses Reshape Agentic Search.</span>
+            Retrieval effectiveness is not stable across architecturally distinct agent harnesses even when the underlying text corpus is held fixed.
+            <span class="meta">arXiv · arXiv:2605.15184 · 2026-06-10 · <a href="https://arxiv.org/abs/2605.15184" target="_blank" rel="noopener">arxiv.org/abs/2605.15184</a></span>
+          </li>
+          <li id="ref-44">
+            <span class="title">Maintainability Sensors for Coding Agents.</span>
+            Birgitta Böckeler. Documents AI compounding technical debt via semantic duplication and coverage illusions, then shows dependency-rule sensors catching architectural drift at the boundary.
+            <span class="meta">Martin Fowler (Böckeler) · martinfowler.com · 2026-06-10 · <a href="https://martinfowler.com/articles/sensors-for-coding-agents.html" target="_blank" rel="noopener">martinfowler.com/articles/sensors-for-coding-agents.html</a></span>
+          </li>
+          <li id="ref-45">
+            <span class="title">Code as Agent Harness.</span>
+            ~40 authors, anchored by UIUC faculty. A large survey frames code as "an operational substrate for agent reasoning, acting, environment modeling, and execution-based verification" rather than only a target output.
+            <span class="meta">arXiv · arXiv:2605.18747 · 2026-06-10 · <a href="https://arxiv.org/abs/2605.18747" target="_blank" rel="noopener">arxiv.org/abs/2605.18747</a></span>
+          </li>
+          <li id="ref-46">
+            <span class="title">From Model Scaling to System Scaling: Scaling the Harness in Agentic AI.</span>
+            Argues for "scaling the harness": treating the structured execution layer around a model as a first-class object of design and evaluation.
+            <span class="meta">arXiv · arXiv:2605.26112 · 2026-06-10 · <a href="https://arxiv.org/abs/2605.26112" target="_blank" rel="noopener">arxiv.org/abs/2605.26112</a></span>
+          </li>
+          <li id="ref-47">
+            <span class="title">How Endava is redesigning software delivery around AI agents.</span>
+            Matthew Cloke. Endava's CTO says agentic coding pushed the bottleneck upstream from engineering output to requirements and business analysis.
+            <span class="meta">OpenAI case study · openai.com · 2026-06-04 · <a href="https://openai.com/index/endava-frontiers/" target="_blank" rel="noopener">openai.com/index/endava-frontiers/</a></span>
+          </li>
+          <li id="ref-48">
+            <span class="title">Meta-Engineering Harnesses for AI-Native Software Production: A Contract-Driven Adversarial Verification Architecture.</span>
+            HireNimbus. A seven-layer harness makes the contract the shared data structure across builder, verifier, and reviewer agents — independently converging on codæ's exact architecture.
+            <span class="meta">arXiv · arXiv:2605.25665 · 2026-05-25 · <a href="https://arxiv.org/abs/2605.25665" target="_blank" rel="noopener">arxiv.org/abs/2605.25665</a></span>
+          </li>
+          <li id="ref-49">
+            <span class="title">Shepherd: A Runtime Substrate Empowering Meta-Agents with a Formalized Execution Trace.</span>
+            Christopher D. Manning, et al. A Git-like execution trace lets meta-agents fork, replay, and attribute agent behavior by content hash — traceability made a programmable interface.
+            <span class="meta">arXiv (Stanford/Northeastern) · arXiv:2605.10913 · 2026-05-25 · <a href="https://arxiv.org/abs/2605.10913" target="_blank" rel="noopener">arxiv.org/abs/2605.10913</a></span>
+          </li>
+          <li id="ref-50">
+            <span class="title">Learning on the Shop floor — Shopify's River agent.</span>
+            Tobias Lütke, via Simon Willison. Shopify's River agent works only in public Slack channels — "osmosis learning" where the whole shop floor is the classroom.
+            <span class="meta">Simon Willison · simonwillison.net · 2026-05-11 · <a href="https://simonwillison.net/2026/May/11/learning-on-the-shop-floor/" target="_blank" rel="noopener">simonwillison.net/2026/May/11/learning-on-the-shop-floor/</a></span>
+          </li>
+          <li id="ref-51">
+            <span class="title">Coding Agents Don't Know When to Act (FixedBench).</span>
+            ETH Zurich + LogicStar.ai. Frontier agents make unnecessary edits to already-fixed code in 35–65% of cases, an "action bias" that only an explicit, machine-checkable definition of done corrects.
+            <span class="meta">arXiv · arXiv:2605.07769 · 2026-05-08 · <a href="https://arxiv.org/abs/2605.07769" target="_blank" rel="noopener">arxiv.org/abs/2605.07769</a></span>
+          </li>
+          <li id="ref-52">
+            <span class="title">Configuring Agentic AI Coding Tools: An Exploratory Study (AGENTS.md as emerging standard).</span>
+            Mining 2,853 repositories found AGENTS.md emerging as a tool-agnostic standard "README for agents" — bottom-up convergence on an agent-legible instruction surface.
+            <span class="meta">arXiv (ACM AIware '26) · arXiv:2602.14690 · 2026-05-08 · <a href="https://arxiv.org/abs/2602.14690" target="_blank" rel="noopener">arxiv.org/abs/2602.14690</a></span>
+          </li>
+          <li id="ref-53">
+            <span class="title">SlopCodeBench: Benchmarking How Coding Agents Degrade Over Long-Horizon Iterative Tasks.</span>
+            Across 15 coding agents, structural erosion rose in 77% of long-horizon trajectories even as pass rates stayed flat — agents degrade 5–6.6x faster than maintained human repos.
+            <span class="meta">arXiv (UW–Madison, WSU, MIT) · arXiv:2603.24755 · 2026-05-07 · <a href="https://arxiv.org/abs/2603.24755" target="_blank" rel="noopener">arxiv.org/abs/2603.24755</a></span>
+          </li>
+          <li id="ref-54">
+            <span class="title">SWE Context Bench: A Benchmark for Context Learning in Coding.</span>
+            A 217-token curated summary beat a 25,600-token raw trajectory dump, showing compact, agent-legible artifacts outperform verbose context.
+            <span class="meta">arXiv · arXiv:2602.08316 · 2026-05-06 · <a href="https://arxiv.org/abs/2602.08316" target="_blank" rel="noopener">arxiv.org/abs/2602.08316</a></span>
+          </li>
+          <li id="ref-55">
+            <span class="title">Agentic Coding is a Trap.</span>
+            Lars Faye. Faye argues effective agent supervision demands exactly the skills heavy AI use erodes; codæ answers with a machine-checkable contract instead of forcing humans back into the code.
+            <span class="meta">larsfaye.com · 2026-04-30 · <a href="https://larsfaye.com/articles/agentic-coding-is-a-trap" target="_blank" rel="noopener">larsfaye.com/articles/agentic-coding-is-a-trap</a></span>
+          </li>
+          <li id="ref-56">
+            <span class="title">From Vibe Coding to Agentic Engineering.</span>
+            Andrej Karpathy. Karpathy, who coined "vibe coding," argues agentic engineering means coordinating fallible agents while preserving correctness — you can outsource thinking but not understanding.
+            <span class="meta">Sequoia AI Ascent (Karpathy) · karpathy.bearblog.dev · 2026-04-30 · <a href="https://karpathy.bearblog.dev/sequoia-ascent-2026/" target="_blank" rel="noopener">karpathy.bearblog.dev/sequoia-ascent-2026/</a></span>
+          </li>
+          <li id="ref-57">
+            <span class="title">Agents, AGI &amp; the Next Big Scientific Breakthrough.</span>
+            Demis Hassabis. Hassabis says autonomous agentic coding "isn't quite there yet" — building still needs human craft, soul, and taste.
+            <span class="meta">YouTube (Y Combinator) · youtu.be · 2026-04-29 · <a href="https://youtu.be/JNyuX1zoOgU" target="_blank" rel="noopener">youtu.be/JNyuX1zoOgU</a></span>
+          </li>
+          <li id="ref-58">
+            <span class="title">Debt Behind the AI Boom: A Large-Scale Empirical Study of AI-Generated Code in the Wild.</span>
+            Mining 302,600 AI-authored commits found 22.7% of introduced issues still survive at HEAD, with unresolved AI debt climbing past 100,000 issues by 2026.
+            <span class="meta">arXiv (David Lo et al.) · arXiv:2603.28592 · 2026-04-26 · <a href="https://arxiv.org/abs/2603.28592" target="_blank" rel="noopener">arxiv.org/abs/2603.28592</a></span>
+          </li>
+          <li id="ref-59">
+            <span class="title">The Impact of Generative AI on Critical Thinking.</span>
+            Microsoft + CMU. A 319-worker survey found automation that hands routine tasks to AI and leaves only exceptions to humans leaves them "atrophied and unprepared" when exceptions arise.
+            <span class="meta">404 Media (Microsoft/CMU) · 404media.co · 2025-04-26 · <a href="https://www.404media.co/microsoft-study-finds-ai-makes-human-cognition-atrophied-and-unprepared-3/" target="_blank" rel="noopener">www.404media.co/microsoft-study-finds-ai-makes-human-cognition-atrophied-and-unprepared-3/</a></span>
+          </li>
+          <li id="ref-60">
+            <span class="title">Shift-Up: A Framework for Software Engineering Guardrails in AI-native Development.</span>
+            University of Jyväskylä. Embedding BDD, C4, and ADRs as machine-readable constraints stabilized agent behavior and shifted human effort from reactive debugging to requirements and design.
+            <span class="meta">arXiv (EASE 2026) · arXiv:2604.20436 · 2026-04-22 · <a href="https://arxiv.org/abs/2604.20436" target="_blank" rel="noopener">arxiv.org/abs/2604.20436</a></span>
+          </li>
+          <li id="ref-61">
+            <span class="title">Bridging the Gap between User Intent and LLM: A Requirement Alignment Approach for Code Generation (REA-Coder).</span>
+            Explicit, checkable requirement-alignment before code generation beat post-hoc repair by up to 344% first-round Pass@1, vindicating contract-first over repair-after.
+            <span class="meta">arXiv · arXiv:2604.16198 · 2026-04-17 · <a href="https://arxiv.org/abs/2604.16198" target="_blank" rel="noopener">arxiv.org/abs/2604.16198</a></span>
+          </li>
+          <li id="ref-62">
+            <span class="title">Cognitive-Load-Aware Refactoring (CDDRefactorER).</span>
+            Unconstrained LLM refactoring silently altered logic in half of failures; explicit cognitive-load constraints cut failure rates 54–71%.
+            <span class="meta">arXiv (EASE 2026) · arXiv:2603.16791 · 2026-04-16 · <a href="https://arxiv.org/abs/2603.16791" target="_blank" rel="noopener">arxiv.org/abs/2603.16791</a></span>
+          </li>
+          <li id="ref-63">
+            <span class="title">Comprehension Debt in GenAI-Assisted Software Engineering Projects.</span>
+            Karlstad University. A study of 621 student diary entries names the "competence trap": the people least able to detect AI error are the ones most reliant on it.
+            <span class="meta">arXiv (EASE) · arXiv:2604.13277 · 2026-04-14 · <a href="https://arxiv.org/abs/2604.13277" target="_blank" rel="noopener">arxiv.org/abs/2604.13277</a></span>
+          </li>
+          <li id="ref-64">
+            <span class="title">Comprehension Debt — the hidden cost of AI generated code.</span>
+            Addy Osmani. Osmani argues comprehension debt breeds false confidence — tests pass and code looks clean until nobody can explain why the system works.
+            <span class="meta">O'Reilly Radar · oreilly.com · 2026-04-13 · <a href="https://www.oreilly.com/radar/comprehension-debt-the-hidden-cost-of-ai-generated-code/" target="_blank" rel="noopener">www.oreilly.com/radar/comprehension-debt-the-hidden-cost-of-ai-generated-code/</a></span>
+          </li>
+          <li id="ref-65">
+            <span class="title">Spec Kit Agents: Context-Grounded Agentic Workflows.</span>
+            Validating spec/plan/tasks artifacts against repository reality before code generation caught hallucinated APIs early, confirming spec-as-control-surface.
+            <span class="meta">arXiv · arXiv:2604.05278 · 2026-04-07 · <a href="https://arxiv.org/abs/2604.05278" target="_blank" rel="noopener">arxiv.org/abs/2604.05278</a></span>
+          </li>
+          <li id="ref-66">
+            <span class="title">From Technical Debt to Cognitive and Intent Debt.</span>
+            Margaret-Anne Storey. Storey names "intent debt" — the erosion of explicit rationale in artifacts — as the layer technical-debt metrics miss and AI accelerates.
+            <span class="meta">arXiv · arXiv:2603.22106 · 2026-04-06 · <a href="https://arxiv.org/abs/2603.22106" target="_blank" rel="noopener">arxiv.org/abs/2603.22106</a></span>
+          </li>
+          <li id="ref-67">
+            <span class="title">VibeGuard: A Security Gate Framework for AI-Generated Code.</span>
+            A pre-publish security gate caught a real Claude Code npm leak of 512,000 lines of source with 100% recall, arguing "AI generators optimize for presence and rarely verify absence."
+            <span class="meta">arXiv · arXiv:2604.01052 · 2026-04-01 · <a href="https://arxiv.org/abs/2604.01052" target="_blank" rel="noopener">arxiv.org/abs/2604.01052</a></span>
+          </li>
+          <li id="ref-68">
+            <span class="title">"An Endless Stream of AI Slop": The Growing Burden of AI-Assisted Software Development.</span>
+            Baltes, Treude. A qualitative study of 1,154 Reddit/HN posts frames AI slop as a tragedy of the commons — producers capture the gains, reviewers absorb the cost.
+            <span class="meta">arXiv · arXiv:2603.27249 · 2026-03-28 · <a href="https://arxiv.org/abs/2603.27249" target="_blank" rel="noopener">arxiv.org/abs/2603.27249</a></span>
+          </li>
+          <li id="ref-69">
+            <span class="title">The Dark Software Factory: A New Era of Autonomous Software Delivery.</span>
+            BCG Platinion. BCG names the "Dark Software Factory" directly, describing "auditability by design" and governance shifting from reviewing code to verifying built-matches-intended.
+            <span class="meta">BCG Platinion · bcgplatinion.com · 2026-03-26 · <a href="https://www.bcgplatinion.com/insights/the-dark-software-factory" target="_blank" rel="noopener">www.bcgplatinion.com/insights/the-dark-software-factory</a></span>
+          </li>
+          <li id="ref-70">
+            <span class="title">The Specification as Quality Gate: Three Hypotheses on AI-Assisted Code Review.</span>
+            Christo Zietsman. Zietsman argues AI-reviewing-AI is circular without an executable spec: "the review checks code against itself, not against intent."
+            <span class="meta">arXiv · arXiv:2603.25773 · 2026-03-26 · <a href="https://arxiv.org/abs/2603.25773" target="_blank" rel="noopener">arxiv.org/abs/2603.25773</a></span>
+          </li>
+          <li id="ref-71">
+            <span class="title">Leading high-performing engineering teams in the age of AI.</span>
+            Nicole Forsgren. Forsgren argues GenAI sped the inner loop while overwhelming downstream review and release gates, forcing engineers to rebuild their mental model "dozens of times" in 30 minutes.
+            <span class="meta">YouTube (Forsgren) · youtu.be · 2026-03-22 · <a href="https://youtu.be/DfrAaDgFgjc" target="_blank" rel="noopener">youtu.be/DfrAaDgFgjc</a></span>
+          </li>
+          <li id="ref-72">
+            <span class="title">TDAD: Test-Driven Agentic Development — Reducing Code Regressions via Graph-Based Impact Analysis.</span>
+            A code-test dependency graph cut agent regressions 70%, showing a machine-checkable test contract — not prescriptive procedure — is what suppresses drift.
+            <span class="meta">arXiv · arXiv:2603.17973 · 2026-03-19 · <a href="https://arxiv.org/abs/2603.17973" target="_blank" rel="noopener">arxiv.org/abs/2603.17973</a></span>
+          </li>
+          <li id="ref-73">
+            <span class="title">2025 State of AI-Assisted Software Development.</span>
+            Google DORA. DORA's ~5,000-respondent study found AI is a multiplier of existing engineering conditions — it accelerates technical debt in fragmented organizations rather than fixing them.
+            <span class="meta">InfoQ (Google DORA) · infoq.com · 2026-03-17 · <a href="https://www.infoq.com/news/2026/03/ai-dora-report/" target="_blank" rel="noopener">www.infoq.com/news/2026/03/ai-dora-report/</a></span>
+          </li>
+          <li id="ref-74">
+            <span class="title">Codified Context: Infrastructure for AI Agents in a Complex Codebase.</span>
+            A tiered, agent-legible documentation architecture (26,000+ lines) let one developer build a 108,000-line system in 70 days, with a drift detector flagging code changes lacking spec updates.
+            <span class="meta">arXiv · arXiv:2602.20478 · 2026-02-24 · <a href="https://arxiv.org/abs/2602.20478" target="_blank" rel="noopener">arxiv.org/abs/2602.20478</a></span>
+          </li>
+          <li id="ref-75">
+            <span class="title">How Generative and Agentic AI Shift Concern from Technical Debt to Cognitive Debt.</span>
+            Simon Willison, amplifying Margaret-Anne Storey. Willison confirms firsthand: prompting features into existence works, but he found himself "getting lost" in his own projects, losing his mental model.
+            <span class="meta">Simon Willison · simonwillison.net · 2026-02-15 · <a href="https://simonwillison.net/2026/Feb/15/cognitive-debt/" target="_blank" rel="noopener">simonwillison.net/2026/Feb/15/cognitive-debt/</a></span>
+          </li>
+          <li id="ref-76">
+            <span class="title">Fragments: February 13.</span>
+            Martin Fowler, relaying Storey, Tacho, Fournier. Fowler relays a Thoughtworks retreat: a student team paralyzed not by messy code but because "the theory of the system... had fragmented or disappeared."
+            <span class="meta">Martin Fowler · martinfowler.com · 2026-02-13 · <a href="https://martinfowler.com/fragments/2026-02-13.html" target="_blank" rel="noopener">martinfowler.com/fragments/2026-02-13.html</a></span>
+          </li>
+          <li id="ref-77">
+            <span class="title">Spotify says its best developers haven't written a line of code since December.</span>
+            Gustav Söderström (quoted). Spotify's co-CEO says top engineers "have not written a single line of code since December," directing Claude Code from Slack and merging on the commute.
+            <span class="meta">TechCrunch · techcrunch.com · 2026-02-12 · <a href="https://techcrunch.com/2026/02/12/spotify-says-its-best-developers-havent-written-a-line-of-code-since-december-thanks-to-ai/" target="_blank" rel="noopener">techcrunch.com/2026/02/12/spotify-says-its-best-developers-havent-written-a-line-of-code-since-december-thanks-to-ai/</a></span>
+          </li>
+          <li id="ref-78">
+            <span class="title">AIDev: Studying AI Coding Agents on GitHub.</span>
+            Hao Li, Haoxiang Zhang, Ahmed E. Hassan. A dataset of 932,791 agent-authored GitHub pull requests confirms the dark-factory transition is already underway at population scale.
+            <span class="meta">arXiv (MSR '26) · arXiv:2602.09185 · 2026-02-09 · <a href="https://arxiv.org/abs/2602.09185" target="_blank" rel="noopener">arxiv.org/abs/2602.09185</a></span>
+          </li>
+          <li id="ref-79">
+            <span class="title">Constitutional Spec-Driven Development: Enforcing Security by Construction.</span>
+            A machine-readable security "constitution" embedded upstream of code generation cut CWE violations 73% in a case study, instantiating contract-as-control-surface for security.
+            <span class="meta">arXiv · arXiv:2602.02584 · 2026-01-31 · <a href="https://arxiv.org/abs/2602.02584" target="_blank" rel="noopener">arxiv.org/abs/2602.02584</a></span>
+          </li>
+          <li id="ref-80">
+            <span class="title">Spec-Driven Development: From Code to Contract in the Age of AI Coding Assistants.</span>
+            Inverting the workflow so specs are the source of truth and code the generated artifact: "code is the implementation detail of the specification."
+            <span class="meta">arXiv · arXiv:2602.00180 · 2026-01-30 · <a href="https://arxiv.org/abs/2602.00180" target="_blank" rel="noopener">arxiv.org/abs/2602.00180</a></span>
+          </li>
+          <li id="ref-81">
+            <span class="title">How AI assistance impacts the formation of coding skills (Anthropic RCT).</span>
+            Anthropic. An RCT of 52 engineers found AI-assisted delegation cut comprehension-quiz scores 17 points versus hand-coding, with the steepest losses in debugging skill.
+            <span class="meta">Anthropic · anthropic.com · 2026-01-29 · <a href="https://www.anthropic.com/research/AI-assistance-coding-skills" target="_blank" rel="noopener">www.anthropic.com/research/AI-assistance-coding-skills</a></span>
+          </li>
+          <li id="ref-82">
+            <span class="title">Speed at the Cost of Quality: How Cursor AI Increases Short-Term Velocity and Long-Term Complexity.</span>
+            He, Miller, Agarwal, Kästner, Vasilescu (CMU). A causal study of 806 Cursor-adopting repos found a 3–5x velocity surge fully dissipated in two months while complexity rose 41.6% and warnings 30.3%.
+            <span class="meta">arXiv (CMU, MSR '26) · arXiv:2511.04427 · 2026-01-26 · <a href="https://arxiv.org/abs/2511.04427" target="_blank" rel="noopener">arxiv.org/abs/2511.04427</a></span>
+          </li>
+          <li id="ref-83">
+            <span class="title">cURL ends its bug bounty program over AI slop.</span>
+            Daniel Stenberg (quoted). cURL shut down its bug bounty after being "effectively DDoSed" by AI-slop security reports, having never received one valid AI-assisted report.
+            <span class="meta">The New Stack · thenewstack.io · 2026-01-22 · <a href="https://thenewstack.io/drowning-in-ai-slop-reports-curl-ends-bug-bounties/" target="_blank" rel="noopener">thenewstack.io/drowning-in-ai-slop-reports-curl-ends-bug-bounties/</a></span>
+          </li>
+          <li id="ref-84">
+            <span class="title">2026 Agentic Coding Trends Report.</span>
+            Anthropic. Anthropic names the "collaboration paradox": developers use AI in 60% of work but can fully delegate only 0–20% of tasks.
+            <span class="meta">Anthropic · resources.anthropic.com · 2026-01-01 · <a href="https://resources.anthropic.com/hubfs/2026%20Agentic%20Coding%20Trends%20Report.pdf" target="_blank" rel="noopener">resources.anthropic.com/hubfs/2026%20Agentic%20Coding%20Trends%20Report.pdf</a></span>
+          </li>
+          <li id="ref-85">
+            <span class="title">How AI Is Transforming Work at Anthropic (paradox of supervision).</span>
+            Huang, et al. (Anthropic). Anthropic's own transcripts show tool-call chains up 116% and human turns down 33%, naming the "paradox of supervision": supervising Claude requires the skills that erode from using it.
+            <span class="meta">Anthropic · anthropic.com · 2025-12-02 · <a href="https://www.anthropic.com/research/how-ai-is-transforming-work-at-anthropic" target="_blank" rel="noopener">www.anthropic.com/research/how-ai-is-transforming-work-at-anthropic</a></span>
+          </li>
+          <li id="ref-86">
+            <span class="title">Context Rot: how increasing input tokens impacts LLM performance.</span>
+            Chroma. Across 18 LLMs and ~194,000 calls, performance degraded non-uniformly as input length grew — the substrate-level fragility beneath agent drift.
+            <span class="meta">Chroma · trychroma.com · 2025-07-14 · <a href="https://www.trychroma.com/research/context-rot" target="_blank" rel="noopener">www.trychroma.com/research/context-rot</a></span>
+          </li>
+          <li id="ref-87">
+            <span class="title">Your Brain on ChatGPT: Accumulation of Cognitive Debt (MIT Media Lab).</span>
+            Kosmyna, et al. A four-month EEG study coined "cognitive debt": LLM writers showed the weakest neural engagement and couldn't quote their own essays.
+            <span class="meta">MIT Media Lab · media.mit.edu · 2025-06-10 · <a href="https://www.media.mit.edu/publications/your-brain-on-chatgpt/" target="_blank" rel="noopener">www.media.mit.edu/publications/your-brain-on-chatgpt/</a></span>
+          </li>
+          <li id="ref-88">
+            <span class="title">Claude Code best practices.</span>
+            Cal Rueb (Anthropic), Code w/ Claude. A practitioner talk on CLAUDE.md files, plan-then-verify workflows, and context management — real intent-preservation habits framed as productivity tips rather than governance.
+            <span class="meta">Anthropic, Code w/ Claude · youtu.be · 2025-05-22 · <a href="https://youtu.be/gv0WHhKelSE" target="_blank" rel="noopener">youtu.be/gv0WHhKelSE</a></span>
           </li>
         </ol>
 
         <h3 style="margin: 32px 0 18px 0; font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-5); font-weight: 700;">Foundations</h3>
-        <ol start="43">
-          <li id="ref-43">
-            <span class="title">Domain-Specific Languages.</span>
-            Fowler, M. &amp; Parsons, R. (Addison-Wesley, 2010). The canonical book-length treatment of DSLs as structured languages purpose-built to capture intent in a form more rigorous than prose and cheaper than full formal specification — the technical lineage the codæ contract belongs to.
-            <span class="meta">2010 · <a href="https://martinfowler.com/books/dsl.html" target="_blank" rel="noopener">martinfowler.com/books/dsl.html</a></span>
+        <ol start="89">
+          <li id="ref-89">
+            <span class="title">Programming as Theory Building.</span>
+            Peter Naur.
+            <span class="meta">pages.cs.wisc.edu · 1985-01-01 · <a href="https://pages.cs.wisc.edu/~remzi/Naur.pdf" target="_blank" rel="noopener">pages.cs.wisc.edu/~remzi/Naur.pdf</a></span>
           </li>
-          <li id="ref-44">
-            <span class="title">Domain-Driven Design: Tackling Complexity in the Heart of Software.</span>
-            Evans, E. (Addison-Wesley, 2003). The lineage for bounded contexts, ubiquitous language, aggregates, and the broader vocabulary the contract stack uses to give a system its domain shape.
-            <span class="meta">2003 · <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">domainlanguage.com/ddd</a></span>
-          </li>
-          <li id="ref-45">
+          <li id="ref-90">
             <span class="title">No Silver Bullet — Essence and Accident in Software Engineering.</span>
-            Brooks, F.P. (IEEE Computer, 1987; reprinted in <em>The Mythical Man-Month, 20th Anniversary Edition</em>, 1995). Distinguishes the essential complexity of specifying what a system must do from the accidental complexity of implementing it — the foundational argument behind the cognitive-surface case for contracts.
-            <span class="meta">1986/1995 · <a href="https://en.wikipedia.org/wiki/No_Silver_Bullet" target="_blank" rel="noopener">No Silver Bullet — overview</a></span>
+            Fred Brooks.
+            <span class="meta">en.wikipedia.org · 1986-01-01 · <a href="https://en.wikipedia.org/wiki/No_Silver_Bullet" target="_blank" rel="noopener">en.wikipedia.org/wiki/No_Silver_Bullet</a></span>
           </li>
-          <li id="ref-46">
+          <li id="ref-91">
             <span class="title">Design by Contract.</span>
-            Meyer, B. (Eiffel Software). The foundational discipline of explicit obligations between software elements via preconditions, postconditions, and invariants — the contract pattern <span class="codae">cod<span class="ae">æ</span></span> generalizes from routine scope to system scope.
-            <span class="meta"><a href="https://www.eiffel.com/values/design-by-contract/" target="_blank" rel="noopener">eiffel.com/values/design-by-contract</a></span>
+            Bertrand Meyer (Eiffel).
+            <span class="meta">eiffel.com · 1986-01-01 · <a href="https://www.eiffel.com/values/design-by-contract/" target="_blank" rel="noopener">www.eiffel.com/values/design-by-contract/</a></span>
+          </li>
+          <li id="ref-92">
+            <span class="title">Domain-Driven Design: Tackling Complexity in the Heart of Software.</span>
+            Eric Evans.
+            <span class="meta">domainlanguage.com · 2003-01-01 · <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">www.domainlanguage.com/ddd/</a></span>
           </li>
         </ol>
       </section>

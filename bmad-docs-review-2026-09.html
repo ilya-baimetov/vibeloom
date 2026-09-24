@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BMAD v6 Docs Review</title>
+<meta name="description" content="A receipts-first review of the BMAD Method v6 documentation and process, prepared for the maintainers. Reviewed at v6.11.0, main@bd7ee16, 2026-09-01.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root {
+  --paper: #F8FAF9;
+  --card: #FFFFFF;
+  --ink: #16211E;
+  --ink-2: #45534E;
+  --ink-3: #6C7A74;
+  --line: #DEE7E3;
+  --line-2: #C9D6D0;
+  --accent: #0E7C6B;
+  --accent-ink: #0A5C50;
+  --accent-wash: #E3F0ED;
+  --crit: #B3402E;
+  --crit-wash: #F7E8E4;
+  --warn: #96660F;
+  --warn-wash: #F5EDDC;
+  --good: #237A4B;
+  --good-wash: #E2F0E7;
+  --mono-bg: #EFF4F2;
+  --sans: "Archivo", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0F1613;
+    --card: #161F1B;
+    --ink: #E7EFEA;
+    --ink-2: #AEBFB8;
+    --ink-3: #7E8F88;
+    --line: #263129;
+    --line-2: #33413A;
+    --accent: #43C3AB;
+    --accent-ink: #6ED9C4;
+    --accent-wash: #14352E;
+    --crit: #E07A66;
+    --crit-wash: #3A211B;
+    --warn: #D4A244;
+    --warn-wash: #352B15;
+    --good: #5BBD85;
+    --good-wash: #1B3325;
+    --mono-bg: #1B2622;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0F1613;
+  --card: #161F1B;
+  --ink: #E7EFEA;
+  --ink-2: #AEBFB8;
+  --ink-3: #7E8F88;
+  --line: #263129;
+  --line-2: #33413A;
+  --accent: #43C3AB;
+  --accent-ink: #6ED9C4;
+  --accent-wash: #14352E;
+  --crit: #E07A66;
+  --crit-wash: #3A211B;
+  --warn: #D4A244;
+  --warn-wash: #352B15;
+  --good: #5BBD85;
+  --good-wash: #1B3325;
+  --mono-bg: #1B2622;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 16.5px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+a { color: var(--accent-ink); text-decoration: none; border-bottom: 1px solid var(--line-2); }
+a:hover { border-color: var(--accent); color: var(--accent); }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+h1, h2, h3 { font-family: var(--sans); letter-spacing: -0.02em; line-height: 1.15; text-wrap: balance; }
+h1 { font-size: clamp(1.9rem, 4.6vw, 2.7rem); font-weight: 800; }
+h2 { font-size: 1.32rem; font-weight: 700; margin: 0 0 18px; }
+h3 { font-size: 1.02rem; font-weight: 700; }
+p { color: var(--ink-2); }
+p strong { color: var(--ink); font-weight: 600; }
+.label {
+  font-family: var(--mono); font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-ink);
+}
+header.masthead { padding: 56px 0 34px; border-bottom: 2px solid var(--ink); }
+.masthead .label { display: block; margin-bottom: 14px; }
+.masthead h1 { margin-bottom: 14px; }
+.masthead .standfirst { font-size: 1.06rem; max-width: 62ch; }
+.scope {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px;
+  font-family: var(--mono); font-size: 0.72rem;
+}
+.scope span {
+  padding: 5px 10px; border: 1px solid var(--line-2); border-radius: 6px;
+  background: var(--card); color: var(--ink-2); white-space: nowrap;
+}
+.scope span b { color: var(--ink); font-weight: 600; }
+main section { padding: 40px 0 8px; }
+main section + section { border-top: 1px solid var(--line); margin-top: 32px; }
+.verdict {
+  background: var(--card); border: 1px solid var(--line);
+  border-left: 4px solid var(--accent); border-radius: 10px;
+  padding: 22px 24px; margin: 6px 0 26px;
+}
+.verdict p { font-size: 1.02rem; }
+.verdict p + p { margin-top: 10px; }
+table.score { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.tablewrap { overflow-x: auto; margin: 8px 0 20px; }
+table.score th, table.score td {
+  text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line);
+  vertical-align: top; line-height: 1.5; color: var(--ink-2);
+}
+table.score thead th {
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-3); border-bottom: 2px solid var(--line-2);
+}
+table.score tbody th { font-family: var(--sans); font-size: 0.85rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.chip {
+  display: inline-block; font-family: var(--mono); font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.06em; padding: 3px 9px; border-radius: 100px; white-space: nowrap;
+}
+.chip.good { background: var(--good-wash); color: var(--good); }
+.chip.warn { background: var(--warn-wash); color: var(--warn); }
+.chip.crit { background: var(--crit-wash); color: var(--crit); }
+.chip.neutral { background: var(--mono-bg); color: var(--ink-2); }
+ul.wins { list-style: none; display: grid; gap: 12px; margin: 4px 0 20px; }
+ul.wins li {
+  padding: 14px 16px 14px 18px; background: var(--card);
+  border: 1px solid var(--line); border-radius: 10px; position: relative;
+  color: var(--ink-2); font-size: 0.96rem;
+}
+ul.wins li::before {
+  content: ""; position: absolute; left: 0; top: 10px; bottom: 10px;
+  width: 3px; border-radius: 2px; background: var(--good);
+}
+ul.wins li strong { color: var(--ink); }
+.finding {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 20px 22px; margin: 0 0 18px; position: relative;
+}
+.finding::before {
+  content: ""; position: absolute; left: 0; top: 14px; bottom: 14px;
+  width: 4px; border-radius: 3px; background: var(--sev, var(--warn));
+}
+.finding.sev-crit { --sev: var(--crit); }
+.finding.sev-warn { --sev: var(--warn); }
+.finding.sev-low  { --sev: var(--line-2); }
+.finding .fhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; margin-bottom: 10px; }
+.finding .fid { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--ink-3); }
+.finding h3 { flex: 1 1 260px; }
+.finding p { font-size: 0.97rem; }
+.finding p + p { margin-top: 8px; }
+.receipt {
+  margin: 12px 0 4px; padding: 12px 14px; background: var(--mono-bg);
+  border: 1px solid var(--line); border-radius: 8px;
+  font-family: var(--mono); font-size: 0.76rem; line-height: 1.65;
+  color: var(--ink-2); overflow-x: auto;
+}
+.receipt .rl { display: block; white-space: nowrap; }
+.receipt .rl b { color: var(--ink); font-weight: 600; }
+.receipt a { border-bottom: 1px dotted var(--line-2); }
+.fix { margin-top: 10px; font-size: 0.93rem; color: var(--ink-2); }
+.fix b { font-family: var(--sans); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-ink); font-weight: 700; margin-right: 6px; }
+ol.offers { margin: 4px 0 20px 20px; display: grid; gap: 10px; }
+ol.offers li { color: var(--ink-2); font-size: 0.97rem; padding-left: 4px; }
+ol.offers li strong { color: var(--ink); }
+.note {
+  margin: 18px 0 8px; padding: 14px 16px; border: 1px dashed var(--line-2);
+  border-radius: 10px; font-size: 0.9rem; color: var(--ink-2); background: var(--paper);
+}
+footer { margin-top: 44px; border-top: 2px solid var(--ink); padding: 22px 0 48px; }
+footer p { font-size: 0.86rem; color: var(--ink-3); }
+footer p + p { margin-top: 8px; }
+.toc { margin: 20px 0 4px; font-family: var(--sans); font-size: 0.85rem; }
+.toc a { display: inline-block; margin: 0 14px 8px 0; border-bottom: 1px solid var(--line-2); color: var(--ink-2); }
+.toc a:hover { color: var(--accent); border-color: var(--accent); }
+@media (max-width: 560px) {
+  body { font-size: 15.5px; }
+  header.masthead { padding-top: 40px; }
+  .finding { padding: 16px 16px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <span class="label">Contributor feedback · documentation first</span>
+    <h1>BMAD Method — a receipts-first docs review</h1>
+    <p class="standfirst">
+      I was invited to contribute to BMAD. Before proposing anything, I did a
+      structured pass over the v6 documentation and the repo behind it. Credit
+      first, then findings ranked by impact — every claim links to its source.
+    </p>
+    <div class="scope">
+      <span><b>Reviewed at</b> v6.11.0 · main@bd7ee16 (2026-08-30)</span>
+      <span><b>Corpus</b> all 29 EN pages · 33,318 words</span>
+      <span><b>Method</b> full read + link/name-drift checks</span>
+      <span><b>Date</b> 2026-09-01</span>
+      <span><b>By</b> Ilya Baimetov</span>
+    </div>
+    <nav class="toc" aria-label="Contents">
+      <a href="#verdict">Verdict</a>
+      <a href="#wins">What's working</a>
+      <a href="#findings">Findings</a>
+      <a href="#method-notes">Method notes</a>
+      <a href="#offers">What I can PR</a>
+      <a href="#methodology">Methodology</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="verdict">
+    <div class="wrap">
+      <h2>Verdict</h2>
+      <div class="verdict">
+        <p>
+          <strong>The v6.11 docs are much better than the community folklore says.</strong>
+          A January 2026 audit logged
+          <a href="https://github.com/bmad-code-org/BMAD-METHOD/issues/1400">47 doc issues</a>
+          and newcomers filed
+          <a href="https://github.com/bmad-code-org/BMAD-METHOD/issues/1543">"confusing and sometimes incorrect"</a>.
+          What exists today — a task-first restructure, a real style guide, CI
+          link validation, zero naming drift after aggressive renames — is the
+          strongest docs discipline I've seen in an OSS AI framework.
+        </p>
+        <p>
+          The gaps that remain are specific and fixable: the flagship theory
+          page makes precise empirical claims with zero citations, the
+          reference tier is one page for 29 commands, translations are a full
+          information-architecture generation behind English, and the site
+          carries no version signals. Details and receipts below.
+        </p>
+      </div>
+      <div class="tablewrap">
+      <table class="score">
+        <thead><tr><th>Dimension</th><th>Read</th><th>Evidence in one line</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Information architecture</th><td><span class="chip good">STRONG</span></td><td>Journey-based sections (Start / Build / Plan / Existing / Customize) with a 58-rule redirect map preserving old URLs</td></tr>
+          <tr><th scope="row">Docs-as-code hygiene</th><td><span class="chip good">STRONG</span></td><td>6 <code style="font-family:var(--mono);font-size:0.85em">docs:*</code> CI scripts; 0 stale IDs after the v6.11 renames; 0 broken internal links</td></tr>
+          <tr><th scope="row">Curation &amp; writing</th><td><span class="chip good">STRONG</span></td><td>33k words total for the whole framework; objections addressed head-on ("Why does this take so long?")</td></tr>
+          <tr><th scope="row">Evidence integrity</th><td><span class="chip crit">GAP</span></td><td>Theory of Project Context: quantitative research claims, zero links (F1)</td></tr>
+          <tr><th scope="row">Reference completeness</th><td><span class="chip crit">GAP</span></td><td>1 reference page for 29 commands; no glossary, config reference, or troubleshooting hub (F2)</td></tr>
+          <tr><th scope="row">Localization</th><td><span class="chip warn">DRIFT</span></td><td>5 locales still on the pre-restructure IA; 26–40 pages vs EN's 29 (F3)</td></tr>
+          <tr><th scope="row">Version signals</th><td><span class="chip warn">DRIFT</span></td><td>No version indicator or changelog on the site; no llms.txt (F4)</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="wins">
+    <div class="wrap">
+      <h2>What's working — worth saying out loud</h2>
+      <ul class="wins">
+        <li><strong>The restructure was the right call, executed with discipline.</strong> Diátaxis buckets became user journeys, and the old URLs didn't break: 58 redirect rules in <a href="https://github.com/bmad-code-org/BMAD-METHOD/blob/main/website/astro.config.mjs">astro.config.mjs</a>. The "Find Your Starting Point" router on the <a href="https://docs.bmad-method.org/">homepage</a> is exactly what a multi-entry-point tool needs.</li>
+        <li><strong>Rename hygiene under churn.</strong> v6.11 renamed the core loop (<code style="font-family:var(--mono);font-size:0.85em">quick-dev → build</code>) and merged six skills into one. I grepped every English page for the retired IDs: zero hits. Almost nobody keeps docs consistent through that.</li>
+        <li><strong>A real style guide, followed.</strong> <a href="https://github.com/bmad-code-org/BMAD-METHOD/blob/main/docs/_STYLE_GUIDE.md">docs/_STYLE_GUIDE.md</a> commits to Google style + Diátaxis, with per-doctype templates and checklists — and the published pages mostly honor it.</li>
+        <li><strong>CONTRIBUTING's AI-code policy is ahead of the field.</strong> "Using AI to write code is normal here; using AI as a substitute for thinking is not" — plus PR size caps and Discord-first for large changes. Other projects will copy this.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="findings">
+    <div class="wrap">
+      <h2>Findings, ranked by impact</h2>
+
+      <article class="finding sev-crit">
+        <div class="fhead"><span class="fid">F1</span><h3>Your strongest argument is uncited</h3><span class="chip crit">HIGH IMPACT</span><span class="chip neutral">SMALL FIX</span></div>
+        <p>
+          <a href="https://docs.bmad-method.org/existing-codebases/theory-of-project-context/">The Theory of Project Context</a>
+          is the most differentiated page in the docs — and it states precise
+          empirical results ("no improvement in success rate and +20% inference
+          cost", a 53/79/100% pass-rate table, a "709-page wiki" retrieval
+          test) with <strong>zero citations</strong>. Anyone can check:
+        </p>
+        <div class="receipt">
+          <span class="rl">$ grep -cE 'https?://' docs/existing-codebases/theory-of-project-context.md</span>
+          <span class="rl"><b>0</b>   # at main@bd7ee16</span>
+        </div>
+        <p>
+          The claims appear to be real. Two published sources match them
+          exactly and would make the page bulletproof:
+          <a href="https://www.sri.inf.ethz.ch/publications/gloaguen2026agentsmd">Gloaguen et al., "Evaluating AGENTS.md"</a>
+          (MemAgents @ ICLR 2026, runner-up best paper: no success-rate improvement, &gt;20% inference-cost increase) and
+          <a href="https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals">Vercel's agent evals</a>
+          (Jan 27, 2026: 53% baseline / 53% unaided skill / 79% instructed / 100% compressed
+          AGENTS.md index; skill never invoked in 56% of runs; 40KB→8KB). If
+          those are the sources, say so; if not, name the ones that are.
+        </p>
+        <p class="fix"><b>Fix</b>References section on that one page. I'm happy to open the PR — the maintainers only need to confirm the sources.</p>
+      </article>
+
+      <article class="finding sev-crit">
+        <div class="fhead"><span class="fid">F2</span><h3>The reference tier is one page deep</h3><span class="chip crit">HIGH IMPACT</span><span class="chip neutral">MEDIUM FIX</span></div>
+        <p>
+          <a href="https://docs.bmad-method.org/reference/skills-and-agents/">Skills and Agents</a>
+          is the entire reference section — one page for 29 named commands
+          (8 core skills, 16 method skills, 5 agents). The machine contracts
+          that orchestrator authors need (Build Auto's status table, blocking
+          conditions, folder+id dispatch) live inside a Build
+          <em>guide</em>; the new layered-TOML config system is documented
+          only in the CHANGELOG; there is no glossary, no troubleshooting hub,
+          and the v4→v6 upgrade guide was folded into the install page while
+          a large v4 install base still exists.
+        </p>
+        <p class="fix"><b>Fix</b>A per-skill reference page pattern (the style guide already defines one — "Item Deep-Dive Reference"), a config reference, and a restored upgrade guide. Incremental; I can draft the pattern on one skill first.</p>
+      </article>
+
+      <article class="finding sev-warn">
+        <div class="fhead"><span class="fid">F3</span><h3>Translations are one IA generation behind</h3><span class="chip warn">MEDIUM IMPACT</span><span class="chip neutral">POLICY CALL</span></div>
+        <p>
+          English moved to the journey structure; all five locales (cs, fr,
+          ko-kr, vi-vn, zh-cn) still ship the old
+          <code style="font-family:var(--mono);font-size:0.85em">tutorials/how-to/explanation</code>
+          tree, with diverging page sets — 26 to 40 files against English's 29.
+          Several locale redirects land users on <em>English</em> pages
+          mid-journey.
+        </p>
+        <div class="receipt">
+          <span class="rl">docs/ cs:26 · fr:32 · ko-kr:40 · vi-vn:31 · zh-cn:35 · <b>en:29</b>  (page counts, main@bd7ee16)</span>
+          <span class="rl">astro.config.mjs: '/cs/explanation/adversarial-review' → '/build/review-a-change/'  # locale → EN</span>
+        </div>
+        <p class="fix"><b>Fix</b>Decide the policy explicitly: either migrate locales to the new IA (community sprint) or mark them as best-effort snapshots with a banner. Silent drift is the worst of the three options.</p>
+      </article>
+
+      <article class="finding sev-warn">
+        <div class="fhead"><span class="fid">F4</span><h3>No version signals on an AI-native docs site</h3><span class="chip warn">MEDIUM IMPACT</span><span class="chip neutral">SMALL FIX</span></div>
+        <p>
+          No page says which BMAD version it documents; the site has no
+          changelog surface and no version switcher, while breaking renames
+          ship monthly and a v4 install base reads the same URLs. And for a
+          project whose own docs strategy is "point your AI at the source",
+          the site ships no <code style="font-family:var(--mono);font-size:0.85em">llms.txt</code> —
+          the one convention built for exactly that audience.
+        </p>
+        <p class="fix"><b>Fix</b>A version badge in the header, the CHANGELOG (or release notes) linked in the nav, and a generated llms.txt / llms-full.txt. All three are small PRs.</p>
+      </article>
+
+      <article class="finding sev-low">
+        <div class="fhead"><span class="fid">F5</span><h3>The docs site's own README is stale</h3><span class="chip neutral">LOW IMPACT</span><span class="chip neutral">TRIVIAL FIX</span></div>
+        <p>
+          <a href="https://github.com/bmad-code-org/BMAD-METHOD/blob/main/website/README.md">website/README.md</a>
+          still describes the pre-restructure layout
+          (<code style="font-family:var(--mono);font-size:0.85em">docs/tutorials/, how-to/, explanation/</code>)
+          that no longer exists. Harmless, but it's the first file a docs
+          contributor opens.
+        </p>
+        <p class="fix"><b>Fix</b>One-file PR; I'll include it with F1.</p>
+      </article>
+
+      <article class="finding sev-low">
+        <div class="fhead"><span class="fid">F6</span><h3>Small tone drift against your own style guide</h3><span class="chip neutral">LOW IMPACT</span><span class="chip neutral">EDITORIAL</span></div>
+        <p>
+          <a href="https://docs.bmad-method.org/start/get-answers-about-bmad/">Get Answers About BMad</a>
+          claims bmad-help "handles over 80% of questions" — no source — and
+          closes with a poem. Both are charming; both sit oddly next to a
+          style guide that asks for literal language and no inflated claims.
+          Keep the personality, source the number (or soften it), and maybe
+          let the poem live in the repo rather than the front door enterprise
+          evaluators walk through.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section id="method-notes">
+    <div class="wrap">
+      <h2>Two notes beyond the docs</h2>
+
+      <article class="finding sev-warn">
+        <div class="fhead"><span class="fid">M1</span><h3>Breaking changes ship in minor versions</h3><span class="chip warn">PROCESS</span></div>
+        <p>
+          <a href="https://github.com/bmad-code-org/BMAD-METHOD/blob/main/CHANGELOG.md">v6.11.0's changelog</a>
+          opens with a "💥 Breaking Changes" section — renames, removals, a new
+          hard dependency (uv + Python 3.11 for rendered skills). The
+          forwarding shims are genuinely good engineering, but semver says
+          this is v7 territory, and the ecosystem around BMAD (videos,
+          courses, blog posts) rots faster than the docs with every renamed
+          command. If the release train can't slow down, the docs can absorb
+          it: a "renamed in vX" table and version badges (F4) are the
+          mitigation.
+        </p>
+      </article>
+
+      <article class="finding sev-low">
+        <div class="fhead"><span class="fid">M2</span><h3>The evidence turn is your best story — tell it</h3><span class="chip good">PRAISE</span></div>
+        <p>
+          v6.9–6.11 quietly rebuilt BMAD's trust model: content-addressed
+          snapshots of exactly what ran, retrospectives that must cite the
+          epic's own artifacts, machine-readable spec statuses, deterministic
+          script cores for sprint planning. That is the most defensible
+          direction in the project and it currently lives only in changelog
+          prose. It deserves a first-class explanation page — "how BMAD
+          produces evidence" — because it's the answer to the hardest
+          enterprise question: <em>how do I audit what the agent did?</em>
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section id="offers">
+    <div class="wrap">
+      <h2>What I can PR this month</h2>
+      <ol class="offers">
+        <li><strong>F1 + F5 in one small PR:</strong> a References section for the Theory page (with the two matching sources above, subject to maintainer confirmation) and the website README fix.</li>
+        <li><strong>F4 as a follow-up:</strong> version badge, changelog link, generated llms.txt.</li>
+        <li><strong>F2 as a pattern proposal:</strong> one exemplary per-skill reference page (probably <code style="font-family:var(--mono);font-size:0.85em">bmad-build-auto</code>, whose contract orchestrator authors need most), posted as a discussion before any bulk work.</li>
+        <li><strong>F3 as a discussion only:</strong> the locale policy is a maintainer call; I'll bring the data.</li>
+      </ol>
+      <p class="note">
+        Per CONTRIBUTING, anything beyond the small fixes starts as a Discord
+        conversation, not a surprise PR. This document is that conversation
+        starter.
+      </p>
+    </div>
+  </section>
+
+  <section id="methodology">
+    <div class="wrap">
+      <h2>Methodology</h2>
+      <p>
+        Cloned <a href="https://github.com/bmad-code-org/BMAD-METHOD">bmad-code-org/BMAD-METHOD</a>
+        at main@bd7ee16 (2026-08-30); read all 29 English doc pages, the style
+        guide, and CONTRIBUTING; ran link-resolution, stale-ID, and locale
+        checks across the docs tree; cross-checked against
+        <a href="https://docs.bmad-method.org/">docs.bmad-method.org</a>, the
+        npm registry (latest 6.11.0; nightly next channel), GitHub issues and
+        discussions (including <a href="https://github.com/bmad-code-org/BMAD-METHOD/discussions/979">#979</a>,
+        the unanswered v4-vs-v6 analysis — worth a reply, even a late one),
+        and practitioner reviews. Compiled with AI-assisted repo analysis;
+        every number above links to its source or names the command that
+        reproduces it.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Prepared by Ilya Baimetov · September 1, 2026 · Reviewed at BMAD v6.11.0, repo state main@bd7ee16.</p>
+    <p>Written as contributor feedback: critical where the evidence is critical, and easy to act on. Corrections welcome — every finding is falsifiable by design.</p>
+  </div>
+</footer>
+
+</body>
+</html>
