@@ -38,6 +38,8 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:ital,wght@1,500;1,600&display=swap"></noscript>
 
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="contact.css">
+<script src="contact.js" defer></script>
 
 <script type="application/ld+json">
 {
@@ -102,12 +104,40 @@
       <span class="eyebrow">Hands-on assistance</span>
       <h1>Make coding agents useful past the demo.</h1>
       <p class="lead">VibeLoom is free and open source. If your team wants hands-on help making it stick on your codebase, get in touch.</p>
-      <div class="actions">
-        <a href="#contact" class="btn btn-primary">
+      <details class="contact-disclosure" id="conversation">
+        <summary class="btn btn-primary">
           Start a conversation
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10m0 0L9 4m4 4L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </div>
+        </summary>
+        <form id="contact-form" class="contact-form" action="/api/contact" method="post">
+          <fieldset id="contact-fields">
+            <legend class="visually-hidden">Your contact details</legend>
+            <div class="contact-fields-row">
+              <div class="contact-field">
+                <label for="contact-name">Name</label>
+                <input id="contact-name" name="name" autocomplete="name" maxlength="120" required>
+              </div>
+              <div class="contact-field">
+                <label for="contact-email">Email</label>
+                <input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+              </div>
+            </div>
+            <div class="contact-field">
+              <label for="contact-comment">Comment <span>(optional)</span></label>
+              <textarea id="contact-comment" name="comment" rows="5" maxlength="5000"></textarea>
+            </div>
+            <div class="contact-trap" aria-hidden="true" inert>
+              <label for="contact-website">Website</label>
+              <input id="contact-website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+            <p class="contact-privacy">Your details will only be used to respond to your inquiry.</p>
+            <button class="btn btn-primary" id="contact-submit" type="submit" disabled>Submit request</button>
+          </fieldset>
+          <p id="contact-success" class="contact-feedback contact-success" role="status" aria-live="polite" aria-atomic="true" tabindex="-1"></p>
+          <p id="contact-error" class="contact-feedback contact-error" role="alert" aria-atomic="true" tabindex="-1"></p>
+          <noscript><p>Please email <a href="mailto:info@vibeloom.ai">info@vibeloom.ai</a> to get in touch.</p></noscript>
+        </form>
+      </details>
     </div>
   </div>
 </header>

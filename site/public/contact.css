@@ -1,0 +1,34 @@
+.contact-disclosure > summary { list-style: none; width: fit-content; }
+.contact-disclosure > summary::-webkit-details-marker { display: none; }
+.contact-disclosure[open] > summary svg { transform: rotate(90deg); }
+.contact-disclosure > summary:focus-visible,
+.contact-form button:focus-visible { outline: 3px solid var(--c-red-deep); outline-offset: 4px; }
+.contact-form { margin-top: 28px; max-width: 640px; }
+.contact-form fieldset { border: 0; min-width: 0; }
+.contact-fields-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.contact-field { display: grid; gap: 8px; margin-bottom: 20px; min-width: 0; }
+.contact-field label { font-size: 0.94rem; font-weight: 600; }
+.contact-field label span { color: var(--c-ink-4); font-weight: 400; }
+.contact-field input, .contact-field textarea {
+  width: 100%; min-width: 0; padding: 12px; border: 1px solid var(--c-line-3);
+  border-radius: 6px; background: #fff; color: var(--c-ink);
+  font: inherit; font-size: 1rem; line-height: 1.5;
+}
+.contact-field textarea { resize: vertical; min-height: 130px; }
+.contact-field input:focus, .contact-field textarea:focus {
+  outline: 2px solid var(--c-red-deep); outline-offset: 2px;
+}
+.contact-form .contact-privacy { color: var(--c-ink-4); font-size: 0.85rem; margin-bottom: 20px; }
+.contact-form button { font-family: inherit; min-width: 164px; min-height: 44px; }
+.contact-form button:disabled { opacity: 0.65; cursor: wait; transform: none; }
+.contact-feedback { overflow-wrap: anywhere; font-size: 0.95rem; }
+.contact-feedback:not(:empty) { padding: 14px 16px; margin-top: 16px; border-left: 3px solid; border-radius: 4px; }
+.contact-success { color: #17583c; background: #edf8f1; }
+.contact-error { color: #9b2033; background: #fff0f2; }
+.visually-hidden, .contact-trap {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+@media (max-width: 560px) {
+  .contact-fields-row { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}

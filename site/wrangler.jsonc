@@ -1,7 +1,21 @@
 {
   "name": "vibeloom-site",
+  "main": "worker.js",
   "compatibility_date": "2026-04-25",
+  "vars": {
+    "NOTION_DATA_SOURCE_ID": "3e5b73b9-298a-80c1-92cc-000b10119aa1"
+  },
+  "observability": { "enabled": true },
   "assets": {
-    "directory": "./public"
-  }
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [{
+    "binding": "CONTACTS_DB",
+    "database_name": "vibeloom-contacts",
+    "database_id": "ba3af2bd-cece-4e0b-b2c8-a675bf9578ad",
+    "migrations_dir": "migrations"
+  }],
+  "triggers": { "crons": ["*/5 * * * *"] }
 }

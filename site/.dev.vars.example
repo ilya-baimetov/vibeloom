@@ -1,0 +1,4 @@
+# Optional local-only token. Never commit a real token.
+# Store production credentials with `npx wrangler secret put NOTION_TOKEN`.
+# NOTION_TOKEN=your-internal-integration-token
+# The VibeLoom/Contacts data source ID is configured in wrangler.jsonc.

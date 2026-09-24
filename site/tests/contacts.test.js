@@ -1,0 +1,217 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { DatabaseSync } from 'node:sqlite';
+import { readFileSync } from 'node:fs';
+import worker from '../worker.js';
+import { syncContact, syncPendingContacts } from '../notion.js';
+
+function setup(t) {
+  const sqlite = new DatabaseSync(':memory:');
+  sqlite.exec(readFileSync(new URL('../migrations/0001_contacts.sql', import.meta.url), 'utf8'));
+  t.after(() => sqlite.close());
+  const db = {
+    prepare(sql) {
+      const stmt = sqlite.prepare(sql);
+      return {
+        params: [],
+        bind(...params) { this.params = params; return this; },
+        async first() { return stmt.get(...this.params) || null; },
+        async all() { return { results: stmt.all(...this.params) }; },
+        async run() { return stmt.run(...this.params); },
+      };
+    },
+  };
+  const env = { CONTACTS_DB: db, ASSETS: { fetch: async () => new Response('static') } };
+  const contact = { name: 'Ada Example', email: 'ada@example.com', comment: 'Hello' };
+  const all = () => sqlite.prepare('SELECT * FROM contact_requests').all();
+  async function submit(data = contact, headers = {}) {
+    const background = [];
+    const response = await worker.fetch(new Request('https://vibeloom.ai/api/contact', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'https://vibeloom.ai', ...headers },
+      body: typeof data === 'string' ? data : JSON.stringify(data),
+    }), env, { waitUntil: (promise) => background.push(promise) });
+    await Promise.all(background);
+    return response;
+  }
+  const notionEnv = { ...env, NOTION_TOKEN: 'test-token', NOTION_DATA_SOURCE_ID: 'test-source' };
+  return { sqlite, db, env, notionEnv, contact, all, submit };
+}
+
+test('saves a normalized contact, supports optional comment, and exposes no contact data', async (t) => {
+  const s = setup(t);
+  const response = await s.submit({ name: ' Ada ', email: ' ADA@Example.com ' });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true });
+  assert.equal(response.headers.get('Cache-Control'), 'no-store');
+  assert.equal(s.all()[0].name, 'Ada');
+  assert.equal(s.all()[0].email, 'ada@example.com');
+  assert.equal(s.all()[0].comment, '');
+});
+
+test('email alone identifies contact: replaces name/comment, clears blank comment, preserves identity', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  const original = s.all()[0];
+  await s.submit({ name: 'Changed Name', email: 'ADA@EXAMPLE.COM', comment: '' });
+  const [latest] = s.all();
+  assert.equal(s.all().length, 1);
+  assert.equal(latest.id, original.id);
+  assert.equal(latest.created_at, original.created_at);
+  assert.equal(latest.name, 'Changed Name');
+  assert.equal(latest.comment, '');
+  assert.equal(latest.version, 2);
+  await s.submit({ ...s.contact, email: 'other@example.com' });
+  assert.equal(s.all().length, 2);
+});
+
+test('concurrent saves to one email never create duplicate contacts', async (t) => {
+  const s = setup(t);
+  await Promise.all(Array.from({ length: 8 }, (_, i) => s.submit({ ...s.contact, name: `Name ${i}` })));
+  assert.equal(s.all().length, 1);
+  assert.equal(s.all()[0].version, 8);
+});
+
+test('rejects malformed/invalid data, honeypot, wrong content type, and oversized bodies', async (t) => {
+  const s = setup(t);
+  for (const data of [null, [], '{broken', { ...s.contact, name: ' ' }, { ...s.contact, name: 'a'.repeat(121) },
+    { ...s.contact, email: 'no-email' }, { ...s.contact, email: 'bad\u0000@example.com' },
+    { ...s.contact, comment: 42 }, { ...s.contact, comment: 'x'.repeat(5001) }, { ...s.contact, website: 'spam' }]) {
+    assert.equal((await s.submit(data)).status, 400);
+  }
+  assert.equal((await s.submit(s.contact, { 'Content-Type': 'text/plain' })).status, 415);
+  assert.equal((await s.submit('x'.repeat(32769))).status, 413);
+  assert.equal((await s.submit(s.contact, { 'Content-Length': '50000' })).status, 413);
+  assert.equal(s.all().length, 0);
+});
+
+test('cross-site requests are rejected; methods and routes are bounded', async (t) => {
+  const s = setup(t);
+  assert.equal((await s.submit(s.contact, { Origin: 'https://elsewhere.example' })).status, 403);
+  assert.equal((await s.submit(s.contact, { 'Sec-Fetch-Site': 'cross-site' })).status, 403);
+  const get = await worker.fetch(new Request('https://vibeloom.ai/api/contact'), s.env, {});
+  assert.equal(get.status, 405);
+  assert.equal(get.headers.get('Allow'), 'POST');
+  assert.equal((await worker.fetch(new Request('https://vibeloom.ai/api/unknown'), s.env, {})).status, 404);
+  assert.equal(await (await worker.fetch(new Request('https://vibeloom.ai/contact'), s.env, {})).text(), 'static');
+});
+
+test('storage failure never reports success', async (t) => {
+  const s = setup(t);
+  s.env.CONTACTS_DB = { prepare() { throw new Error('private storage details'); } };
+  const response = await s.submit();
+  assert.equal(response.status, 503);
+  assert.doesNotMatch(await response.text(), /private storage/);
+});
+
+test('rate limits by temporary IP hash, then scheduled cleanup removes expired buckets', async (t) => {
+  const s = setup(t);
+  const headers = { 'CF-Connecting-IP': '192.0.2.1' };
+  for (let i = 0; i < 5; i++) assert.equal((await s.submit(s.contact, headers)).status, 200);
+  const response = await s.submit(s.contact, headers);
+  assert.equal(response.status, 429);
+  assert.equal(response.headers.get('Retry-After'), '600');
+  const bucket = s.sqlite.prepare('SELECT bucket FROM contact_rate_limits').get().bucket;
+  assert.match(bucket, /^[a-f0-9]{64}$/);
+  s.sqlite.exec('UPDATE contact_rate_limits SET expires_at = 0');
+  await worker.scheduled({}, s.env);
+  assert.equal(s.sqlite.prepare('SELECT COUNT(*) AS count FROM contact_rate_limits').get().count, 0);
+});
+
+test('SQL-looking and HTML-looking input is stored as inert text', async (t) => {
+  const s = setup(t);
+  const comment = "'); DROP TABLE contact_requests; -- <script>alert(1)</script>";
+  assert.equal((await s.submit({ ...s.contact, comment })).status, 200);
+  assert.equal(s.all()[0].comment, comment);
+});
+
+test('Notion is optional: pending contacts survive until credentials are configured', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  await syncPendingContacts(s.env, () => { throw new Error('must not call'); });
+  assert.equal(s.all()[0].notion_synced_version, 0);
+  assert.equal(s.all()[0].notion_attempts, 0);
+});
+
+test('creates Notion entry with matching schema, then updates same page for the same email', async (t) => {
+  const s = setup(t);
+  await s.submit({ ...s.contact, comment: 'x'.repeat(1999) + '\u{1f600}' + 'y'.repeat(2500) });
+  const calls = [];
+  const fetcher = async (url, options) => {
+    calls.push({ url, ...options, body: JSON.parse(options.body) });
+    return Response.json(url.endsWith('/query') ? { results: [] } : { id: 'page-1' });
+  };
+  await syncPendingContacts(s.notionEnv, fetcher);
+  assert.equal(calls.length, 2);
+  assert.deepEqual(calls[0].body.filter, { property: 'Email', email: { equals: s.contact.email } });
+  const chunks = calls[1].body.properties.Comment.rich_text;
+  assert.ok(chunks.every((x) => x.text.content.length <= 2000));
+  assert.equal(chunks.map((x) => x.text.content).join(''), s.all()[0].comment);
+  assert.equal(s.all()[0].notion_synced_version, 1);
+  await s.submit({ ...s.contact, name: 'New Name', comment: '' });
+  await syncPendingContacts(s.notionEnv, fetcher);
+  assert.equal(calls.length, 3);
+  assert.equal(calls[2].method, 'PATCH');
+  assert.match(calls[2].url, /pages\/page-1$/);
+  assert.deepEqual(calls[2].body.properties.Comment.rich_text, []);
+  assert.equal(s.all()[0].notion_synced_version, 2);
+});
+
+test('recovers existing Notion page by email instead of appending another', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  const methods = [];
+  await syncPendingContacts(s.notionEnv, async (url, options) => {
+    methods.push(options.method);
+    return Response.json(url.endsWith('/query') ? { results: [{ id: 'existing' }] } : { id: 'existing' });
+  });
+  assert.deepEqual(methods, ['POST', 'PATCH']);
+  assert.equal(s.all()[0].notion_page_id, 'existing');
+});
+
+test('Notion failure schedules retry without losing D1 data or exposing API response', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  await syncPendingContacts(s.notionEnv, async () => new Response('sensitive diagnostic', { status: 429, headers: { 'Retry-After': '900' } }));
+  const row = s.all()[0];
+  assert.equal(row.notion_synced_version, 0);
+  assert.equal(row.notion_last_error, 'notion_http_429');
+  assert.ok(row.notion_next_attempt >= Math.floor(Date.now() / 1000) + 899);
+  assert.equal(row.notion_lease_until, 0);
+  await syncPendingContacts(s.notionEnv, () => { throw new Error('too early'); });
+  assert.equal(s.all()[0].notion_attempts, 1);
+  s.sqlite.exec('UPDATE contact_requests SET notion_next_attempt = 0');
+  await syncPendingContacts(s.notionEnv, async (url) => Response.json(url.endsWith('/query') ? { results: [] } : { id: 'retried' }));
+  assert.equal(s.all()[0].notion_synced_version, 1);
+});
+
+test('leases prevent overlapping delivery; updates arriving mid-sync remain pending', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  const id = s.all()[0].id;
+  let calls = 0;
+  await syncContact(s.notionEnv, id, async (url) => {
+    calls++;
+    if (url.endsWith('/query')) {
+      await syncContact(s.notionEnv, id, () => { throw new Error('lease ignored'); });
+      await s.submit({ ...s.contact, name: 'Newer' });
+      return Response.json({ results: [] });
+    }
+    return Response.json({ id: 'page-race' });
+  });
+  assert.equal(calls, 2);
+  assert.equal(s.all()[0].version, 2);
+  assert.equal(s.all()[0].notion_synced_version, 1);
+  await syncPendingContacts(s.notionEnv, async (_url, options) => {
+    assert.equal(JSON.parse(options.body).properties.Name.title[0].text.content, 'Newer');
+    return Response.json({ id: 'page-race' });
+  });
+  assert.equal(s.all()[0].notion_synced_version, 2);
+});
+
+test('multiple existing Notion matches require operator repair, not arbitrary overwrite', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  await syncPendingContacts(s.notionEnv, async () => Response.json({ results: [{ id: 'a' }, { id: 'b' }] }));
+  assert.equal(s.all()[0].notion_last_error, 'notion_duplicate_email');
+  assert.equal(s.all()[0].notion_page_id, null);
+});

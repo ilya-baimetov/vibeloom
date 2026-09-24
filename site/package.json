@@ -1,0 +1,14 @@
+{
+  "name": "vibeloom-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local --port 8124",
+    "test": "node --test tests/*.test.js",
+    "types": "wrangler types --env-interface CloudflareEnv",
+    "db:local": "wrangler d1 migrations apply CONTACTS_DB --local",
+    "db:remote": "wrangler d1 migrations apply CONTACTS_DB --remote",
+    "deploy": "npm run db:remote && wrangler deploy"
+  },
+  "devDependencies": { "wrangler": "4.139.0" }
+}
