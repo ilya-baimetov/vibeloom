@@ -94,11 +94,16 @@ run picks up pending contacts, including earlier submissions. One batch processe
 up to five contacts. Failures back off and remain pending; submissions do not depend
 on Notion availability.
 
-The mirror updates the remembered Notion page. Before creating a page, it searches
-by email, allowing recovery when a create response was lost. Leases prevent overlapping
+The mirror updates the remembered Notion page. If that page returns 404 or is
+confirmed to be in Trash after a rejected update, it creates a fresh row directly
+and remembers the new page ID. It does not search for another matching row or
+restore the old one. Other errors retain the existing link and retry later.
+When no page ID is stored, it first searches by email. Leases prevent overlapping
 deliveries; versions ensure that edits received during a sync remain pending. This
 is eventual, one-way sync, not a transaction across D1 and Notion or an exactly-once
-guarantee. Rare duplicates after ambiguous failures still require manual reconciliation.
+guarantee. A replacement whose create response is lost can be duplicated on retry;
+those ambiguous failures still require manual reconciliation. Notion also uses 404
+for pages hidden from the integration, so keep its access consistent across Contacts.
 Multiple email matches are flagged, not arbitrarily overwritten. Notion edits do not
 flow back to D1 and may be replaced by the next website submission. Do not change the
 Notion data source without also handling stored page IDs. Direct SQL writes do not
@@ -112,7 +117,9 @@ Inspect pending delivery without printing contact details:
 npx wrangler d1 execute CONTACTS_DB --remote --command "SELECT id, version, notion_synced_version, notion_attempts, notion_last_error FROM contact_requests WHERE notion_synced_version < version;"
 ```
 
-After repairing an archived/deleted Notion entry or duplicate email entries, clear
+Missing or trashed destinations recover automatically on the next pending delivery
+or new submission. Already-synced contacts are not continuously checked for deletion.
+After manually reconciling duplicate email entries or moving a destination, clear
 `notion_page_id`, reset `notion_next_attempt`, and increment `version` for that
 affected contact to let the worker find/create its destination again, even if it
 was previously marked as synced. Keep existing contacts intact.
@@ -120,4 +127,5 @@ was previously marked as synced. Keep existing contacts intact.
 References: [D1 pricing and free-plan limits](https://developers.cloudflare.com/d1/platform/pricing/),
 [Worker/static asset routing](https://developers.cloudflare.com/workers/static-assets/routing/worker-script/),
 [Notion page creation](https://developers.notion.com/reference/post-page),
+[Notion API status codes](https://developers.notion.com/reference/status-codes),
 [Notion data source filters](https://developers.notion.com/reference/filter-data-source-entries).

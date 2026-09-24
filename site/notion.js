@@ -32,10 +32,32 @@ async function notionRequest(env, fetcher, path, method, body) {
   });
   if (!response.ok) {
     const error = new Error(`notion_http_${response.status}`);
+    error.status = response.status;
     error.retryAfter = Number(response.headers.get('Retry-After')) || 0;
     throw error;
   }
   return response.json();
+}
+
+async function updatePageIfPresent(env, fetcher, pageId, properties) {
+  try {
+    const page = await notionRequest(env, fetcher, `pages/${pageId}`, 'PATCH', { properties });
+    if (!page?.id) throw new Error('notion_invalid_response');
+    return page;
+  } catch (error) {
+    if (error.status === 404) return null;
+    if (error.status !== 400) throw error;
+    // A trashed page can reject updates with 400, just like an invalid payload.
+    let existing;
+    try {
+      existing = await notionRequest(env, fetcher, `pages/${pageId}`, 'GET');
+    } catch (lookupError) {
+      if (lookupError.status === 404) return null;
+      throw lookupError;
+    }
+    if (existing.in_trash === true) return null;
+    throw error;
+  }
 }
 
 export async function syncContact(env, id, fetcher = fetch) {
@@ -67,12 +89,13 @@ export async function syncContact(env, id, fetcher = fetch) {
       Email: { email: row.email },
       Comment: { rich_text: richText(row.comment) },
     };
-    const page = pageId
-      ? await notionRequest(env, fetcher, `pages/${pageId}`, 'PATCH', { properties })
-      : await notionRequest(env, fetcher, 'pages', 'POST', {
+    let page = pageId ? await updatePageIfPresent(env, fetcher, pageId, properties) : null;
+    if (!page) {
+      page = await notionRequest(env, fetcher, 'pages', 'POST', {
         parent: { type: 'data_source_id', data_source_id: env.NOTION_DATA_SOURCE_ID }, properties,
       });
-    if (!page.id) throw new Error('notion_invalid_response');
+    }
+    if (!page?.id) throw new Error('notion_invalid_response');
     await db.prepare(`
       UPDATE contact_requests SET notion_page_id = ?, notion_synced_version = ?,
         notion_lease_until = 0, notion_lease_token = NULL, notion_next_attempt = 0,

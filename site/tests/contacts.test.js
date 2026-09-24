@@ -215,3 +215,203 @@ test('multiple existing Notion matches require operator repair, not arbitrary ov
   assert.equal(s.all()[0].notion_last_error, 'notion_duplicate_email');
   assert.equal(s.all()[0].notion_page_id, null);
 });
+
+test('missing stored Notion page is replaced directly and subsequent submissions update the replacement', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  s.sqlite.exec("UPDATE contact_requests SET notion_page_id = 'missing', notion_synced_version = 1");
+  await s.submit({ ...s.contact, name: 'Latest Name', comment: '' });
+  const calls = [];
+  const fetcher = async (url, options) => {
+    calls.push({ url, method: options.method, body: JSON.parse(options.body) });
+    if (url.endsWith('/pages/missing')) return new Response(null, { status: 404 });
+    assert.ok(!url.endsWith('/query'), 'must not search for another matching row');
+    return Response.json({ id: 'replacement' });
+  };
+  await syncPendingContacts(s.notionEnv, fetcher);
+  assert.deepEqual(calls.map((call) => call.method), ['PATCH', 'POST']);
+  assert.equal(calls[1].url, 'https://api.notion.com/v1/pages');
+  assert.deepEqual(calls[1].body, {
+    parent: { type: 'data_source_id', data_source_id: 'test-source' },
+    properties: {
+      Name: { title: [{ type: 'text', text: { content: 'Latest Name' } }] },
+      Email: { email: s.contact.email },
+      Comment: { rich_text: [] },
+    },
+  });
+  assert.equal(s.all()[0].notion_page_id, 'replacement');
+  assert.equal(s.all()[0].notion_synced_version, 2);
+  assert.equal(s.all()[0].notion_last_error, null);
+  await s.submit({ ...s.contact, comment: 'Next update' });
+  await syncPendingContacts(s.notionEnv, fetcher);
+  assert.deepEqual(calls.map((call) => call.method), ['PATCH', 'POST', 'PATCH']);
+  assert.ok(calls[2].url.endsWith('/pages/replacement'));
+  assert.equal(s.all()[0].notion_synced_version, 3);
+});
+
+test('400 on a trashed page creates a replacement without restoring or searching', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  s.sqlite.exec("UPDATE contact_requests SET notion_page_id = 'trashed'");
+  const methods = [];
+  await syncPendingContacts(s.notionEnv, async (url, options) => {
+    methods.push(options.method);
+    assert.ok(!url.endsWith('/query'));
+    if (options.method === 'PATCH') {
+      assert.deepEqual(Object.keys(JSON.parse(options.body)), ['properties']);
+      return new Response(null, { status: 400 });
+    }
+    if (options.method === 'GET') {
+      assert.equal(options.body, undefined);
+      return Response.json({ id: 'trashed', in_trash: true });
+    }
+    assert.equal(url, 'https://api.notion.com/v1/pages');
+    return Response.json({ id: 'replacement' });
+  });
+  assert.deepEqual(methods, ['PATCH', 'GET', 'POST']);
+  assert.equal(s.all()[0].notion_page_id, 'replacement');
+  assert.equal(s.all()[0].notion_synced_version, 1);
+});
+
+test('400 is not treated as deletion when the page still exists', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  s.sqlite.exec("UPDATE contact_requests SET notion_page_id = 'existing'");
+  const methods = [];
+  await syncPendingContacts(s.notionEnv, async (_url, options) => {
+    methods.push(options.method);
+    assert.notEqual(options.method, 'POST');
+    return options.method === 'PATCH'
+      ? new Response('private validation details', { status: 400 })
+      : Response.json({ id: 'existing', in_trash: false });
+  });
+  assert.deepEqual(methods, ['PATCH', 'GET']);
+  assert.equal(s.all()[0].notion_page_id, 'existing');
+  assert.equal(s.all()[0].notion_synced_version, 0);
+  assert.equal(s.all()[0].notion_last_error, 'notion_http_400');
+});
+
+test('page disappearing during the 400 diagnostic lookup is replaced', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  s.sqlite.exec("UPDATE contact_requests SET notion_page_id = 'missing'");
+  const methods = [];
+  await syncPendingContacts(s.notionEnv, async (_url, options) => {
+    methods.push(options.method);
+    if (options.method === 'PATCH') return new Response(null, { status: 400 });
+    if (options.method === 'GET') return new Response(null, { status: 404 });
+    return Response.json({ id: 'replacement' });
+  });
+  assert.deepEqual(methods, ['PATCH', 'GET', 'POST']);
+  assert.equal(s.all()[0].notion_page_id, 'replacement');
+});
+
+test('auth, rate limit, server, and network failures never create replacements', async (t) => {
+  for (const status of [401, 403, 429, 503, 'network']) {
+    await t.test(String(status), async (t) => {
+      const s = setup(t);
+      await s.submit();
+      s.sqlite.exec("UPDATE contact_requests SET notion_page_id = 'existing'");
+      let calls = 0;
+      await syncPendingContacts(s.notionEnv, async (_url, options) => {
+        calls++;
+        assert.equal(options.method, 'PATCH');
+        if (status === 'network') throw new TypeError('private network details');
+        return new Response(null, { status });
+      });
+      assert.equal(calls, 1);
+      assert.equal(s.all()[0].notion_page_id, 'existing');
+      assert.equal(s.all()[0].notion_synced_version, 0);
+      assert.equal(s.all()[0].notion_lease_until, 0);
+      assert.equal(s.all()[0].notion_last_error, status === 'network' ? 'notion_delivery_failed' : `notion_http_${status}`);
+    });
+  }
+});
+
+test('failure to inspect a rejected page is not evidence of deletion', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  s.sqlite.exec("UPDATE contact_requests SET notion_page_id = 'existing'");
+  const methods = [];
+  await syncPendingContacts(s.notionEnv, async (_url, options) => {
+    methods.push(options.method);
+    assert.notEqual(options.method, 'POST');
+    return new Response(null, { status: options.method === 'PATCH' ? 400 : 403 });
+  });
+  assert.deepEqual(methods, ['PATCH', 'GET']);
+  assert.equal(s.all()[0].notion_page_id, 'existing');
+  assert.equal(s.all()[0].notion_synced_version, 0);
+  assert.equal(s.all()[0].notion_last_error, 'notion_http_403');
+});
+
+test('an invalid successful update response does not cause a duplicate creation', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  s.sqlite.exec("UPDATE contact_requests SET notion_page_id = 'existing'");
+  let calls = 0;
+  await syncPendingContacts(s.notionEnv, async (_url, options) => {
+    calls++;
+    assert.equal(options.method, 'PATCH');
+    return Response.json(null);
+  });
+  assert.equal(calls, 1);
+  assert.equal(s.all()[0].notion_page_id, 'existing');
+  assert.equal(s.all()[0].notion_synced_version, 0);
+  assert.equal(s.all()[0].notion_last_error, 'notion_invalid_response');
+});
+
+test('failed replacement remains pending and retains the old link until creation succeeds', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  s.sqlite.exec("UPDATE contact_requests SET notion_page_id = 'missing'");
+  await syncPendingContacts(s.notionEnv, async (_url, options) =>
+    new Response(null, { status: options.method === 'PATCH' ? 404 : 503 }));
+  assert.equal(s.all()[0].notion_page_id, 'missing');
+  assert.equal(s.all()[0].notion_synced_version, 0);
+  assert.equal(s.all()[0].notion_last_error, 'notion_http_503');
+  assert.equal(s.all()[0].name, s.contact.name);
+  s.sqlite.exec('UPDATE contact_requests SET notion_next_attempt = 0');
+  await syncPendingContacts(s.notionEnv, async (_url, options) => options.method === 'PATCH'
+    ? new Response(null, { status: 404 }) : Response.json({ id: 'replacement' }));
+  assert.equal(s.all()[0].notion_page_id, 'replacement');
+  assert.equal(s.all()[0].notion_synced_version, 1);
+});
+
+test('replacement keeps the lease and preserves submissions arriving during creation', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  s.sqlite.exec("UPDATE contact_requests SET notion_page_id = 'missing'");
+  const id = s.all()[0].id;
+  await syncContact(s.notionEnv, id, async (_url, options) => {
+    if (options.method === 'PATCH') return new Response(null, { status: 404 });
+    await s.submit({ ...s.contact, name: 'Newer' });
+    await syncContact(s.notionEnv, id, () => { throw new Error('lease ignored'); });
+    return Response.json({ id: 'replacement' });
+  });
+  assert.equal(s.all()[0].version, 2);
+  assert.equal(s.all()[0].notion_synced_version, 1);
+  assert.equal(s.all()[0].notion_page_id, 'replacement');
+  await syncPendingContacts(s.notionEnv, async (url, options) => {
+    assert.equal(options.method, 'PATCH');
+    assert.ok(url.endsWith('/pages/replacement'));
+    assert.equal(JSON.parse(options.body).properties.Name.title[0].text.content, 'Newer');
+    return Response.json({ id: 'replacement' });
+  });
+  assert.equal(s.all()[0].notion_synced_version, 2);
+});
+
+test('a row found on initial email lookup but deleted before update is replaced without another search', async (t) => {
+  const s = setup(t);
+  await s.submit();
+  let queries = 0;
+  await syncPendingContacts(s.notionEnv, async (url, options) => {
+    if (url.endsWith('/query')) {
+      queries++;
+      return Response.json({ results: [{ id: 'vanished' }] });
+    }
+    if (options.method === 'PATCH') return new Response(null, { status: 404 });
+    return Response.json({ id: 'replacement' });
+  });
+  assert.equal(queries, 1);
+  assert.equal(s.all()[0].notion_page_id, 'replacement');
+});
